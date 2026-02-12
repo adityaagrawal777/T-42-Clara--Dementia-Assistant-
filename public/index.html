@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clara — Your Gentle Companion</title>
+  <meta name="description" content="Clara is a warm, emotion-aware AI companion designed to provide comfort and reassurance." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Soft floating particles background -->
+  <div class="particles" id="particles"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header" id="header">
+      <div class="header-inner">
+        <div class="avatar-wrapper">
+          <div class="avatar" id="claraAvatar">
+            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="30" cy="30" r="28" fill="url(#avatarGrad)" />
+              <path d="M20 28C20 28 22 32 30 32C38 32 40 28 40 28" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="22" cy="23" r="2.5" fill="white"/>
+              <circle cx="38" cy="23" r="2.5" fill="white"/>
+              <path d="M15 16C18 12 22 11 26 13" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M45 16C42 12 38 11 34 13" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <defs>
+                <linearGradient id="avatarGrad" x1="0" y1="0" x2="60" y2="60">
+                  <stop offset="0%" stop-color="#e8a0bf"/>
+                  <stop offset="100%" stop-color="#c9a0e8"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="pulse-ring"></div>
+        </div>
+        <div class="header-text">
+          <h1>Clara</h1>
+          <p class="subtitle">Your gentle companion 💛</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Chat Area -->
+    <main class="chat-area" id="chatArea">
+      <div class="chat-messages" id="chatMessages">
+        <!-- Welcome message -->
+        <div class="message clara-message welcome-msg" id="welcomeMessage">
+          <div class="message-avatar">
+            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="18" cy="18" r="17" fill="url(#smallGrad)"/>
+              <path d="M12 17C12 17 13.5 19.5 18 19.5C22.5 19.5 24 17 24 17" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="13.5" cy="14" r="1.5" fill="white"/>
+              <circle cx="22.5" cy="14" r="1.5" fill="white"/>
+              <defs>
+                <linearGradient id="smallGrad" x1="0" y1="0" x2="36" y2="36">
+                  <stop offset="0%" stop-color="#e8a0bf"/>
+                  <stop offset="100%" stop-color="#c9a0e8"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="message-content">
+            <p>Hello, dear. 💛 I'm Clara, and I'm so glad you're here. How are you feeling today?</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Input Area -->
+    <footer class="input-area" id="inputArea">
+      <div class="input-wrapper">
+        <textarea
+          id="userInput"
+          placeholder="Type how you're feeling..."
+          rows="1"
+          maxlength="500"
+          aria-label="Type your message to Clara"
+        ></textarea>
+        <button id="sendBtn" class="send-btn" aria-label="Send message" title="Send">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <p class="input-hint">Clara is here to listen and comfort you 🌸</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
