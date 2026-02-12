@@ -1,4 +1,4 @@
-# 🌸 Clara — Emotion-Aware AI Companion for Dementia Care
+# 🌸 Clara — Emotion-Aware AI Companion for Dementia Care for everyone
 
 Clara is a chat-based AI companion designed specifically to support people living with dementia. She provides emotional reassurance, calmness, and a sense of safety through gentle, warm conversation.
 
