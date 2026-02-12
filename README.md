@@ -247,3 +247,5 @@ People with dementia may ask the same question many times. Clara:
 ---
 
 *Built with care for those who need gentleness most. 💛*
+
+with lots of love
