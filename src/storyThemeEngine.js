@@ -104,8 +104,10 @@ const SAFE_THEMES = [
     }
 ];
 
-// Track last used theme per session (in-memory)
-const sessionThemeHistory = new Map();
+const narrativeUsageQueries = require("./db/queries/narrativeUsageQueries");
+
+// Track last used theme per session (in-memory cache for speed, fallback to DB)
+const sessionThemeCache = new Map();
 
 class StoryThemeEngine {
 
@@ -115,7 +117,21 @@ class StoryThemeEngine {
      * @returns {{ id: string, label: string, sensoryHints: string }}
      */
     selectTheme(sessionId) {
-        const lastThemeId = sessionThemeHistory.get(sessionId) || null;
+        let lastThemeId = sessionThemeCache.get(sessionId);
+
+        // If not in cache, try to fetch the most recent one from DB
+        if (!lastThemeId) {
+            try {
+                // Ensure stmts are prepared (the DB should already be init by server.js)
+                // narrativeUsageQueries.prepare() is called by MemoryManager.prepareStatements()
+                const used = narrativeUsageQueries.getSessionNarratives(sessionId);
+                if (used && used.length > 0) {
+                    lastThemeId = used[used.length - 1];
+                }
+            } catch (err) {
+                // Silence DB errors here, just proceed with no history
+            }
+        }
 
         // Filter out the last-used theme to prevent consecutive repetition
         const available = lastThemeId
@@ -125,8 +141,8 @@ class StoryThemeEngine {
         // Random selection from available pool
         const selected = available[Math.floor(Math.random() * available.length)];
 
-        // Track this selection
-        sessionThemeHistory.set(sessionId, selected.id);
+        // Update cache
+        sessionThemeCache.set(sessionId, selected.id);
 
         return {
             id: selected.id,
@@ -143,11 +159,11 @@ class StoryThemeEngine {
     }
 
     /**
-     * Clear session theme history (for session cleanup).
+     * Clear session theme cache.
      * @param {string} sessionId
      */
     clearSession(sessionId) {
-        sessionThemeHistory.delete(sessionId);
+        sessionThemeCache.delete(sessionId);
     }
 }
 

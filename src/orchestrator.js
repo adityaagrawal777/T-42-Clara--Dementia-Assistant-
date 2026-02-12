@@ -182,7 +182,7 @@ class ClaraOrchestrator {
         }
 
         // --- Step 9: Update Memory & Log ---
-        memoryManager.update(sessionId, message, reply, emotionResult);
+        memoryManager.update(sessionId, message, reply, emotionResult, intentResult, storyContext);
 
         logger.interaction({
             sessionId,

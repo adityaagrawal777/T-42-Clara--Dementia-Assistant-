@@ -17,7 +17,7 @@ router.post("/", (req, res) => {
 
         const sessionId = "sess_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
 
-        const session = memoryManager.createSession(sessionId, caregiverContext || {});
+        const session = memoryManager.createSession(sessionId, caregiverContext || {}, userId);
 
         // Generate a personalized greeting
         let greeting = getResponse("greeting");

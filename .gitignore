@@ -206,3 +206,12 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 node_modules/
+
+# Clara — SQLite database (contains user data, generated at runtime)
+data/
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Clara — Application logs
+logs/

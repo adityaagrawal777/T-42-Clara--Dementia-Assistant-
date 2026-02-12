@@ -1,6 +1,7 @@
 /**
  * Clara — Server Entry Point
  * Production-grade Express server with modular brain architecture.
+ * Now with SQLite-backed persistent memory.
  */
 
 // Load environment variables FIRST — before any module reads process.env
@@ -8,6 +9,10 @@ require("dotenv").config();
 
 const express = require("express");
 const path = require("path");
+
+// --- Initialize SQLite Database (MUST happen before routes/components load) ---
+const db = require("./src/db/connection");
+db.initialize();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -66,6 +71,16 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// --- Graceful Shutdown ---
+function gracefulShutdown(signal) {
+  console.log(`\n  [Clara] Received ${signal}. Closing database and shutting down...`);
+  db.close();
+  process.exit(0);
+}
+
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+
 // --- Start Server ---
 app.listen(PORT, () => {
   console.log("");
@@ -76,13 +91,14 @@ app.listen(PORT, () => {
   console.log("  ║                                           ║");
   console.log("  ║   Components:                             ║");
   console.log("  ║   ✅ Emotion Analyzer                     ║");
-  console.log("  ║   ✅ Memory Manager                       ║");
+  console.log("  ║   ✅ Memory Manager (SQLite)              ║");
   console.log("  ║   ✅ Safety Guard                         ║");
   console.log("  ║   ✅ Context Assembler                    ║");
   console.log("  ║   ✅ LLM Client (Groq)                   ║");
   console.log("  ║   ✅ Response Pacer                       ║");
   console.log("  ║   ✅ Orchestrator                         ║");
   console.log("  ║   ✅ Logger                               ║");
+  console.log("  ║   ✅ SQLite Database                      ║");
   console.log("  ║                                           ║");
   console.log("  ╚═══════════════════════════════════════════╝");
   console.log("");
