@@ -30,7 +30,12 @@ function prepare() {
     `);
 
     stmts.getSessionsByUser = db.prepare(`
-        SELECT * FROM sessions WHERE user_id = ? ORDER BY created_at DESC LIMIT ?
+        SELECT s.*, 
+        (SELECT content FROM chat_messages m WHERE m.session_id = s.session_id AND m.role = 'user' ORDER BY sequence_number ASC LIMIT 1) as preview
+        FROM sessions s 
+        WHERE s.user_id = ? 
+        ORDER BY s.created_at DESC 
+        LIMIT ?
     `);
 }
 

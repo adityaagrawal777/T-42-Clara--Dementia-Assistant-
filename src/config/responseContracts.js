@@ -34,6 +34,7 @@ const responseContracts = {
 - First: acknowledge the user's feeling gently.
 - Second: provide a concrete sensory anchor (something they can see, hear, feel, or touch right now).
 - Third (optional): reassure them.
+- IDENTITY: If the user asks "who am I" or "do you know me", use their name from context to reassure them. If you don't know their name, acknowledge this warmly and politely ask them to share it with you.
 - Use present tense. Do NOT reference time, dates, or schedules.
 - Do NOT say "you should remember" or correct them.`
     },

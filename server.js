@@ -9,16 +9,20 @@ require("dotenv").config();
 
 const express = require("express");
 const path = require("path");
+const cookieParser = require("cookie-parser");
 
 // --- Initialize SQLite Database (MUST happen before routes/components load) ---
 const db = require("./src/db/connection");
+const memoryManager = require("./src/memoryManager");
 db.initialize();
+memoryManager.prepareStatements();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
 app.use(express.json({ limit: "10kb" }));
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // --- Request Logging (lightweight) ---
@@ -34,37 +38,14 @@ const chatRoute = require("./routes/chat");
 const sessionRoute = require("./routes/session");
 const healthRoute = require("./routes/health");
 const escalateRoute = require("./routes/escalate");
+const authRoute = require("./routes/auth");
 const logger = require("./src/logger");
 
 app.use("/api/v1/chat", chatRoute);
 app.use("/api/v1/session", sessionRoute);
 app.use("/api/v1/health", healthRoute);
 app.use("/api/v1/escalate", escalateRoute);
-
-// --- Legacy endpoint (backward compatibility with existing frontend) ---
-const orchestrator = require("./src/orchestrator");
-
-app.post("/api/chat", async (req, res) => {
-  try {
-    const { message, sessionId } = req.body;
-
-    if (!message || !sessionId) {
-      return res.status(400).json({ error: "Message and sessionId are required." });
-    }
-
-    const result = await orchestrator.processMessage(sessionId, message);
-    res.json(result);
-  } catch (error) {
-    console.error("[Legacy Chat] Error:", error.message);
-    res.json({
-      reply: "I am right here with you. Everything is okay. 💛",
-      pacing: {
-        initialDelayMs: 1800,
-        chunks: [{ text: "I am right here with you. Everything is okay. 💛", preDelayMs: 0 }]
-      }
-    });
-  }
-});
+app.use("/api/v1/auth", authRoute);
 
 // --- Serve Frontend ---
 app.get("/", (req, res) => {

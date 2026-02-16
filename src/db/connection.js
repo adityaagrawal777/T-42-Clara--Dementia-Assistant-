@@ -42,9 +42,18 @@ function initialize() {
     db.pragma("busy_timeout = 5000");          // Wait up to 5s if DB is locked
     db.pragma("synchronous = NORMAL");         // Good balance of safety & speed with WAL
 
-    // Run migrations
-    const runMigrations = require("./migrations/001_initial_schema");
-    runMigrations(db);
+    // Run migrations dynamically
+    const migrationsDir = path.join(__dirname, "migrations");
+    const migrationFiles = fs.readdirSync(migrationsDir)
+        .filter(f => f.endsWith(".js"))
+        .sort(); // Run in order (001, 002, ...)
+
+    migrationFiles.forEach(file => {
+        const migration = require(path.join(migrationsDir, file));
+        if (typeof migration === "function") {
+            migration(db);
+        }
+    });
 
     return db;
 }

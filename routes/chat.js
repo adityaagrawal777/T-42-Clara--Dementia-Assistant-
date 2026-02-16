@@ -6,8 +6,9 @@
 const express = require("express");
 const router = express.Router();
 const orchestrator = require("../src/orchestrator");
+const authManager = require("../src/auth");
 
-router.post("/", async (req, res) => {
+router.post("/", authManager.authenticateRequest.bind(authManager), async (req, res) => {
     try {
         const { message, sessionId } = req.body;
 

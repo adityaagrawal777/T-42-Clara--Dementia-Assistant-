@@ -31,6 +31,7 @@ const messageQueries = require("./db/queries/messageQueries");
 const emotionQueries = require("./db/queries/emotionQueries");
 const repetitionQueries = require("./db/queries/repetitionQueries");
 const narrativeUsageQueries = require("./db/queries/narrativeUsageQueries");
+const knowledgeExtractor = require("./knowledgeExtractor");
 
 class MemoryManager {
     constructor() {
@@ -88,7 +89,7 @@ class MemoryManager {
             anchors: [],
             questionHashes: [],
             caregiverContext: {
-                userName: caregiverContext.userName || null,
+                userName: caregiverContext.userName || (userId ? userQueries.getUser(userId)?.display_name : null),
                 knownTopics: caregiverContext.knownTopics || [],
                 avoidTopics: caregiverContext.avoidTopics || []
             },
@@ -298,6 +299,11 @@ class MemoryManager {
             });
 
             persistTransaction();
+
+            // --- Background Knowledge Extraction (non-blocking) ---
+            if (userId) {
+                this._asyncKnowledgeUpdate(sessionId, userMessage, claraReply);
+            }
         } catch (err) {
             // Log but don't crash — the in-memory cache is already updated.
             // The interaction was already delivered to the user.
@@ -364,6 +370,29 @@ class MemoryManager {
     // Private Methods
     // ===============================================================
 
+    async _asyncKnowledgeUpdate(sessionId, userMessage, claraReply) {
+        const session = this.getSession(sessionId);
+        if (!session || !session.userId) return;
+
+        try {
+            const discovered = await knowledgeExtractor.extract(userMessage, claraReply);
+
+            if (discovered && Object.keys(discovered).length > 0) {
+                const updatedContext = knowledgeExtractor.merge(session.caregiverContext, discovered);
+
+                // Update in-memory
+                session.caregiverContext = updatedContext;
+
+                // Update DB
+                userQueries.updateCaregiverContext(session.userId, updatedContext);
+
+                console.log(`[MemoryManager] Knowledge updated for user ${session.userId}:`, discovered);
+            }
+        } catch (err) {
+            console.error(`[MemoryManager] Knowledge extraction background task failed: ${err.message}`);
+        }
+    }
+
     /**
      * Ensure prepared statements are ready.
      * Called at the top of every public method.
@@ -424,13 +453,19 @@ class MemoryManager {
         let caregiverContext = { userName: null, knownTopics: [], avoidTopics: [] };
         if (dbSession.user_id) {
             const user = userQueries.getUser(dbSession.user_id);
-            if (user && user.caregiver_context) {
-                try {
-                    caregiverContext = typeof user.caregiver_context === "string"
-                        ? JSON.parse(user.caregiver_context)
-                        : user.caregiver_context;
-                } catch (err) {
-                    // Fallback to empty context on parse error
+            if (user) {
+                if (user.caregiver_context) {
+                    try {
+                        caregiverContext = typeof user.caregiver_context === "string"
+                            ? JSON.parse(user.caregiver_context)
+                            : user.caregiver_context;
+                    } catch (err) {
+                        // Fallback to empty context on parse error
+                    }
+                }
+                // --- AUTH FIX: Fallback to display_name if userName is missing in context ---
+                if (!caregiverContext.userName && user.display_name) {
+                    caregiverContext.userName = user.display_name;
                 }
             }
         }
