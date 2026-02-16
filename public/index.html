@@ -1,89 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clara — Your Gentle Companion</title>
-  <meta name="description" content="Clara is a warm, emotion-aware AI companion designed to provide comfort and reassurance." />
+  <meta name="description"
+    content="Clara is a warm, emotion-aware AI companion designed to provide comfort and reassurance." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Nunito:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <!-- Soft floating particles background -->
+  <!-- Global Background -->
   <div class="particles" id="particles"></div>
 
-  <div class="app-container">
+  <!-- Landing / Auth Screen -->
+  <div id="authScreen" class="full-screen-container">
+    <div class="landing-card">
+      <div class="landing-header">
+        <div class="landing-avatar">
+          <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="30" cy="30" r="28" fill="url(#landGrad)" />
+            <path d="M20 28C20 28 22 32 30 32C38 32 40 28 40 28" stroke="white" stroke-width="2"
+              stroke-linecap="round" />
+            <circle cx="22" cy="23" r="2.5" fill="white" />
+            <circle cx="38" cy="23" r="2.5" fill="white" />
+            <defs>
+              <linearGradient id="landGrad" x1="0" y1="0" x2="60" y2="60">
+                <stop offset="0%" stop-color="#e8a0bf" />
+                <stop offset="100%" stop-color="#c9a0e8" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h1>Clara</h1>
+        <p>A gentle companion for peaceful moments 💛</p>
+      </div>
+
+      <div id="authFormsContainer">
+        <!-- Login Form -->
+        <form id="loginForm" class="landing-form" autocomplete="off">
+          <h2>Hey Buddy! welcome back</h2>
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" required placeholder="your@email.com">
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="new-password">
+          </div>
+          <button type="submit" class="primary-btn">Sign In</button>
+          <p class="form-footer">New to Clara? <a href="#" id="toRegister">Create an account</a></p>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" class="landing-form" style="display: none;" autocomplete="off">
+          <h2>Join Clara</h2>
+          <div class="form-group">
+            <label for="regName">Your Name</label>
+            <input type="text" id="regName" required placeholder="What should Clara call you?">
+          </div>
+          <div class="form-group">
+            <label for="regEmail">Email</label>
+            <input type="email" id="regEmail" required placeholder="your@email.com">
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Password</label>
+            <input type="password" id="regPassword" required placeholder="••••••••" autocomplete="new-password">
+          </div>
+          <button type="submit" class="primary-btn">Create Account</button>
+          <p class="form-footer">Already have an account? <a href="#" id="toLogin">Sign in</a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App Container (Hidden by default) -->
+  <div id="appContainer" class="app-container" style="display: none;">
     <!-- Header -->
     <header class="header" id="header">
       <div class="header-inner">
-        <div class="avatar-wrapper">
-          <div class="avatar" id="claraAvatar">
-            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="30" cy="30" r="28" fill="url(#avatarGrad)" />
-              <path d="M20 28C20 28 22 32 30 32C38 32 40 28 40 28" stroke="white" stroke-width="2" stroke-linecap="round"/>
-              <circle cx="22" cy="23" r="2.5" fill="white"/>
-              <circle cx="38" cy="23" r="2.5" fill="white"/>
-              <path d="M15 16C18 12 22 11 26 13" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M45 16C42 12 38 11 34 13" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-              <defs>
-                <linearGradient id="avatarGrad" x1="0" y1="0" x2="60" y2="60">
-                  <stop offset="0%" stop-color="#e8a0bf"/>
-                  <stop offset="100%" stop-color="#c9a0e8"/>
-                </linearGradient>
-              </defs>
-            </svg>
+        <div class="header-left">
+          <div class="avatar-wrapper">
+            <div class="avatar" id="claraAvatar">
+              <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="30" r="28" fill="url(#avatarGrad)" />
+                <path d="M20 28C20 28 22 32 30 32C38 32 40 28 40 28" stroke="white" stroke-width="2"
+                  stroke-linecap="round" />
+                <circle cx="22" cy="23" r="2.5" fill="white" />
+                <circle cx="38" cy="23" r="2.5" fill="white" />
+                <path d="M15 16C18 12 22 11 26 13" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M45 16C42 12 38 11 34 13" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+                <defs>
+                  <linearGradient id="avatarGrad" x1="0" y1="0" x2="60" y2="60">
+                    <stop offset="0%" stop-color="#e8a0bf" />
+                    <stop offset="100%" stop-color="#c9a0e8" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="pulse-ring"></div>
           </div>
-          <div class="pulse-ring"></div>
+          <div class="header-text">
+            <h1>Clara</h1>
+            <p class="subtitle">Your gentle companion 💛</p>
+          </div>
         </div>
-        <div class="header-text">
-          <h1>Clara</h1>
-          <p class="subtitle">Your gentle companion 💛</p>
+        <div class="header-right">
+          <button id="historyBtn" class="icon-btn" title="Conversation History">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button id="logoutBtn" class="icon-btn" title="Sign Out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </button>
         </div>
       </div>
     </header>
 
     <!-- Chat Area -->
     <main class="chat-area" id="chatArea">
-      <div class="chat-messages" id="chatMessages">
-        <!-- Welcome message -->
-        <div class="message clara-message welcome-msg" id="welcomeMessage">
-          <div class="message-avatar">
-            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="18" cy="18" r="17" fill="url(#smallGrad)"/>
-              <path d="M12 17C12 17 13.5 19.5 18 19.5C22.5 19.5 24 17 24 17" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-              <circle cx="13.5" cy="14" r="1.5" fill="white"/>
-              <circle cx="22.5" cy="14" r="1.5" fill="white"/>
-              <defs>
-                <linearGradient id="smallGrad" x1="0" y1="0" x2="36" y2="36">
-                  <stop offset="0%" stop-color="#e8a0bf"/>
-                  <stop offset="100%" stop-color="#c9a0e8"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <div class="message-content">
-            <p>Hello, dear. 💛 I'm Clara, and I'm so glad you're here. How are you feeling today?</p>
-          </div>
-        </div>
-      </div>
+      <div class="chat-messages" id="chatMessages"></div>
     </main>
 
     <!-- Input Area -->
     <footer class="input-area" id="inputArea">
       <div class="input-wrapper">
-        <textarea
-          id="userInput"
-          placeholder="Type how you're feeling..."
-          rows="1"
-          maxlength="500"
-          aria-label="Type your message to Clara"
-        ></textarea>
+        <textarea id="userInput" placeholder="Type how you're feeling..." rows="1" maxlength="500"
+          aria-label="Type your message to Clara"></textarea>
         <button id="sendBtn" class="send-btn" aria-label="Send message" title="Send">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
           </svg>
         </button>
       </div>
@@ -91,6 +150,20 @@
     </footer>
   </div>
 
+  <!-- History Modal -->
+  <div id="historyModal" class="modal">
+    <div class="modal-content history-content">
+      <div class="modal-header">
+        <h2>Last Conversations</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div id="sessionList" class="session-list">
+        <p class="empty-msg">No previous conversations yet.</p>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
+
 </html>
