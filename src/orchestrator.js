@@ -32,14 +32,17 @@ class ClaraOrchestrator {
      * @param {string} message
      * @returns {object} ClaraResponse
      */
-    async processMessage(sessionId, message) {
+    async processMessage(sessionId, message, userId = null) {
         const startTime = Date.now();
         const responseId = this._generateId();
 
         // --- Ensure session exists ---
         let session = memoryManager.getSession(sessionId);
         if (!session) {
-            session = memoryManager.createSession(sessionId);
+            session = memoryManager.createSession(sessionId, {}, userId);
+        } else if (userId && !session.userId) {
+            // Link userId if it was missing (e.g. session created before full auth context available)
+            session.userId = userId;
         }
 
         // --- Step 1: Emotion Analysis ---
@@ -133,7 +136,7 @@ class ClaraOrchestrator {
             }
 
             // Select a unique story theme (avoids consecutive repeats)
-            const theme = storyThemeEngine.selectTheme(sessionId);
+            const theme = storyThemeEngine.selectTheme(sessionId, session.userId);
             storyContext = { theme, storyLengthMode };
 
             console.log(`[Orchestrator] 🎨 Story theme: "${theme.id}" — ${theme.label}`);
@@ -160,7 +163,7 @@ class ClaraOrchestrator {
             const retryCompleteness = completenessValidator.validate(reply, intentResult, storyLengthMode);
             if (!retryCompleteness.valid) {
                 console.warn(`[Orchestrator] Regeneration still incomplete. Using intent-specific fallback.`);
-                reply = getIntentFallback(intentResult.intent);
+                reply = getIntentFallback(intentResult.intent, sessionId);
             }
         }
 
@@ -177,7 +180,7 @@ class ClaraOrchestrator {
             const retryValidation = safetyGuard.validateOutput(reply);
             if (!retryValidation.valid) {
                 console.warn(`[Orchestrator] Regeneration also rejected. Using fallback.`);
-                reply = getIntentFallback(intentResult.intent);
+                reply = getIntentFallback(intentResult.intent, sessionId);
             }
         }
 

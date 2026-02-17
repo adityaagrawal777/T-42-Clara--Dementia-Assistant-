@@ -112,37 +112,40 @@ const sessionThemeCache = new Map();
 class StoryThemeEngine {
 
     /**
-     * Select a random theme, avoiding the last-used theme for this session.
+     * Select a random theme, avoiding recently used themes for this user.
      * @param {string} sessionId
+     * @param {string} userId - Optinally provide userId for cross-session uniqueness
      * @returns {{ id: string, label: string, sensoryHints: string }}
      */
-    selectTheme(sessionId) {
-        let lastThemeId = sessionThemeCache.get(sessionId);
+    selectTheme(sessionId, userId = null) {
+        let excludedThemeIds = new Set();
 
-        // If not in cache, try to fetch the most recent one from DB
-        if (!lastThemeId) {
+        // 1. Always exclude themes used in the CURRENT session
+        try {
+            const sessionUsed = narrativeUsageQueries.getSessionNarratives(sessionId);
+            sessionUsed.forEach(id => excludedThemeIds.add(id));
+        } catch (err) { }
+
+        // 2. If userId is provided, exclude themes used in the last 10 global interactions for this user
+        if (userId) {
             try {
-                // Ensure stmts are prepared (the DB should already be init by server.js)
-                // narrativeUsageQueries.prepare() is called by MemoryManager.prepareStatements()
-                const used = narrativeUsageQueries.getSessionNarratives(sessionId);
-                if (used && used.length > 0) {
-                    lastThemeId = used[used.length - 1];
-                }
-            } catch (err) {
-                // Silence DB errors here, just proceed with no history
-            }
+                const userUsed = narrativeUsageQueries.getUserNarratives(userId, 10);
+                userUsed.forEach(usage => excludedThemeIds.add(usage.narrative_id));
+            } catch (err) { }
         }
 
-        // Filter out the last-used theme to prevent consecutive repetition
-        const available = lastThemeId
-            ? SAFE_THEMES.filter(t => t.id !== lastThemeId)
-            : SAFE_THEMES;
+        // 3. Filter available themes
+        let available = SAFE_THEMES.filter(t => !excludedThemeIds.has(t.id));
 
-        // Random selection from available pool
+        // 4. Fallback: if we've used EVERY theme, reset and allow everything except the very last one
+        if (available.length === 0) {
+            const lastSessionUsed = narrativeUsageQueries.getSessionNarratives(sessionId);
+            const lastThemeId = lastSessionUsed[lastSessionUsed.length - 1];
+            available = SAFE_THEMES.filter(t => t.id !== lastThemeId);
+        }
+
+        // 5. Random selection
         const selected = available[Math.floor(Math.random() * available.length)];
-
-        // Update cache
-        sessionThemeCache.set(sessionId, selected.id);
 
         return {
             id: selected.id,

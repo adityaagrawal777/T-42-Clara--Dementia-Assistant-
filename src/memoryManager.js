@@ -151,6 +151,21 @@ class MemoryManager {
             content: m.content
         }));
 
+        // --- NEW: Cross-session memory recall (Last 3 sessions) ---
+        let pastSessionsContext = [];
+        if (session.userId) {
+            const lastSessIds = sessionQueries.getPreviousSessions(session.userId, sessionId, 3);
+            for (const lastId of lastSessIds) {
+                const history = messageQueries.getConversationWindow(lastId, 20); // Last 20 messages per session
+                if (history && history.length > 0) {
+                    pastSessionsContext.push({
+                        sessionId: lastId,
+                        messages: history
+                    });
+                }
+            }
+        }
+
         return {
             isRepeat: repeatInfo.isRepeat,
             repeatCount: repeatInfo.count,
@@ -158,7 +173,8 @@ class MemoryManager {
             emotionHistory: session.emotionHistory.slice(-10),
             anchors: session.anchors.slice(-5),
             conversationWindow,
-            caregiverContext: session.caregiverContext
+            caregiverContext: session.caregiverContext,
+            pastSessionsContext // Changed from lastSessionContext
         };
     }
 

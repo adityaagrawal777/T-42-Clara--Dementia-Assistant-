@@ -124,11 +124,11 @@ class CompletenessValidator {
         const sentenceCount = this._countSentences(text);
 
         if (storyLengthMode === "extended") {
-            // Extended story: expect at least 30 sentences (relaxed from 40 to account for LLM variance)
-            if (sentenceCount < 30) {
+            // Extended story: expect at least 20 sentences (matched with responseContracts.js)
+            if (sentenceCount < 20) {
                 return {
                     valid: false,
-                    reason: `Extended story too short: ${sentenceCount} sentences. Need at least 30 for a bedtime-style story.`
+                    reason: `Extended story too short: ${sentenceCount} sentences. Need at least 20 for a bedtime-style story.`
                 };
             }
 

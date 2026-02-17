@@ -90,6 +90,22 @@ class ContextAssembler {
             );
         }
 
+        // --- NEW: Multi-session memory injection ---
+        if (memoryResult.pastSessionsContext && memoryResult.pastSessionsContext.length > 0) {
+            let memorySnippet = "\nCRITICAL: MEMORIES OF OUR PAST CONVERSATIONS (Prioritize if the user asks 'do you remember'):";
+
+            memoryResult.pastSessionsContext.forEach((session, index) => {
+                const logs = session.messages
+                    .map(m => `${m.role === 'user' ? 'User' : 'Clara'}: ${m.content}`)
+                    .join('\n');
+                memorySnippet += `\n\n[Conversation ${index + 1}]:\n${logs}`;
+            });
+
+            memorySnippet += `\n\nINSTRUCTION: If the user asks what you talked about before, or asks 'do you remember what I told you', use the logs above to answer specifically. For example: "Last time we talked about [detail]" or "You told me you enjoy [hobby]". If they don't ask, keep this in your heart but don't bring it up unless it makes them feel safe.`;
+
+            systemParts.push(memorySnippet);
+        }
+
         // 9. Intent-specific directive (if intent detection is active)
         if (intentResult && intentResult.contract && intentResult.contract.promptDirective) {
             systemParts.push(`\n${intentResult.contract.promptDirective}`);
@@ -98,12 +114,16 @@ class ContextAssembler {
         // 10. Story theme injection (for calming_story intents)
         if (storyContext && storyContext.theme) {
             const modeLabel = storyContext.storyLengthMode === "extended" ? "long, detailed bedtime" : "gentle, short";
+            const interests = (memoryResult.caregiverContext?.knownTopics || []).join(", ");
+            const interestSnippet = interests ? `- USER INTERESTS to weave into the story: ${interests}\n` : "";
+
             systemParts.push(
                 `\nSTORY THEME SEED (use this as inspiration — do NOT copy it literally):\n` +
                 `- Setting: ${storyContext.theme.label}\n` +
                 `- Sensory details to weave in: ${storyContext.theme.sensoryHints}\n` +
+                interestSnippet +
                 `- Tone: ${modeLabel} story\n` +
-                `- IMPORTANT: Make this story unique and fresh. Do not repeat stories you have told before.`
+                `- IMPORTANT: Make this story unique and fresh. Incorporate the user's interests gently into this setting. Do not repeat stories you have told before.`
             );
         }
 

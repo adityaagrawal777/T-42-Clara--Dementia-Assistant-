@@ -234,9 +234,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const date = new Date(sess.created_at).toLocaleDateString(undefined, {
           month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
+
+        // Use the first user message as the title, or a warm generic one if somehow missing
+        const title = sess.preview || "Our Conversation";
+
         item.innerHTML = `
           <span class="session-date">${date}</span>
-          <div class="session-preview">${sess.preview || "New conversation..."}</div>
+          <div class="session-preview">${title}</div>
         `;
         item.onclick = () => {
           startNewSession(sess.session_id);

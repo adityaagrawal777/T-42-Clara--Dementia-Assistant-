@@ -57,7 +57,14 @@ const INTENT_PATTERNS = {
         "a story to fall asleep to",
         "keep telling me a story",
         "a story that goes on for a while",
-        "longer story please"
+        "longer story please",
+        "another story",
+        "more story",
+        "tell me more",
+        "100 words",
+        "200 words",
+        "many words",
+        "long one"
     ],
 
     grounding: [

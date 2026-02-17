@@ -11,7 +11,7 @@ const { getResponse } = require("./safeResponseBank");
 
 // Timeout durations
 const DEFAULT_TIMEOUT_MS = 10000;    // 10 seconds for normal responses
-const EXTENDED_TIMEOUT_MS = 45000;   // 45 seconds for extended bedtime stories
+const EXTENDED_TIMEOUT_MS = 60000;   // 60 seconds for extended bedtime stories
 
 class LLMClient {
     constructor() {

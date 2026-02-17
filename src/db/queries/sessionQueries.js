@@ -33,8 +33,15 @@ function prepare() {
         SELECT s.*, 
         (SELECT content FROM chat_messages m WHERE m.session_id = s.session_id AND m.role = 'user' ORDER BY sequence_number ASC LIMIT 1) as preview
         FROM sessions s 
-        WHERE s.user_id = ? 
+        WHERE s.user_id = ? AND s.message_count > 0
         ORDER BY s.created_at DESC 
+        LIMIT ?
+    `);
+
+    stmts.getPreviousSessions = db.prepare(`
+        SELECT session_id FROM sessions
+        WHERE user_id = ? AND session_id != ? AND message_count > 0
+        ORDER BY created_at DESC
         LIMIT ?
     `);
 }
@@ -60,5 +67,10 @@ module.exports = {
 
     getSessionsByUser(userId, limit = 10) {
         return stmts.getSessionsByUser.all(userId, limit);
+    },
+
+    getPreviousSessions(userId, currentSessionId, limit = 1) {
+        const rows = stmts.getPreviousSessions.all(userId, currentSessionId, limit);
+        return rows.map(r => r.session_id);
     }
 };

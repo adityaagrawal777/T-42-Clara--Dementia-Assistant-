@@ -28,7 +28,7 @@ router.post("/", authManager.authenticateRequest.bind(authManager), async (req, 
         }
 
         // Process through the full Clara pipeline
-        const result = await orchestrator.processMessage(sessionId, sanitized);
+        const result = await orchestrator.processMessage(sessionId, sanitized, req.user.userId);
 
         res.json(result);
     } catch (error) {

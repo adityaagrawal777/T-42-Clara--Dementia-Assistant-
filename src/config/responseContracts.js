@@ -66,33 +66,29 @@ STORY RULES:
     },
 
     calming_story_extended: {
-        maxTokens: 2500,
-        minSentences: 40,
-        maxSentences: 50,
+        maxTokens: 1500,
+        minSentences: 20,
+        maxSentences: 30,
         allowChunking: false,
         requiredParts: ["opening", "middle", "ending"],
-        completionSignals: [".", "!", "💛", "🌸", "and everything was", "the end", "as the sun", "from that day", "and all was", "drifted softly to sleep", "peacefully", "and so"],
+        completionSignals: [".", "!", "💛", "🌸", "and everything was", "the end", "as the sun", "from that day", "all was well", "drifted softly to sleep", "peacefully", "and so"],
         incompletionSignals: ["...", "—", " and then", "to be continued", "would you like", "shall I continue", "want to hear more"],
         promptDirective: `RESPONSE TYPE: CALMING STORY (Extended Bedtime Story)
-You must tell a long, slow, detailed, gentle bedtime-style story in 40–50 sentences. This is very important.
+You must tell a long, slow, detailed, gentle bedtime-style story in 20–30 sentences. This is very important.
 
 STORY STRUCTURE:
-- OPENING (5–7 sentences): Set the scene slowly. Describe the place, the light, the air, the sounds. Make it feel safe and inviting.
-- MIDDLE (25–35 sentences): Unfold a gentle journey or discovery. Describe each moment with rich sensory detail — what things look like, smell like, feel like, sound like. Move slowly between scenes. Let the story breathe.
-- ENDING (5–8 sentences): Bring everything to a warm, peaceful close. The world settles into stillness. Everything is safe. The story is finished.
+- OPENING (4–5 sentences): Set the scene slowly. Describe the place, the light, the air, the sounds.
+- MIDDLE (12–20 sentences): Unfold a gentle journey or discovery. Describe each moment with rich sensory detail.
+- ENDING (4–5 sentences): Bring everything to a warm, peaceful close. The story must feel finished.
 
 STORY RULES:
-- Use 40–50 sentences. This must be a LONG, slow, immersive story.
-- Use nature, warmth, light, and deep sensory details (flowers, streams, birdsong, sunshine, rain, gardens, warm kitchens, soft blankets, meadows, starlight).
-- Do NOT use character names. Use descriptions: "a small bird", "a little cat", "a tiny rabbit", "a gentle old tree."
-- The story must feel FINISHED. The final sentences must feel like falling asleep — peaceful, safe, warm.
-- Do NOT leave the story unfinished or cut it short. This is the ENTIRE story.
-- Do NOT say "would you like to hear more?" or "shall I continue?" — this IS the complete story.
-- Do NOT include conflict, danger, suspense, sadness, or anything frightening.
-- Do NOT start with "Once upon a time" — use a gentler opening.
+- Use 20–30 sentences. It must be immersive and calm.
+- Use nature, warmth, and deep sensory details.
+- Do NOT use character names. Use "a small bird", "a little cat", "a tiny rabbit".
+- The story MUST be finished. Do not stop halfway.
 - Tell the story as a single, uninterrupted block of text.
-- Keep vocabulary simple. Sentences can vary in length but remain gentle.
-- Pace the story like a bedtime reading — slow, soothing, and comforting.`
+- Do NOT ask if they want to hear more or offer to continue.
+- Keep vocabulary simple but the tone rich and soothing.`
     },
 
     emotional_validation: {

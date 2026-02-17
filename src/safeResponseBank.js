@@ -123,15 +123,36 @@ const safeResponseBank = {
     }
 };
 
+// Memory to prevent consecutive repetition of fallbacks in the same session
+const fallbackHistory = new Map();
+
 /**
- * Get a random response from a category
+ * Get a random response from a category, avoiding the last one used in this session.
  */
-function getResponse(category) {
+function getResponse(category, sessionId = null) {
     const responses = safeResponseBank[category];
     if (!responses || responses.length === 0) {
         return safeResponseBank.fallbacks[0];
     }
-    return responses[Math.floor(Math.random() * responses.length)];
+
+    if (responses.length === 1) return responses[0];
+
+    // Try to avoid repetition within the session
+    let available = responses;
+    if (sessionId) {
+        const lastUsed = fallbackHistory.get(`${sessionId}_${category}`);
+        if (lastUsed) {
+            available = responses.filter(r => r !== lastUsed);
+        }
+    }
+
+    const selected = available[Math.floor(Math.random() * available.length)];
+
+    if (sessionId) {
+        fallbackHistory.set(`${sessionId}_${category}`, selected);
+    }
+
+    return selected;
 }
 
 /**
@@ -139,18 +160,33 @@ function getResponse(category) {
  * For calming_story, returns a complete pre-written story.
  * For other intents, returns an intent-appropriate fallback.
  */
-function getIntentFallback(intent) {
+function getIntentFallback(intent, sessionId = null) {
     if (intent === "calming_story") {
-        return getResponse("calming_stories");
+        return getResponse("calming_stories", sessionId);
     }
 
     const intentResponses = safeResponseBank.intentFallbacks[intent];
     if (intentResponses && intentResponses.length > 0) {
-        return intentResponses[Math.floor(Math.random() * intentResponses.length)];
+        // Try to avoid repetition within the session for the specific intent
+        let available = intentResponses;
+        if (sessionId) {
+            const lastUsed = fallbackHistory.get(`${sessionId}_intent_${intent}`);
+            if (lastUsed) {
+                available = intentResponses.filter(r => r !== lastUsed);
+            }
+        }
+
+        const selected = available[Math.floor(Math.random() * available.length)];
+
+        if (sessionId) {
+            fallbackHistory.set(`${sessionId}_intent_${intent}`, selected);
+        }
+
+        return selected;
     }
 
     // Ultimate fallback
-    return getResponse("fallbacks");
+    return getResponse("fallbacks", sessionId);
 }
 
 module.exports = { safeResponseBank, getResponse, getIntentFallback };
