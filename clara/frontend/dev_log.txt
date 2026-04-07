@@ -1,0 +1,103 @@
+﻿
+> clara-frontend@0.1.0 dev
+> next dev
+
+  Γû▓ Next.js 14.2.3
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ Γ£ô Starting...
+ Γ£ô Ready in 5.8s
+ Γùï Compiling / ...
+ Γ£ô Compiled / in 6.8s (640 modules)
+node.exe :  ΓÜá 
+Unsupported metadata 
+viewport is configured 
+in metadata export in 
+/. Please move it to 
+viewport export 
+instead.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: ( ΓÜá Unsuppor   
+ te...export instea    
+d.:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+Read more: https://next
+js.org/docs/app/api-ref
+erence/functions/genera
+te-viewport
+ ΓÜá Unsupported 
+metadata viewport is 
+configured in metadata 
+export in /. Please 
+move it to viewport 
+export instead.
+Read more: https://next
+js.org/docs/app/api-ref
+erence/functions/genera
+te-viewport
+ Γ£ô Compiled in 332ms (302 modules)
+ GET / 307 in 7225ms
+ Γùï Compiling /signin ...
+ Γ£ô Compiled /signin in 2.4s (624 modules)
+ ΓÜá Unsupported 
+metadata viewport is 
+configured in metadata 
+export in /signin. 
+Please move it to 
+viewport export 
+instead.
+Read more: https://next
+js.org/docs/app/api-ref
+erence/functions/genera
+te-viewport
+ GET /signin 200 in 2527ms
+ Γ£ô Compiled /favicon.ico in 175ms (359 modules)
+ GET /favicon.ico 200 in 250ms
+ Γ¿» The requested 
+resource "https://api.d
+icebear.com/7.x/avataaa
+rs/svg?seed=Arthur&back
+groundColor=b6e3f4" 
+has type 
+"image/svg+xml" but 
+dangerouslyAllowSVG is 
+disabled
+(node:35224) [DEP0060] 
+DeprecationWarning: 
+The `util._extend` API 
+is deprecated. Please 
+use Object.assign() 
+instead.
+(Use `node 
+--trace-deprecation 
+...` to show where the 
+warning was created)
+ Γùï Compiling /chat ...
+ Γ£ô Compiled /chat in 2.3s (1462 modules)
+ ΓÜá Unsupported 
+metadata viewport is 
+configured in metadata 
+export in /chat. 
+Please move it to 
+viewport export 
+instead.
+Read more: https://next
+js.org/docs/app/api-ref
+erence/functions/genera
+te-viewport
