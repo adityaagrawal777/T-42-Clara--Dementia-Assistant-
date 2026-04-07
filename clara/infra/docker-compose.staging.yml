@@ -1,0 +1,19 @@
+# Docker Compose Staging Overrides
+version: '3.8'
+
+services:
+  frontend:
+    # Staging-level overrides (e.g., resource limits or replica counts)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  backend:
+    # Staging-level overrides
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+    environment:
+      - ENVIRONMENT=staging

@@ -1,0 +1,20 @@
+{
+  "pythonVersion": "3.11",
+  "pythonPlatform": "Windows",
+  "venvPath": "C:/Program Files/Python311",
+  "pythonPath": "C:/Program Files/Python311/python.exe",
+  "extraPaths": [
+    "C:/Users/darkd/AppData/Roaming/Python/Python311/site-packages",
+    "C:/Program Files/Python311/Lib/site-packages",
+    "C:/Program Files/Python311"
+  ],
+  "include": ["app", "scripts", "migrations"],
+  "exclude": ["**/__pycache__"],
+  "typeCheckingMode": "basic",
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false,
+  "useLibraryCodeForTypes": true
+}
