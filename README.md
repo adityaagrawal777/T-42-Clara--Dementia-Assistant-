@@ -11,36 +11,15 @@
 ## 🌟 Vision & Mission
 **Clara** is an industrial-grade, empathetic AI companion engineered specifically for dementia care. Unlike traditional assistants, Clara focuses on **emotional validation** and **reminiscence therapy**, providing a sanctuary for patients and a robust oversight tool for caregivers.
 
-> [!TIP]
-> **Industrial Goal**: To bridge the gap between clinical care and emotional companionship using state-of-the-art LLMs and real-time biometric-aware interaction.
-
----
-
-## 📸 Technical Showcase
-
-### 1. The Sanctuary Interface
-Designed for low cognitive load, the interface uses a Forest Green and Beige palette ("The Sanctuary Theme") to reduce anxiety and promote grounding.
-
-<p align="center">
-  <img src="docs/assets/chat_ui.png" alt="Clara Chat UI" width="90%">
-</p>
-
-### 2. Caregiver Intelligence Dashboard
-Providing real-time analytics on patient mood, cognitive trends, and automated distress alerting.
-
-<p align="center">
-  <img src="docs/assets/dashboard.png" alt="Caregiver Dashboard" width="90%">
-</p>
-
 ---
 
 ## 🏗️ System Architecture
 
-Clara is built on a resilient, multi-layered monorepo architecture designed for high availability and low latency.
+Clara is built on a resilient, multi-layered monorepo architecture designed for high availability and local-first AI processing.
 
 ```mermaid
 graph TD
-    subgraph "Frontend Layer (React 18 / Next.js 14)"
+    subgraph "Frontend Layer (Next.js 14)"
         A[Sanctuary UI] --> B[WebSocket Handler]
         A --> C[Voice/STT Engine]
     end
@@ -54,70 +33,113 @@ graph TD
 
     subgraph "Intelligence & Persistence Layer"
         F <--> H[(PostgreSQL / Supabase)]
-        E <--> I[(Redis State Cache)]
-        D <--> J[Ollama / Llama 3.2]
+        E <--> I[(Redis Cache)]
+        D <--> J[Ollama / Llama 3.1]
     end
 
-    G --> K[Caregiver Notification Service]
+    G --> K[Resend Email Service]
 ```
 
 ---
 
-## 🛠️ Integrated Tech Stack
+## 🛠️ Prerequisites
 
-| Layer | Technology | Security & Standards |
-| :--- | :--- | :--- |
-| **Frontend** | Next.js 14 (App Router), TailwindCSS | React 18 Concurrent Features |
-| **Backend** | FastAPI (Python 3.12), Pydantic v2 | JWT-based Session Auth |
-| **Inference** | Ollama (Llama 3.2:1b/8b) | Local-first Privacy Compliance |
-| **Database** | PostgreSQL (Supabase), pgvector | Semantic Memory Retrieval |
-| **Cache** | Redis Stack | High-frequency State Persist |
-| **DevOps** | Docker Compose | Multi-container Orchestration |
+Before you begin, ensure you have the following installed:
+- **Python 3.10+** (Backend)
+- **Node.js 18+ / npm** (Frontend)
+- **Ollama** (Local AI Inference)
+- **Git**
 
 ---
 
-## ✅ Project Milestone: Status Repo (April 2026)
+## 🚀 Getting Started (Manual Setup)
 
-The project has reached significant stability in its core engine. Current achievements include:
+Follow these steps to set up the project locally for development.
 
-- [x] **Empathetic Persona Engineering**: Fine-tuned system prompts for dementia validation therapy.
-- [x] **Real-time Mood Classification**: Hybrid pattern-matching and LLM-based mood detection.
-- [x] **Persistent Semantic Memory**: Integration of vector storage for cross-session patient history retrieval.
-- [x] **Multi-modal Interaction**: Seamless voice-to-text and text-to-speech integration.
-- [x] **Caregiver Dashboard Foundation**: Automated distress detection and notification workflows.
-- [x] **Sanctuary Design System**: Fully responsive, accessible UI themed for cognitive support.
+### 1. Clone the Repository
+```bash
+git clone https://github.com/adityaagrawal777/T-42-Clara--Dementia-Assistant-
+cd T-42-Clara--Dementia-Assistant-
+```
+
+### 2. Configure Environment Variables
+Copy the templates and fill in your service keys.
+
+**Backend (`clara/backend/.env`):**
+```env
+DATABASE_URL=your_supabase_postgresql_url
+REDIS_URL=your_redis_url
+JWT_SECRET=your_generated_secret
+RESEND_API_KEY=your_resend_api_key
+OLLAMA_BASE_URL=http://localhost:11434
+```
+
+**Frontend (`clara/frontend/.env.local`):**
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_WS_URL=ws://localhost:8000
+```
+
+### 3. Initialize AI Models
+Clara requires two specific models to be pulled via Ollama:
+```bash
+ollama pull llama3.1:8b
+ollama pull nomic-embed-text
+```
+
+### 4. Backend Setup
+```bash
+cd clara/backend
+python -m venv .venv
+# On Windows: .venv\Scripts\activate
+# On Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+alembic upgrade head  # Run database migrations
+```
+
+### 5. Frontend Setup
+```bash
+cd ../frontend
+npm install
+```
 
 ---
 
-## ⚡ Quick Start (Developer Setup)
+## ⚡ Running the Application
 
-### Prerequisites
-- Docker & Docker Compose
-- Ollama (running locally or via container)
-- Python 3.12+ / Node.js 20+
+### Development Mode (Recommended)
+You can start both services using the provided batch scripts (Windows) or manual commands:
 
-### Installation
-1. Clone the repository and initialize environment variables:
-   ```bash
-   cp infra/.env.example infra/.env
-   # Update variables for Supabase and Ollama
-   ```
+**Option A: Using Batch Scripts**
+- Run `clara/backend/start_backend.bat`
+- Run `clara/frontend/start_frontend.bat`
 
-2. Spin up the infrastructure:
-   ```bash
-   docker compose -f infra/docker-compose.yml up --build
-   ```
+**Option B: Manual Commands**
+- **Backend**: `uvicorn app.main:app --reload --port 8000` (within `.venv`)
+- **Frontend**: `npm run dev`
 
-3. Access the portal:
-   - **User Interface**: `http://localhost:3000`
-   - **API Registry**: `http://localhost:8000/docs`
+### Docker Mode
+For a containerized environment:
+```bash
+docker compose -f clara/infra/docker-compose.yml up --build
+```
+
+---
+
+## ✅ Feature Roadmap
+- [x] **Empathetic Persona Engineering**: Validation therapy-aligned prompts.
+- [x] **Real-time Mood Classification**: Hybrid detection engine.
+- [x] **Persistent Semantic Memory**: Cross-session patient history.
+- [x] **Multi-modal Interaction**: STT/TTS voice integration.
+- [x] **Caregiver Alerts**: Automated distress notifications via Resend.
 
 ---
 
 ## 🔒 Security & Privacy
-Clara is designed with a **Privacy-First** approach. By utilizing local LLM inference (via Ollama), sensitive patient data remains within the managed environment, minimizing external exposure and ensuring compliance with healthcare data regulations.
+Clara prioritizes patient privacy. By utilizing **local LLM inference** via Ollama, sensitive interactions remain within your controlled environment, ensuring higher data sovereignty than cloud-only solutions.
 
 ---
+
 <p align="center">
   <i>Developed for the next generation of empathetic elderly care.</i>
 </p>
