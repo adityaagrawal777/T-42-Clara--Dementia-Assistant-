@@ -6,7 +6,6 @@ from datetime import datetime
 from app.models.alert import Alert
 from app.repositories.patient_repo import PatientRepository
 from app.services.email_service import EmailService
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import get_settings
 
 settings = get_settings()
@@ -16,10 +15,11 @@ class AlertService:
     """
     Caregiver Notification Engine.
     Orchestrates the dispatch of alerts across FCM, Email, and the Dashboard.
+
+    NOTE: create_and_notify always opens its own DB session so it is safe to
+    run as an asyncio background task without interfering with the caller's
+    active transaction.
     """
-    
-    def __init__(self, db: AsyncSession):
-        self.db = db
 
     async def create_and_notify(
         self,
@@ -29,26 +29,36 @@ class AlertService:
         distress_level: str,
         message_content: str,
         categories: List[str]
-    ) -> Alert:
+    ) -> Optional[Alert]:
         """Create database record and dispatch real-time notifications."""
-        
-        # 1. Persist the alert to the database
-        alert = Alert(
-            organization_id=organization_id,
-            session_id=session_id,
-            patient_id=patient_id,
-            severity=distress_level,
-            trigger_phrase=f"[{', '.join(categories).upper()}] - {message_content[:100]}...",
-        )
-        self.db.add(alert)
-        await self.db.commit()
-        await self.db.refresh(alert)
-        
-        # 2. Trigger Professional Email Notification via Background Task
-        patient_repo = PatientRepository(self.db)
-        patient = await patient_repo.get_by_id(patient_id)
-        patient_name = patient.name if patient else "Unknown Patient"
+        from app.db.session import async_session_factory
 
+        try:
+            async with async_session_factory() as db:
+                # 1. Persist the alert to the database
+                alert = Alert(
+                    organization_id=organization_id,
+                    session_id=session_id,
+                    patient_id=patient_id,
+                    severity=distress_level,
+                    trigger_phrase=f"[{', '.join(categories).upper()}] - {message_content[:100]}...",
+                )
+                db.add(alert)
+                await db.flush()
+
+                # 2. Resolve patient name for notification
+                patient_repo = PatientRepository(db)
+                patient = await patient_repo.get_by_id_scoped(patient_id, organization_id)
+                patient_name = patient.name if patient else "Unknown Patient"
+
+                await db.commit()
+                await db.refresh(alert)
+
+        except Exception as e:
+            logger.error("alert_service_db_failed", error=str(e))
+            return None
+
+        # 3. Trigger Professional Email Notification via Background Task
         if settings.alert_email_to:
             asyncio.create_task(
                 EmailService.send_clinical_alert(
@@ -59,6 +69,6 @@ class AlertService:
                     message_context=message_content
                 )
             )
-        
+
         logger.info("alert_notified", alert_id=alert.id, level=distress_level, patient=patient_name)
         return alert

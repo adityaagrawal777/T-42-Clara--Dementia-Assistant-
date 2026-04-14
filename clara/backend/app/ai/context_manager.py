@@ -1,20 +1,22 @@
 # Clara Backend — Redis Context Management
 import json
 import uuid
+import structlog
 from typing import List, Dict, Optional
 from app.db.redis import redis_client, SESSION_CONTEXT_KEY, SESSION_TTL
 from app.ai.ollama_client import ollama_client
 from app.config import get_settings
 
 settings = get_settings()
+logger = structlog.get_logger()
 
 class ContextManager:
     """
-    State manager for conversation history in Redis.
-    Handles memory compression via Ollama summarization.
+    Session-scoped state manager for conversation history in Redis.
+    Handles memory compression via Ollama-based summarization to keep context windows lean.
     """
     
-    # Configurable limits
+    # Context window limits for optimizing model prefill time
     MAX_CONTEXT_MESSAGES = 20
     SUMMARIZATION_THRESHOLD = 10
 
@@ -28,12 +30,11 @@ class ContextManager:
                 return []
             return json.loads(context_data)
         except Exception as e:
-            # Catch Redis connection errors or JSON decode errors gracefully
-            print(f"[ContextManager] Warning: Could not load context from Redis: {e}")
+            logger.warning("context_load_failed", session_id=str(session_id), error=str(e))
             return []
 
     async def add_message(self, session_id: uuid.UUID, role: str, content: str):
-        """Append a new interaction turn to the history and manage overflow."""
+        """Append a new interaction turn and trigger summarization if the window exceeds limits."""
         context = await self.load_context(session_id)
         
         # Add the new message
@@ -41,6 +42,7 @@ class ContextManager:
         
         # Check for window overflow
         if len(context) > self.MAX_CONTEXT_MESSAGES:
+            logger.info("context_limit_reached", session_id=str(session_id), count=len(context))
             context = await self._summarize_context(context, session_id)
             
         # Save back to Redis with TTL refresh
@@ -52,49 +54,43 @@ class ContextManager:
                 ex=SESSION_TTL
             )
         except Exception as e:
-            print(f"[ContextManager] Warning: Could not save context to Redis: {e}")
+            logger.error("context_save_failed", session_id=str(session_id), error=str(e))
 
     async def _summarize_context(self, context: List[Dict[str, str]], session_id: uuid.UUID) -> List[Dict[str, str]]:
-        """Truncate and compress the oldest messages into a single summary block."""
+        """Compress the oldest part of the conversation into a single system anchor."""
         
-        # Prepare messages to be summarized (the oldest SUMMARIZATION_THRESHOLD messages)
-        to_summarize: List[Dict[str, str]] = list(context[:self.SUMMARIZATION_THRESHOLD])
-        remaining: List[Dict[str, str]] = list(context[self.SUMMARIZATION_THRESHOLD:])
-
+        to_summarize = context[:self.SUMMARIZATION_THRESHOLD]
+        remaining = context[self.SUMMARIZATION_THRESHOLD:]
         
-        # Build summarization prompt
+        # Build concise summarization prompt
         conv_str = "\n".join([f"{m['role']}: {m['content']}" for m in to_summarize])
         summarize_prompt = (
-            f"Please summarize the following part of a conversation between a dementia patient "
-            f"and their AI companion Clara in one short, factual sentence. Focus only on relevant history "
-            f"needed for future interactions. Start with 'Earlier in this conversation: '.\n\n"
+            f"Summarize this interaction between a dementia patient and Clara "
+            f"in one short, factual sentence for continuity. Start with 'Earlier: '.\n\n"
             f"{conv_str}"
         )
         
-        # Call Ollama for summary
         try:
-            # Note: We use a non-streaming call here for simplicity in internal logic
-            # Since we didn't implement a non-streaming method in OllamaClient yet, 
-            # I'll iterate through a stream to build the result.
-            summary_content = ""
-            async for chunk in ollama_client.chat_stream(
+            # Use non-streaming chat for lighter, cleaner internal logic
+            summary_content = await ollama_client.chat(
                 [{"role": "user", "content": summarize_prompt}],
                 model=settings.ollama.model
-            ):
-                summary_content += chunk
+            )
             
             summary_message = {"role": "system", "content": summary_content.strip()}
+            logger.info("context_summarized", session_id=str(session_id))
             return [summary_message] + remaining
             
         except Exception as e:
-            # Fail gracefully by just truncating and logging
-            print(f"Summarization failed for session {session_id}: {e}")
+            logger.warning("context_summarize_failed", session_id=str(session_id), error=str(e))
+            # Graceful fallback: just truncate oldest message to avoid infinite overflow
             return remaining
 
     async def clear_context(self, session_id: uuid.UUID):
-        """Permanently delete conversation history on session end."""
+        """Permanently delete conversation history on session end (Privacy/GDPR)."""
         key = SESSION_CONTEXT_KEY.format(session_id=session_id)
         try:
             await redis_client.delete(key)
+            logger.info("context_cleared", session_id=str(session_id))
         except Exception as e:
-            print(f"[ContextManager] Warning: Could not clear context from Redis: {e}")
+            logger.warning("context_clear_failed", session_id=str(session_id), error=str(e))

@@ -66,11 +66,10 @@ async def create_patient_session_token(
     # In a real system, we'd check if current_user.associated_patient_ids contains patient_id
     
     # Session tokens expire in 8 hours and have the 'patient_session' role
-    # user_id is intentionally a fresh UUID here — this is a caregiver-issued
-    # device/tablet token, not tied to a specific user identity.
     expires = datetime.timedelta(hours=8)
     session_token = auth_service.create_access_token(
         user_id=uuid.uuid4(),
+        organization_id=current_user.organization_id,
         role="patient_session",
         patient_id=patient_id,
         expires_delta=expires

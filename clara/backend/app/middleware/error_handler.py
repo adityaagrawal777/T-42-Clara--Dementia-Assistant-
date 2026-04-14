@@ -26,7 +26,7 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
 
         except ClaraAIError as ai_ex:
             # Domain-specific AI error — surface a safe user message
-            logger.warn(
+            logger.warning(
                 "ai_engine_failure",
                 message=str(ai_ex),
                 context=getattr(ai_ex, "log_context", {}),

@@ -1,16 +1,26 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Literal, Optional
 import redis.asyncio as redis
 import json
-from .distress_detector import DistressSignal
 from app.db.redis import SESSION_SIGNALS_KEY, SESSION_TTL
+
+
+@dataclass
+class DistressSignal:
+    """
+    An individual distress signal from a single pattern match.
+    Used by the RuleEngine to evaluate escalation patterns across a session.
+    """
+    severity: Literal["critical", "high", "medium", "low"]
+    signal_type: str
+
 
 @dataclass
 class RuleResult:
     should_alert: bool
     alert_severity: Optional[str] = None
     rule_name: Optional[str] = None
-    notify_channels: List[str] = None
+    notify_channels: List[str] = field(default_factory=list)
 
 class RuleEngine:
     def __init__(self, redis_client: Optional[redis.Redis] = None):

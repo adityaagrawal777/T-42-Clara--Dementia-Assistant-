@@ -15,9 +15,9 @@ async def list_active_patients(
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver)
 ) -> Sequence[PatientResponse]:
-    """Caregiver oversight: List all patients under care."""
+    """Caregiver oversight: List all patients within your organization."""
     repo = PatientRepository(db)
-    return await repo.get_active_patients()
+    return await repo.get_active_patients(current_user.organization_id)
 
 @router.post("/", response_model=PatientResponse, status_code=status.HTTP_201_CREATED)
 async def create_patient_record(
@@ -25,9 +25,11 @@ async def create_patient_record(
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver)
 ) -> PatientResponse:
-    """Caregiver onboarding: Manually register a new patient bio."""
+    """Caregiver onboarding: Register a new patient in your organization."""
     repo = PatientRepository(db)
-    return await repo.create(patient_data.model_dump())
+    data = patient_data.model_dump()
+    data["organization_id"] = current_user.organization_id # Enforce tenancy
+    return await repo.create(data)
 
 @router.get("/{patient_id}", response_model=PatientResponse)
 async def get_patient_profile(
@@ -37,10 +39,13 @@ async def get_patient_profile(
 ) -> PatientResponse:
     """Caregiver detailing: Fetch comprehensive patient bio and memories."""
     repo = PatientRepository(db)
-    patient = await repo.get_by_id(patient_id)
+    patient = await repo.get_by_id_scoped(patient_id, current_user.organization_id)
     
     if not patient:
-        raise HTTPException(status_code=404, detail="Patient record not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Patient record not found in your organization"
+        )
     return patient # type: ignore
 
 @router.patch("/{patient_id}", response_model=PatientResponse)
@@ -52,10 +57,17 @@ async def update_patient_profile(
 ) -> PatientResponse:
     """Caregiver modification: Securely update grounding info or biography."""
     repo = PatientRepository(db)
-    updated = await repo.update_profile(patient_id, patient_data.model_dump(exclude_unset=True))
+    updated = await repo.update_profile(
+        patient_id, 
+        current_user.organization_id, 
+        patient_data.model_dump(exclude_unset=True)
+    )
     
     if not updated:
-        raise HTTPException(status_code=404, detail="Patient record not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Patient record not found in your organization"
+        )
     return updated # type: ignore
 
 @router.delete("/{patient_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -64,10 +76,13 @@ async def archive_patient(
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver)
 ):
-    """Caregiver management: Permanently remove or archive a patient record."""
+    """Caregiver management: Archive a patient record within your organization."""
     repo = PatientRepository(db)
-    success = await repo.delete(patient_id)
+    success = await repo.delete_scoped(patient_id, current_user.organization_id)
     
     if not success:
-        raise HTTPException(status_code=404, detail="Patient record not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Patient record not found in your organization"
+        )
     return None

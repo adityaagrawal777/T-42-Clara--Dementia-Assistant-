@@ -3,10 +3,8 @@ import asyncio
 import uuid
 import json
 import structlog
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.session import get_db_session
-from app.services.auth_service import auth_service, CurrentUser
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
+from app.services.auth_service import auth_service
 from app.services.chat_service import ChatService
 from app.ai.exceptions import ClaraAIError
 from app.config import get_settings
@@ -24,9 +22,9 @@ async def websocket_chat_endpoint(
 ):
     """
     Main real-time communication channel for Clara.
-    Protocol: JSON streaming over WebSocket.
+    Ensures end-to-end security through organizational scoping and role-based checks.
     """
-    # 1. Signature & Expiry Validation (Query param for WS)
+    # 1. Signature & Expiry Validation
     user = auth_service.decode_token(token)
     if not user:
         await websocket.close(code=4001, reason="Invalid credentials")
@@ -35,35 +33,39 @@ async def websocket_chat_endpoint(
     await websocket.accept()
     
     # 2. Setup database and services for this connection
-    # Cannot use standard Depends() in WS loop easily, so we manage manually
     from app.db.session import async_session_factory
     from app.db.redis import redis_client
     
     async with async_session_factory() as db:
         chat_service = ChatService(db, redis_client)
         
-        # Validate patient ownership
-        if user.role == "patient_session" and user.patient_id is None:
-             await websocket.send_json({"type": "error", "message": "Invalid session token."})
+        # Verify organizational isolation: session must exist and belong to user's org
+        session = await chat_service.session_repo.get_by_id_scoped(session_id, user.organization_id)
+        if not session:
+            logger.warning("websocket_unauthorized_access", session_id=str(session_id), org_id=str(user.organization_id))
+            await websocket.send_json({"type": "error", "message": "Access denied: Unauthorized session."})
+            await websocket.close(code=4002)
+            return
+
+        # Role-based restriction: patient role must match the specific session patient
+        if user.role == "patient_session" and user.patient_id != session.patient_id:
+             await websocket.send_json({"type": "error", "message": "Access denied: Patient mismatch."})
              await websocket.close(code=4003)
              return
 
-        # Load patient bio for prompt building
-        # Timeout is configurable via PATIENT_LOAD_TIMEOUT env var (default 5s).
+        # Load patient bio ensuring strict organizational isolation
         patient = None
         try:
             patient = await asyncio.wait_for(
-                chat_service.get_patient_profile(user.patient_id),
+                chat_service.get_patient_profile(session.patient_id, user.organization_id),
                 timeout=settings.chat.patient_load_timeout
             )
         except asyncio.TimeoutError:
-            logger.warning("websocket_patient_load_timeout", patient_id=str(user.patient_id))
+            logger.warning("websocket_patient_load_timeout", patient_id=str(session.patient_id))
         except Exception as load_err:
             logger.error("websocket_patient_load_error", error=str(load_err))
 
         if not patient:
-            # A clinical AI companion must never operate with a fabricated patient
-            # identity — reject the connection cleanly so the frontend can retry.
             await websocket.send_json({
                 "type": "error",
                 "code": "PATIENT_NOT_FOUND",
@@ -72,7 +74,7 @@ async def websocket_chat_endpoint(
             await websocket.close(code=4004)
             return
 
-        # Handshake
+        # Secure Connection Acknowledgement
         await websocket.send_json({
             "type": "connection_ack",
             "session_id": str(session_id),
@@ -82,11 +84,9 @@ async def websocket_chat_endpoint(
         # 3. Message Loop
         try:
             while True:
-                # Receive client message
                 data = await websocket.receive_text()
                 try:
                     msg = json.loads(data)
-                    # Accept packets with type="message" or no type at all
                     msg_type = msg.get("type", "message")
                     if msg_type not in ("message", None):
                         continue
@@ -97,7 +97,7 @@ async def websocket_chat_endpoint(
                     if not content:
                         continue
                         
-                    # Process and stream tokens back
+                    # Process and stream tokens back ensuring tenant isolation continues in handle_message
                     async for chunk in chat_service.handle_message(
                         session_id=session_id,
                         patient=patient,
@@ -119,5 +119,4 @@ async def websocket_chat_endpoint(
                     await websocket.send_json({"type": "error", "message": "An unexpected error occurred."})
                     
         except WebSocketDisconnect:
-            # Clean exit on client departure
             pass

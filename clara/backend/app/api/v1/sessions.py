@@ -6,10 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db_session
 from app.repositories.session_repo import SessionRepository
-from app.repositories.patient_repo import PatientRepository
 from app.ai.context_manager import ContextManager
 from app.schemas.session import SessionCreate, SessionResponse, SessionUpdate
-from app.api.deps import get_current_user, require_patient_session, CurrentUser
+from app.api.deps import get_current_user, CurrentUser
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
@@ -22,10 +21,15 @@ async def start_clara_session(
     """Session startup: Initialize a safe interaction session for a patient."""
     # Ensure authorization via device token or caregiver
     if current_user.role == "patient_session" and current_user.patient_id != session_data.patient_id:
-        raise HTTPException(status_code=403, detail="Unauthorised session request.")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized session request.")
         
     repo = SessionRepository(db)
-    new_session = await repo.create_session(session_data.patient_id, session_data.mode)
+    # Enforce organizational isolation: only create sessions within the user's organization
+    new_session = await repo.create_session(
+        patient_id=session_data.patient_id, 
+        organization_id=current_user.organization_id,
+        mode=session_data.mode
+    )
     return new_session # type: ignore
 
 @router.patch("/{session_id}/end", response_model=SessionResponse)
@@ -37,19 +41,20 @@ async def end_clara_session(
 ) -> SessionResponse:
     """Session conclusion: Finalize interaction and securely clear AI memory."""
     repo = SessionRepository(db)
-    session = await repo.get_by_id(session_id)
     
-    if not session:
-        raise HTTPException(status_code=404, detail="Session record not found")
-        
-    # Authorization checks
-    if current_user.role == "patient_session" and current_user.patient_id != session.patient_id:
-        raise HTTPException(status_code=403, detail="Unauthorised session close.")
-        
-    # 1. Update session end metadata
-    mood_summary = session_update.mood_summary or "normal"
-    ended_session = await repo.end_session(session_id, mood_summary)
+    # Securely finalize session within org scope
+    ended_session = await repo.end_session(
+        session_id=session_id, 
+        organization_id=current_user.organization_id,
+        mood_summary=session_update.mood_summary or "normal"
+    )
     
+    if not ended_session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Session record not found in your organization"
+        )
+        
     # 2. Secure context clearing from Redis
     context_manager = ContextManager()
     await context_manager.clear_context(session_id)

@@ -1,0 +1,138 @@
+# Clara Voice Agent - Quick Start Test ⚡
+
+## 🚀 START HERE
+
+### Step 1: Open the App
+```
+http://localhost:3001
+```
+
+### Step 2: Sign In
+Use any test credentials configured in your system
+
+### Step 3: Enable Voice Mode
+Look for the **🎤 microphone icon** in the top-right of the chat input
+- Click it to toggle voice ON (icon turns green)
+- Icon should say "Voice Enabled" when you hover over it
+
+### Step 4: Speak to Clara
+1. Click the **green microphone button** in the input area
+   - It turns RED and says "Stop Listening"
+2. **Speak clearly**: Try "Hello Clara, how are you?"
+3. Your words appear automatically in the text box
+4. Press **ENTER** or click **SEND** button
+
+### Step 5: Listen to Clara
+✨ **Clara speaks back to you with emotion-aware voice!**
+
+---
+
+## ✅ What Should Happen
+
+| Action | Result |
+|--------|--------|
+| Click 🎤 icon | Voice mode toggles on |
+| Click red mic button | You see "LISTENING" indicator |
+| Speak | Your words appear in the box |
+| Stop speaking | Auto-stops after 8 seconds |
+| Click SEND | Clara's response streams in text |
+| Wait for completion | **Clara speaks the response** 🔊 |
+
+---
+
+## 🎯 Example Conversation
+
+```
+YOU (speaking):          "Hello Clara, I'm feeling anxious"
+[Transcript appears]     "Hello Clara, I'm feeling anxious"
+
+CLARA (text):            "I'm here to help. Let's take a moment together. 
+                          Deep breaths can really help when anxiety rises..."
+
+CLARA (voice):           [Speaks the response with CALM tone - 
+                         slower speed (1.0x), normal pitch]
+```
+
+---
+
+## 🐛 If Voice Doesn't Work
+
+### Microphone Not Detected?
+1. Check browser permissions (reload if you denied it)
+2. Try Chrome/Edge (they have best support)
+3. Check Windows sounds (Settings → Sound)
+
+### No Audio Output?
+1. Check your speakers/headphones are working
+2. Check volume (not muted)
+3. Try refreshing the page (Ctrl+R)
+
+### No Transcript Appearing?
+1. Speak louder/more clearly
+2. Check microphone sensitivity in Windows
+3. Try clicking microphone button again
+
+### Hard Reset
+```
+1. Close browser completely
+2. Ctrl+Shift+Delete (clear cache)
+3. Reopen http://localhost:3001
+4. Sign in again
+```
+
+---
+
+## 🎵 Voice Moods You'll Hear
+
+**Happy** 😊 - Fast & high-pitched speech  
+**Calm** 😌 - Normal, balanced speech  
+**Confused** 🤔 - Slightly slower, uncertain tone  
+**Distressed** 😟 - Slower, lower, concerned tone
+
+Clara's mood changes based on the conversation! Try:
+- "I'm so happy!" → Happy voice
+- "I'm scared" → Distressed voice
+- "Can you help me?" → Calm voice
+
+---
+
+## 📊 Technical Details
+
+**Browser APIs Used:**
+- 🎤 Web Speech API (SpeechRecognition) - for listening
+- 🔊 Web Speech API (SpeechSynthesis) - for speaking
+- 🌐 WebSocket - for real-time communication
+
+**No external APIs or cloud services!**
+
+---
+
+## ✨ Tips
+
+✅ **Best Results:**
+- Use Chrome or Edge
+- Speak clearly at normal volume
+- Ensure microphone is working
+- Use headphones for better audio
+
+✅ **Common Queries:**
+- "What's the weather?" - Information request
+- "Tell me a story" - Engagement
+- "I'm feeling down" - Emotional support
+- "Thank you" - Positive feedback
+
+✅ **Voice Mode:**
+- Enable for voice input AND voice output
+- Disable for text-only mode
+- Toggle anytime during conversation
+
+---
+
+## 🎯 Success!
+
+If you hear Clara speak back to you with different tones based on mood,  
+**the voice agent is working perfectly!** 🎉
+
+---
+
+**Questions?** Check `VOICE_AGENT_IMPLEMENTATION.md` for detailed docs.

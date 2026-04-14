@@ -10,11 +10,28 @@ declare global {
   }
 }
 
+/**
+ * Picks the best female English voice available in the browser.
+ * Priority: explicitly-labelled "female" → known female voice names → any English voice.
+ */
+const pickFemaleVoice = (voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null => {
+  if (!voices.length) return null;
+  const femaleKeywords = /female|aria|samantha|zira|susan|cortana|victoria|karen|moira|serena|tessa|eva|jenny|helena|emma|amy/i;
+
+  return (
+    voices.find((v) => /female/i.test(v.name) && v.lang.startsWith("en")) ||
+    voices.find((v) => femaleKeywords.test(v.name) && v.lang.startsWith("en")) ||
+    voices.find((v) => v.lang.startsWith("en")) ||
+    null
+  );
+};
+
 export const useVoiceOrchestrator = () => {
   const [voiceAvailable, setVoiceAvailable] = useState(false);
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const femaleVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
 
   const { isListening, isSpeaking, setListening, setSpeaking } = useClaraStore((state) => ({
     isListening: state.isListening,
@@ -24,6 +41,15 @@ export const useVoiceOrchestrator = () => {
   }));
 
   useEffect(() => {
+    // Pre-load female voice — voices may not be available synchronously on first render
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      const loadVoices = () => {
+        femaleVoiceRef.current = pickFemaleVoice(window.speechSynthesis.getVoices());
+      };
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       setVoiceAvailable(true);
@@ -50,11 +76,6 @@ export const useVoiceOrchestrator = () => {
         }
 
         setTranscript(interimTranscript || finalTranscript);
-
-        if (finalTranscript) {
-          // In a real app, this would trigger sendMessage via the socket hook
-          // Here we just set it, the component using this hook will handle the actual sending
-        }
 
         // Reset timeout on every result
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -91,6 +112,11 @@ export const useVoiceOrchestrator = () => {
       utterance.rate = params.rate;
       utterance.pitch = params.pitch;
       utterance.volume = params.volume;
+
+      // Use the pre-selected female voice if available
+      if (femaleVoiceRef.current) {
+        utterance.voice = femaleVoiceRef.current;
+      }
 
       utterance.onstart = () => setSpeaking(true);
       utterance.onend = () => setSpeaking(false);

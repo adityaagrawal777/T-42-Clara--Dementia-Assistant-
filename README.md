@@ -52,6 +52,30 @@ Before you begin, ensure you have the following installed:
 
 ---
 
+## ⚡ Quick Start (TL;DR)
+
+```bash
+git clone https://github.com/adityaagrawal777/T-42-Clara--Dementia-Assistant-
+cd T-42-Clara--Dementia-Assistant-
+
+# Backend
+cd clara/backend
+pip install -r requirements.txt
+
+# Frontend
+cd ../frontend
+npm install
+
+# Run Ollama
+ollama run llama3.1:8b
+
+# Start
+uvicorn app.main:app --reload
+npm run dev
+```
+
+---
+
 ## 🚀 Getting Started (Manual Setup)
 
 Follow these steps to set up the project locally for development.
@@ -137,6 +161,13 @@ docker compose -f clara/infra/docker-compose.yml up --build
 
 ## 🔒 Security & Privacy
 Clara prioritizes patient privacy. By utilizing **local LLM inference** via Ollama, sensitive interactions remain within your controlled environment, ensuring higher data sovereignty than cloud-only solutions.
+
+---
+
+## 👥 Contributors
+Aditya Agarwal (Backend)  
+Aditya Sharma (Agent and ML)  
+Kushagra Trivedi (Frontend)
 
 ---
 

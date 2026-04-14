@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getJWT } from "@/lib/tokens";
+import { useRouter, usePathname } from "next/navigation";
+import { decodeJWT } from "@/lib/tokens";
 import { Spinner } from "@/components/ui/Spinner";
 import { LayoutDashboard, Users, Bell, LogOut, Heart } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 export default function CaregiverLayout({
   children,
@@ -15,26 +14,34 @@ export default function CaregiverLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [caregiverName, setCaregiverName] = useState<string>("Caregiver");
 
   useEffect(() => {
-    const token = getJWT();
-    if (!token) {
-      // For demo, allow without token for now
-      // router.push("/caregiver/login");
-      setIsAuthorized(true);
+    const payload = decodeJWT();
+    
+    // Strict Guard: Must have token and must have caregiver/admin role
+    if (!payload || !["caregiver", "admin", "super_admin"].includes(payload.role)) {
+      console.warn("[Clara] Unauthorized access attempt to caregiver dashboard");
+      router.replace("/signin");
     } else {
       setIsAuthorized(true);
+      // In a real payload, we might have the name or email
+      setCaregiverName(payload.email || "Caregiver");
     }
+    setIsLoading(false);
   }, [router]);
 
-  if (isAuthorized === null) {
+  if (isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
         <Spinner />
       </div>
     );
   }
+
+  if (!isAuthorized) return null;
 
   const navLinks = [
     { href: "/caregiver", label: "Dashboard", icon: LayoutDashboard },
@@ -73,7 +80,8 @@ export default function CaregiverLayout({
         <div className="p-4 mt-auto border-t border-slate-100">
           <button
             onClick={() => {
-              /* handle logout */
+              localStorage.removeItem("clara_jwt_token");
+              router.push("/signin");
             }}
             className="flex items-center gap-4 px-6 py-4 rounded-2xl text-rose-500 hover:bg-rose-50 w-full transition-all font-medium"
           >
@@ -94,7 +102,7 @@ export default function CaregiverLayout({
           </div>
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden" />
-            <span className="font-semibold text-slate-700">Dr. Sarah Johnson</span>
+            <span className="font-semibold text-slate-700">{caregiverName}</span>
           </div>
         </header>
         

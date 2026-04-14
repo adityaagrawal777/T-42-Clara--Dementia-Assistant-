@@ -16,9 +16,9 @@ export const MoodIndicator: React.FC = () => {
   const config = MOOD_CONFIG[currentMood] ?? MOOD_CONFIG.neutral;
 
   return (
-    <div className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold mood-transition ${config.color}`}>
+    <div className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all duration-500 ease-out ${config.color}`}>
       <span
-        className="w-2.5 h-2.5 rounded-full flex-shrink-0 mood-transition"
+        className="w-2 h-2 rounded-full flex-shrink-0 transition-colors duration-500"
         style={{ backgroundColor: config.dot }}
       />
       {config.label}

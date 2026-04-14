@@ -17,6 +17,30 @@ from app.schemas.alert import AlertResponse
 
 router = APIRouter(prefix="/caregiver", tags=["Caregiver Dashboard"])
 
+@router.get("/alerts", response_model=List[AlertResponse])
+async def list_org_unresolved_alerts(
+    db: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_caregiver)
+) -> Sequence[Alert]:
+    """Safety oversight: All unresolved alerts across the caregiver's organization."""
+    repo = AlertRepository(db)
+    return await repo.get_org_unresolved_alerts(current_user.organization_id)
+
+
+@router.patch("/alerts/{alert_id}/resolve", response_model=AlertResponse)
+async def resolve_alert(
+    alert_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_caregiver)
+) -> Alert:
+    """Safety workflow: Mark a specific alert as investigated and resolved."""
+    repo = AlertRepository(db)
+    resolved = await repo.resolve_alert(alert_id, str(current_user.user_id))
+    if not resolved:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    return resolved
+
+
 @router.get("/patients/{patient_id}/mood-timeline")
 async def get_patient_mood_timeline(
     patient_id: uuid.UUID,
@@ -37,8 +61,10 @@ async def get_patient_mood_timeline(
         .join(ClaraSession, Message.session_id == ClaraSession.id)
         .where(
             ClaraSession.patient_id == patient_id,
+            ClaraSession.organization_id == current_user.organization_id,
+            Message.organization_id == current_user.organization_id,
             Message.created_at >= since_date,
-            Message.mood != None
+            Message.mood.isnot(None)
         )
         .group_by(func.date(Message.created_at), Message.mood)
         .order_by(func.date(Message.created_at).asc())
@@ -67,7 +93,7 @@ async def list_patient_sessions_paginated(
 ) -> Sequence[ClaraSession]:
     """Audit oversight: Paginated list of interaction sessions for a specific subject."""
     repo = SessionRepository(db)
-    return await repo.get_recent_sessions(patient_id, limit=limit)
+    return await repo.get_recent_sessions(patient_id, current_user.organization_id, limit=limit)
 
 @router.get("/patients/{patient_id}/alerts", response_model=List[AlertResponse])
 async def list_unresolved_patient_alerts(

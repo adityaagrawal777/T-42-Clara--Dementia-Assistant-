@@ -23,7 +23,7 @@ async def test_engine_streaming(engine):
         yield "Patient"
         yield "!"
         
-    with patch.object(engine.ollama, "chat_stream", side_effect=mock_stream):
+    with patch("app.ai.clara_engine.ollama_client.chat_stream", side_effect=mock_stream):
         # Mock ContextManager and MoodClassifier
         with patch.object(engine.context_manager, "load_context", return_value=[]):
             with patch.object(engine.context_manager, "add_message", return_value=None):
@@ -55,7 +55,7 @@ async def test_distress_stripping(engine):
         yield "I'm concerned. "
         yield engine.prompt_builder.DISTRESS_MARKER
         
-    with patch.object(engine.ollama, "chat_stream", side_effect=mock_distress_stream), patch("app.ai.clara_engine.AlertService.create_and_notify", new_callable=AsyncMock):
+    with patch("app.ai.clara_engine.ollama_client.chat_stream", side_effect=mock_distress_stream), patch("app.ai.clara_engine.AlertService.create_and_notify", new_callable=AsyncMock):
         with patch.object(engine.context_manager, "load_context", return_value=[]):
             with patch.object(engine.context_manager, "add_message", return_value=None):
                 with patch.object(engine.mood_classifier, "classify", 

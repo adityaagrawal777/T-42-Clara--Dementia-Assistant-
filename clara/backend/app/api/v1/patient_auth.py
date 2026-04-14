@@ -93,17 +93,6 @@ async def register_patient(
     """
     name_lower = body.name.strip().lower()
 
-    # Duplicate name check
-    result = await db.execute(
-        select(Patient).where(Patient.is_deleted == False, Patient.is_active == True)
-    )
-    for p in result.scalars().all():
-        if p.name.strip().lower() == name_lower:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"An account with the name '{body.name}' already exists. Please sign in instead.",
-            )
-
     # Fetch the default organization (first one in DB)
     org_result = await db.execute(select(Organization).limit(1))
     org = org_result.scalars().first()
@@ -112,6 +101,21 @@ async def register_patient(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="No organization found. Please run the bootstrap script first.",
         )
+
+    # Duplicate name check scoped to the organization
+    result = await db.execute(
+        select(Patient).where(
+            Patient.organization_id == org.id,
+            Patient.is_deleted == False,
+            Patient.is_active == True,
+        )
+    )
+    for p in result.scalars().all():
+        if p.name.strip().lower() == name_lower:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"An account with the name '{body.name}' already exists. Please sign in instead.",
+            )
 
     # Hash passphrase and create patient record
     patient = Patient(
@@ -154,8 +158,21 @@ async def login_patient(
     """
     name_lower = body.name.strip().lower()
 
+    # Fetch the default organization first so login is org-scoped
+    org_result = await db.execute(select(Organization).limit(1))
+    org = org_result.scalars().first()
+    if not org:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="No organization found. Please contact your caregiver.",
+        )
+
     result = await db.execute(
-        select(Patient).where(Patient.is_deleted == False, Patient.is_active == True)
+        select(Patient).where(
+            Patient.organization_id == org.id,
+            Patient.is_deleted == False,
+            Patient.is_active == True,
+        )
     )
     patient = next(
         (p for p in result.scalars().all() if p.name.strip().lower() == name_lower),

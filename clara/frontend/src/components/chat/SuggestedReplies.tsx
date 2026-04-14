@@ -2,57 +2,48 @@
 
 import React from "react";
 import { useClaraStore } from "@/store/claraStore";
-import { motion, AnimatePresence } from "framer-motion";
-
-const SUGGESTIONS = [
-  "Tell me a story",
-  "How are you feeling?",
-  "Remind me of something nice",
-  "Play calm music",
-  "Share a memory",
-];
+import { MessageSquarePlus } from "lucide-react";
 
 export const SuggestedReplies: React.FC = () => {
-  const sendMessage = useClaraStore((state) => state.sendMessage);
-  const status      = useClaraStore((state) => state.status);
   const isStreaming = useClaraStore((state) => state.isStreaming);
-  const messages    = useClaraStore((state) => state.items);
+  const status = useClaraStore((state) => state.status);
+  const sendMessage = useClaraStore((state) => state.sendMessage);
+  const items = useClaraStore((state) => state.items);
 
-  // Only show suggestions when there are very few messages (start of convo)
-  const showSuggestions = !isStreaming && messages.length <= 2;
-  const canSend = status === "active" && !isStreaming;
+  // Example dynamic suggestions based on state or context
+  // In a full implementation, the backend would stream these.
+  const suggestions = [
+    "I'd love to chat",
+    "Tell me a story",
+    "Let's play a game",
+  ];
 
-  const handleSuggestionClick = (text: string) => {
-    if (canSend && sendMessage) sendMessage(text, "chat");
+  const handleSuggest = (text: string) => {
+    if (sendMessage && status === "active" && !isStreaming) {
+      sendMessage(text, "chat");
+    }
   };
 
+  // Only show if not waiting and at the start or after Clara speaks
+  const isReady = status === "active" && !isStreaming;
+  const lastMessage = items[items.length - 1];
+  const shouldShow = isReady && (!lastMessage || lastMessage.role === "clara");
+
+  if (!shouldShow) return null;
+
   return (
-    <AnimatePresence>
-      {showSuggestions && (
-        <motion.div
-          className="flex flex-wrap gap-2 overflow-x-auto no-scrollbar"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 8 }}
-          transition={{ duration: 0.25 }}
+    <div className="flex flex-wrap items-center gap-2 mb-2 px-2 animate-in slide-in-from-bottom-2 fade-in duration-300">
+      <MessageSquarePlus size={16} className="text-clara-green-800/60 mr-1 shrink-0 hidden lg:block" />
+      {suggestions.map((text, i) => (
+        <button
+          key={i}
+          onClick={() => handleSuggest(text)}
+          disabled={!isReady}
+          className="px-4 py-2 rounded-full bg-white/90 border border-clara-beige-200 text-clara-green-900 font-sans text-sm font-semibold whitespace-nowrap cursor-pointer shadow-sm hover:bg-clara-beige-100 hover:border-clara-green-700 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {SUGGESTIONS.map((suggestion, index) => (
-            <motion.button
-              key={suggestion}
-              onClick={() => handleSuggestionClick(suggestion)}
-              disabled={!canSend}
-              initial={{ opacity: 0, x: 16 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.07 }}
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              className="sanctuary-suggestion-pill"
-            >
-              {suggestion}
-            </motion.button>
-          ))}
-        </motion.div>
-      )}
-    </AnimatePresence>
+          {text}
+        </button>
+      ))}
+    </div>
   );
 };

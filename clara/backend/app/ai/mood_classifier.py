@@ -1,14 +1,15 @@
 # Clara Backend — AI Mood Classification
-import json
+import structlog
 from dataclasses import dataclass
 from typing import List, Literal, Optional
 from app.ai.ollama_client import ollama_client
 from app.config import get_settings
 
 settings = get_settings()
+logger = structlog.get_logger()
 
 class MoodSignals:
-    """Keyword patterns for rule-based mood detection."""
+    """Keyword patterns for rule-based mood detection (Strategy A)."""
     DISTRESSED: List[str] = [
         "scared", "frightened", "help me", "where am i",
         "i don't know where", "i want to go home",
@@ -35,25 +36,34 @@ class MoodResult:
 class MoodClassifier:
     """
     Emotion detection for proactive patient safety.
-    Prioritizes distress signals over neutral or positive tones.
+    Optimizes for speed by using patterns first and then an async LLM check.
     """
     
     def __init__(self):
         self.signals = MoodSignals()
 
     async def classify(self, content: str) -> MoodResult:
-        """EntryPoint: Run either pattern or async LLM classification."""
-        strategy = settings.obs.environment if settings.obs.environment == "production" else "StrategyA"
-        
-        if strategy == "production":
+        """EntryPoint: Use patterns for speed, fallback to LLM for accuracy if needed."""
+        # Always check patterns first as it's free (0ms)
+        pattern_result = self._classify_patterns(content)
+        if pattern_result.mood != "calm":
+            return pattern_result
+            
+        # In non-production, avoid extra LLM calls to save costs/time
+        if settings.obs.environment != "production":
+            return pattern_result
+
+        # High-accuracy LLM check
+        try:
             return await self._classify_ollama(content)
-        return self._classify_patterns(content)
+        except Exception as e:
+            logger.warning("mood_classification_llm_failed", error=str(e))
+            return pattern_result
 
     def _classify_patterns(self, content: str) -> MoodResult:
-        """Strategy A: Zero-latency substring pattern matching."""
+        """Strategy A: Substring pattern matching (O(1) latency)."""
         content_low = content.lower()
         
-        # Priority order: DISTRESSED > CONFUSED > HAPPY > CALM
         for pattern in self.signals.DISTRESSED:
             if pattern in content_low:
                 return MoodResult("distressed", 1.0, pattern)
@@ -71,25 +81,20 @@ class MoodClassifier:
     async def _classify_ollama(self, content: str) -> MoodResult:
         """Strategy B: High-accuracy async LLM-based classification."""
         prompt = (
-            f"Analyze the mood of the following message from a dementia patient. "
-            f"Respond with ONLY one word from this list: [distressed, confused, happy, calm]. "
-            f"No explanations.\n\nMessage: \"{content}\""
+            f"Classify the following message from a dementia patient. "
+            f"Respond with ONLY one word: [distressed, confused, happy, calm].\n\n"
+            f"Message: \"{content}\""
         )
         
-        try:
-            full_response = ""
-            async for chunk in ollama_client.chat_stream(
-                [{"role": "user", "content": prompt}], 
-                model=settings.ollama.model
-            ):
-                full_response += chunk
-            
-            clean_resp = full_response.strip().lower()
-            if clean_resp in ["distressed", "confused", "happy", "calm"]:
-                return MoodResult(clean_resp, 0.9) # type: ignore
+        clean_resp = await ollama_client.chat(
+            [{"role": "user", "content": prompt}], 
+            model=settings.ollama.model
+        )
+        
+        clean_resp = clean_resp.strip().lower()
+        # Accept only valid labels
+        for label in ["distressed", "confused", "happy", "calm"]:
+            if label in clean_resp:
+                return MoodResult(label, 0.9) # type: ignore
                 
-            raise ValueError("Invalid Ollama classification result.")
-            
-        except Exception:
-            # Fallback to Strategy A on error
-            return self._classify_patterns(content)
+        return MoodResult("calm", 0.5)

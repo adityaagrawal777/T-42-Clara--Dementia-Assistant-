@@ -1,0 +1,25 @@
+2026-04-13 14:44:25 [info     ] lifecycle_startup              model=llama3.1:8b ollama=connected
+2026-04-13 14:44:37 [info     ] lifecycle_startup              ollama=warmed_up
+2026-04-13 14:44:37 [info     ] lifecycle_startup              env=development
+2026-04-13 15:59:42 [info     ] request_complete               client_host=127.0.0.1 duration_ms=325.37 environment=development method=GET path=/api/v1/health status_code=404
+INFO:     127.0.0.1:56298 - "GET /api/v1/health HTTP/1.1" 404 Not Found
+2026-04-13 16:16:11 [info     ] request_complete               client_host=127.0.0.1 duration_ms=363.1 environment=development method=GET path=/ status_code=404
+INFO:     127.0.0.1:50514 - "GET / HTTP/1.1" 404 Not Found
+2026-04-13 16:16:11 [info     ] request_complete               client_host=127.0.0.1 duration_ms=35.0 environment=development method=GET path=/favicon.ico status_code=404
+INFO:     127.0.0.1:50514 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+2026-04-13 16:18:17 [info     ] request_complete               client_host=127.0.0.1 duration_ms=35.75 environment=development method=GET path=/ status_code=404
+INFO:     127.0.0.1:57335 - "GET / HTTP/1.1" 404 Not Found
+2026-04-13 16:22:15 [info     ] request_complete               client_host=127.0.0.1 duration_ms=7819.28 environment=development method=POST path=/api/v1/auth/patient/login status_code=200
+INFO:     127.0.0.1:65475 - "POST /api/v1/auth/patient/login HTTP/1.1" 200 OK
+2026-04-13 16:22:33 [info     ] audit_log_created              action=ai_interaction target=session
+2026-04-13 16:22:44 [info     ] audit_log_created              action=ai_interaction target=session
+2026-04-13 16:23:42 [info     ] audit_log_created              action=ai_interaction target=session
+2026-04-13 16:26:18 [info     ] request_complete               client_host=127.0.0.1 duration_ms=3183.38 environment=development method=POST path=/api/v1/auth/patient/login status_code=200
+INFO:     127.0.0.1:54016 - "POST /api/v1/auth/patient/login HTTP/1.1" 200 OK
+2026-04-13 16:33:16 [info     ] request_complete               client_host=127.0.0.1 duration_ms=7569.66 environment=development method=POST path=/api/v1/auth/patient/login status_code=200
+INFO:     127.0.0.1:49684 - "POST /api/v1/auth/patient/login HTTP/1.1" 200 OK
+2026-04-13 16:38:14 [info     ] request_complete               client_host=127.0.0.1 duration_ms=7571.85 environment=development method=POST path=/api/v1/auth/patient/login status_code=200
+INFO:     127.0.0.1:51051 - "POST /api/v1/auth/patient/login HTTP/1.1" 200 OK
+2026-04-13 16:55:23 [warning  ] chat_service_db_persistence_skipped error=Can't reconnect until invalid transaction is rolled back.  Please rollback() fully before proceeding (Background on this error at: https://sqlalche.me/e/20/8s2b) session_id=a1031a8a-3c36-4da1-8bc5-568be44a5428
+2026-04-13 17:00:52 [info     ] request_complete               client_host=127.0.0.1 duration_ms=7824.26 environment=development method=POST path=/api/v1/auth/patient/login status_code=200
+INFO:     127.0.0.1:63654 - "POST /api/v1/auth/patient/login HTTP/1.1" 200 OK

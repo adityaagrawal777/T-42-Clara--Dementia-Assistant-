@@ -1,0 +1,1028 @@
+INFO:     Will watch for changes in these directories: ['D:\\ClaraCompanion\\clara\\backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [13804] using WatchFiles
+INFO:     Started server process [25872]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app\safety\rule_engine.py'. Reloading...
+INFO:     ('127.0.0.1', 62034) - "WebSocket /api/v1/chat/ef35cd42-a50d-4ddb-a127-6eb8c8b0dae3?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3NzUzNSwiZXhwIjoxNzc2MTA2MzM1fQ.YOpZyFSMCERhYnzd-pJj9atepOX-cGaElrhfK_9VkLM" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 62286) - "WebSocket /api/v1/chat/ef35cd42-a50d-4ddb-a127-6eb8c8b0dae3?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3NzUzNSwiZXhwIjoxNzc2MTA2MzM1fQ.YOpZyFSMCERhYnzd-pJj9atepOX-cGaElrhfK_9VkLM" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 54132) - "WebSocket /api/v1/chat/ef35cd42-a50d-4ddb-a127-6eb8c8b0dae3?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3NzUzNSwiZXhwIjoxNzc2MTA2MzM1fQ.YOpZyFSMCERhYnzd-pJj9atepOX-cGaElrhfK_9VkLM" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 332, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 618, in send
+    await self.ensure_open()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 916, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 48, in sender
+    await send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 345, in asgi_send
+    raise ClientDisconnected from exc
+uvicorn.protocols.utils.ClientDisconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 78, in websocket_chat_endpoint
+    await websocket.send_json({
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 175, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 88, in send
+    raise WebSocketDisconnect(code=1006)
+starlette.websockets.WebSocketDisconnect
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 332, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 618, in send
+    await self.ensure_open()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 916, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 48, in sender
+    await send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 345, in asgi_send
+    raise ClientDisconnected from exc
+uvicorn.protocols.utils.ClientDisconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 78, in websocket_chat_endpoint
+    await websocket.send_json({
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 175, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 88, in send
+    raise WebSocketDisconnect(code=1006)
+starlette.websockets.WebSocketDisconnect
+INFO:     connection closed
+INFO:     ('127.0.0.1', 54528) - "WebSocket /api/v1/chat/ea7a18ae-6385-4581-9899-da6043fb3d92?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3Nzc3NywiZXhwIjoxNzc2MTA2NTc3fQ.T38hgIEp5VJhsqFJz_LaUxAQOzcPUxaVIyHbeT2cC2w" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 50743) - "WebSocket /api/v1/chat/ea7a18ae-6385-4581-9899-da6043fb3d92?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3Nzc3NywiZXhwIjoxNzc2MTA2NTc3fQ.T38hgIEp5VJhsqFJz_LaUxAQOzcPUxaVIyHbeT2cC2w" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 63227) - "WebSocket /api/v1/chat/ea7a18ae-6385-4581-9899-da6043fb3d92?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3Nzc3NywiZXhwIjoxNzc2MTA2NTc3fQ.T38hgIEp5VJhsqFJz_LaUxAQOzcPUxaVIyHbeT2cC2w" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 332, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 618, in send
+    await self.ensure_open()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 916, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 48, in sender
+    await send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 345, in asgi_send
+    raise ClientDisconnected from exc
+uvicorn.protocols.utils.ClientDisconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 78, in websocket_chat_endpoint
+    await websocket.send_json({
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 175, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 88, in send
+    raise WebSocketDisconnect(code=1006)
+starlette.websockets.WebSocketDisconnect
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 332, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 618, in send
+    await self.ensure_open()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 916, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 48, in sender
+    await send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 345, in asgi_send
+    raise ClientDisconnected from exc
+uvicorn.protocols.utils.ClientDisconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 78, in websocket_chat_endpoint
+    await websocket.send_json({
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 175, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 88, in send
+    raise WebSocketDisconnect(code=1006)
+starlette.websockets.WebSocketDisconnect
+INFO:     ('127.0.0.1', 54880) - "WebSocket /api/v1/chat/5b90488d-0a22-42d4-b467-01afc58c6b55?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3ODE5NiwiZXhwIjoxNzc2MTA2OTk2fQ.FQ14yfsTHD3HiI8U8IoHeiAYsXXpTixDtDuVPmdiSs8" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 56488) - "WebSocket /api/v1/chat/5b90488d-0a22-42d4-b467-01afc58c6b55?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3ODE5NiwiZXhwIjoxNzc2MTA2OTk2fQ.FQ14yfsTHD3HiI8U8IoHeiAYsXXpTixDtDuVPmdiSs8" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 52248) - "WebSocket /api/v1/chat/5b90488d-0a22-42d4-b467-01afc58c6b55?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3ODE5NiwiZXhwIjoxNzc2MTA2OTk2fQ.FQ14yfsTHD3HiI8U8IoHeiAYsXXpTixDtDuVPmdiSs8" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 332, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 618, in send
+    await self.ensure_open()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 916, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 48, in sender
+    await send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 345, in asgi_send
+    raise ClientDisconnected from exc
+uvicorn.protocols.utils.ClientDisconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 78, in websocket_chat_endpoint
+    await websocket.send_json({
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 175, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 88, in send
+    raise WebSocketDisconnect(code=1006)
+starlette.websockets.WebSocketDisconnect
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 332, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 618, in send
+    await self.ensure_open()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 916, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 48, in sender
+    await send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 345, in asgi_send
+    raise ClientDisconnected from exc
+uvicorn.protocols.utils.ClientDisconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 78, in websocket_chat_endpoint
+    await websocket.send_json({
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 175, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 88, in send
+    raise WebSocketDisconnect(code=1006)
+starlette.websockets.WebSocketDisconnect
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 868, in rollback
+    self.await_(self._rollback_and_discard())
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 849, in _rollback_and_discard
+    await self._transaction.rollback()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\asyncpg\connresource.py", line 19, in _check
+    self._check_conn_validity(meth.__name__)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\asyncpg\connresource.py", line 41, in _check_conn_validity
+    raise exceptions.InterfaceError(
+asyncpg.exceptions._base.InterfaceError: cannot call Transaction.rollback(): the underlying connection is closed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1127, in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 699, in do_rollback
+    dbapi_connection.rollback()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 874, in rollback
+    self._handle_exception(error)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 784, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.InterfaceError: <class 'asyncpg.exceptions._base.InterfaceError'>: cannot call Transaction.rollback(): the underlying connection is closed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 39, in websocket_chat_endpoint
+    async with async_session_factory() as db:
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2518, in close
+    self._close_impl(invalidate=False)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2587, in _close_impl
+    transaction.close(invalidate)
+  File "<string>", line 2, in close
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1419, in close
+    transaction.close()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2588, in close
+    self._do_close()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2726, in _do_close
+    self._close_impl()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2712, in _close_impl
+    self._connection_rollback_impl()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2704, in _connection_rollback_impl
+    self.connection._rollback_impl()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1129, in _rollback_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1127, in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 699, in do_rollback
+    dbapi_connection.rollback()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 874, in rollback
+    self._handle_exception(error)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 784, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.InterfaceError: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot call Transaction.rollback(): the underlying connection is closed
+(Background on this error at: https://sqlalche.me/e/20/rvf5)
+INFO:     connection closed
+INFO:     ('127.0.0.1', 63477) - "WebSocket /api/v1/chat/a1031a8a-3c36-4da1-8bc5-568be44a5428?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3ODQ5NCwiZXhwIjoxNzc2MTA3Mjk0fQ.vjSWzXWfPORdw0XR4GqdnzsjEet_fPLNi5kVCHVG9PY" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 49352) - "WebSocket /api/v1/chat/a1031a8a-3c36-4da1-8bc5-568be44a5428?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3ODQ5NCwiZXhwIjoxNzc2MTA3Mjk0fQ.vjSWzXWfPORdw0XR4GqdnzsjEet_fPLNi5kVCHVG9PY" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 58628) - "WebSocket /api/v1/chat/a1031a8a-3c36-4da1-8bc5-568be44a5428?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3ODQ5NCwiZXhwIjoxNzc2MTA3Mjk0fQ.vjSWzXWfPORdw0XR4GqdnzsjEet_fPLNi5kVCHVG9PY" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 332, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 618, in send
+    await self.ensure_open()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 916, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 48, in sender
+    await send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 345, in asgi_send
+    raise ClientDisconnected from exc
+uvicorn.protocols.utils.ClientDisconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 78, in websocket_chat_endpoint
+    await websocket.send_json({
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 175, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 88, in send
+    raise WebSocketDisconnect(code=1006)
+starlette.websockets.WebSocketDisconnect
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 332, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 618, in send
+    await self.ensure_open()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 916, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 48, in sender
+    await send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 345, in asgi_send
+    raise ClientDisconnected from exc
+uvicorn.protocols.utils.ClientDisconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 78, in websocket_chat_endpoint
+    await websocket.send_json({
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 175, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 88, in send
+    raise WebSocketDisconnect(code=1006)
+starlette.websockets.WebSocketDisconnect
+INFO:     connection closed
+INFO:     ('127.0.0.1', 53282) - "WebSocket /api/v1/chat/bdb2770e-e840-41d0-9e2f-e2dc5eae0784?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3OTg1MiwiZXhwIjoxNzc2MTA4NjUyfQ.ofbY5pxeLVyeC9T5DCEIscAoLagrDBQhfBmjglBLWww" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 59457) - "WebSocket /api/v1/chat/bdb2770e-e840-41d0-9e2f-e2dc5eae0784?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3OTg1MiwiZXhwIjoxNzc2MTA4NjUyfQ.ofbY5pxeLVyeC9T5DCEIscAoLagrDBQhfBmjglBLWww" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 52620) - "WebSocket /api/v1/chat/bdb2770e-e840-41d0-9e2f-e2dc5eae0784?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjg0MTJmNy04NmQ4LTQ1ZjgtYjEzNy01M2UwN2UxMzEwOGMiLCJvcmdfaWQiOiI1ZTlmMjFmOC0wNGY2LTQ1MTQtODllNS03Mjg5ZGI3ZTJjZTciLCJyb2xlIjoicGF0aWVudF9zZXNzaW9uIiwicGF0aWVudF9pZCI6IjA2ODQxMmY3LTg2ZDgtNDVmOC1iMTM3LTUzZTA3ZTEzMTA4YyIsImlhdCI6MTc3NjA3OTg1MiwiZXhwIjoxNzc2MTA4NjUyfQ.ofbY5pxeLVyeC9T5DCEIscAoLagrDBQhfBmjglBLWww" [accepted]
+INFO:     connection open
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 332, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 618, in send
+    await self.ensure_open()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 916, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 48, in sender
+    await send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 345, in asgi_send
+    raise ClientDisconnected from exc
+uvicorn.protocols.utils.ClientDisconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 78, in websocket_chat_endpoint
+    await websocket.send_json({
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 175, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 88, in send
+    raise WebSocketDisconnect(code=1006)
+starlette.websockets.WebSocketDisconnect
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 332, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 618, in send
+    await self.ensure_open()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\websockets\legacy\protocol.py", line 916, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 48, in sender
+    await send(message)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 345, in asgi_send
+    raise ClientDisconnected from exc
+uvicorn.protocols.utils.ClientDisconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 78, in websocket_chat_endpoint
+    await websocket.send_json({
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 175, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\websockets.py", line 88, in send
+    raise WebSocketDisconnect(code=1006)
+starlette.websockets.WebSocketDisconnect
+INFO:     connection closed
+INFO:     connection closed
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 868, in rollback
+    self.await_(self._rollback_and_discard())
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 849, in _rollback_and_discard
+    await self._transaction.rollback()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\asyncpg\connresource.py", line 19, in _check
+    self._check_conn_validity(meth.__name__)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\asyncpg\connresource.py", line 41, in _check_conn_validity
+    raise exceptions.InterfaceError(
+asyncpg.exceptions._base.InterfaceError: cannot call Transaction.rollback(): the underlying connection is closed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1127, in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 699, in do_rollback
+    dbapi_connection.rollback()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 874, in rollback
+    self._handle_exception(error)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 784, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.InterfaceError: <class 'asyncpg.exceptions._base.InterfaceError'>: cannot call Transaction.rollback(): the underlying connection is closed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\base.py", line 101, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 62, in wrapped_app
+    raise exc
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\_exception_handler.py", line 51, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "D:\ClaraCompanion\clara\backend\app\api\v1\chat.py", line 39, in websocket_chat_endpoint
+    async with async_session_factory() as db:
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py", line 1080, in __aexit__
+    await asyncio.shield(task)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py", line 1025, in close
+    await greenlet_spawn(self.sync_session.close)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2518, in close
+    self._close_impl(invalidate=False)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2587, in _close_impl
+    transaction.close(invalidate)
+  File "<string>", line 2, in close
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1419, in close
+    transaction.close()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2588, in close
+    self._do_close()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2726, in _do_close
+    self._close_impl()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2712, in _close_impl
+    self._connection_rollback_impl()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2704, in _connection_rollback_impl
+    self.connection._rollback_impl()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1129, in _rollback_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1127, in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 699, in do_rollback
+    dbapi_connection.rollback()
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 874, in rollback
+    self._handle_exception(error)
+  File "D:\ClaraCompanion\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 784, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.InterfaceError: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot call Transaction.rollback(): the underlying connection is closed
+(Background on this error at: https://sqlalche.me/e/20/rvf5)

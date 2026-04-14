@@ -20,70 +20,69 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="sanctuary-sidebar w-[260px] hidden md:flex">
-      <div className="flex flex-col h-full w-full">
+    <aside className="w-[280px] hidden md:flex flex-col h-full bg-clara-beige-100 border-r border-clara-beige-200 shrink-0 shadow-sm relative z-20">
+      {/* Brand Header */}
+      <div className="flex items-center gap-3 px-6 py-8 border-b border-clara-beige-200">
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-sm border border-clara-beige-200">
+          <span className="text-xl">🌿</span>
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-clara-green-900 tracking-tight">Clara</h1>
+          <p className="text-xs font-medium text-clara-neutral-muted uppercase tracking-widest mt-0.5">Companion</p>
+        </div>
+      </div>
 
-        {/* ── Brand Header ── */}
-        <div className="sanctuary-sidebar-brand">
-          <span className="sanctuary-sidebar-logo">🌿</span>
-          <div>
-            <h1 className="sanctuary-sidebar-title">Clara</h1>
+      <div className="px-6 pt-8 pb-3">
+        <span className="block text-xs font-bold text-clara-green-900 uppercase tracking-widest">Your Sanctuary</span>
+        <span className="block text-xs text-clara-neutral-muted mt-1">Safe & Calm</span>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-4 space-y-2 mt-2 overflow-y-auto">
+        <Link href="/chat" className="flex items-center gap-3 px-4 py-3 w-full rounded-2xl bg-clara-green-800 text-white shadow-lg shadow-clara-green-800/20 transition-all hover:bg-clara-green-900 hover:shadow-xl hover:-translate-y-0.5">
+          <MessageSquare size={18} />
+          <span className="font-semibold text-sm">Today&apos;s Chat</span>
+        </Link>
+
+        <button className="flex items-center gap-3 px-4 py-3 w-full rounded-2xl text-clara-neutral-muted transition-all hover:bg-white hover:text-clara-green-900 hover:shadow-sm group">
+          <History size={18} className="group-hover:text-clara-green-800 transition-colors" />
+          <span className="font-semibold text-sm">Past Conversations</span>
+        </button>
+
+        <button className="flex items-center gap-3 px-4 py-3 w-full rounded-2xl text-clara-neutral-muted transition-all hover:bg-white hover:text-clara-green-900 hover:shadow-sm group">
+          <Sparkles size={18} className="group-hover:text-clara-green-800 transition-colors" />
+          <span className="font-semibold text-sm">Saved Memories</span>
+        </button>
+      </nav>
+
+      {/* Decorative Art Container */}
+      <div className="px-6 py-6 mt-auto">
+        <div className="relative w-full aspect-square rounded-3xl overflow-hidden shadow-inner border border-black/5 bg-white mix-blend-multiply">
+          <Image
+            src="/assets/flower.png"
+            alt="Nature ornament"
+            fill
+            className="object-cover opacity-80"
+          />
+        </div>
+      </div>
+
+      {/* User Footer */}
+      <div className="flex items-center justify-between px-6 py-5 border-t border-clara-beige-200 bg-white/40">
+        {patientName && (
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-2 h-2 rounded-full bg-clara-green-700 ring-4 ring-clara-green-100 shadow-sm shrink-0" />
+            <span className="text-sm font-bold text-clara-green-900 truncate">{patientName}</span>
           </div>
-        </div>
-
-        {/* ── Sanctuary label ── */}
-        <div className="sanctuary-sidebar-section-label">
-          <span className="sanctuary-sidebar-section-heading">Your Sanctuary</span>
-          <span className="sanctuary-sidebar-section-sub">Safe &amp; Calm</span>
-        </div>
-
-        {/* ── Navigation ── */}
-        <nav className="flex-1 px-4 space-y-1 mt-2">
-          <Link href="/chat" className="nav-item nav-item-active">
-            <MessageSquare size={18} />
-            <span className="font-semibold">Today&apos;s Chat</span>
-          </Link>
-
-          <button className="nav-item w-full">
-            <History size={18} />
-            <span className="font-medium">Past Conversations</span>
-          </button>
-
-          <button className="nav-item w-full">
-            <Sparkles size={18} />
-            <span className="font-medium">Saved Memories</span>
-          </button>
-        </nav>
-
-        {/* ── Bottom Decorative Art ── */}
-        <div className="sanctuary-sidebar-art">
-          <div className="sanctuary-sidebar-art-frame">
-            <Image
-              src="/assets/flower.png"
-              alt="Nature ornament"
-              fill
-              className="object-cover opacity-90"
-            />
-          </div>
-        </div>
-
-        {/* ── User + Sign-out ── */}
-        <div className="sanctuary-sidebar-footer">
-          {patientName && (
-            <div className="sanctuary-sidebar-user">
-              <div className="sanctuary-sidebar-user-dot" />
-              <span className="sanctuary-sidebar-user-name">{patientName}</span>
-            </div>
-          )}
-          <button
-            onClick={handleSignOut}
-            className="sanctuary-signout-btn"
-            title="Sign out"
-            aria-label="Sign out"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
+        )}
+        <button
+          onClick={handleSignOut}
+          className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-clara-neutral-muted hover:bg-red-50 hover:text-red-500 transition-colors"
+          title="Sign out"
+          aria-label="Sign out"
+        >
+          <LogOut size={16} strokeWidth={2.5} />
+        </button>
       </div>
     </aside>
   );

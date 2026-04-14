@@ -107,7 +107,7 @@ export const useClaraSocket = () => {
     socket.onerror = (error) => {
       console.error("[Clara] WebSocket error:", error);
     };
-  }, [sessionId, reconnectAttempts, setConnected, setStatus, setReconnectAttempts, updateLastMessage, setMood, setStreaming, setLastMessageDone]);
+  }, [sessionId, reconnectAttempts, setConnected, setStatus, setReconnectAttempts, updateLastMessage, setMood, setStreaming, setLastMessageDone, triggerEmergency]);
 
   const sendMessage = useCallback((content: string, inputMode: InputMode) => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {

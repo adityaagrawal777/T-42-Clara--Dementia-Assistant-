@@ -32,12 +32,18 @@ async def lifespan(app: FastAPI):
             )
             logger.info("lifecycle_startup", sentry="initialized")
 
-        # 2. Start: AI Service Integrity Check
+        # 2. Start: AI Service Integrity Check & Warmup
         ollama_ready = await ollama_client.health_check()
         if not ollama_ready:
-            logger.warn("lifecycle_startup", ollama="disconnected", message="AI engine is not reachable on boot.")
+            logger.warning("lifecycle_startup", ollama="disconnected", message="AI engine is not reachable on boot.")
         else:
             logger.info("lifecycle_startup", ollama="connected", model=settings.ollama.model)
+            # Warmup the model into VRAM to eliminate cold-start latency for the first patient
+            try:
+                await ollama_client.chat([{"role": "user", "content": "hi"}], model=settings.ollama.model)
+                logger.info("lifecycle_startup", ollama="warmed_up")
+            except Exception as e:
+                logger.warning("lifecycle_startup", ollama="warmup_failed", error=str(e))
 
         logger.info("lifecycle_startup", env=settings.obs.environment)
 

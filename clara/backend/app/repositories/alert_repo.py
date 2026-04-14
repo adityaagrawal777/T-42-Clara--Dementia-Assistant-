@@ -52,6 +52,18 @@ class AlertRepository(BaseRepository[Alert]):
             "resolved_by": resolved_by
         })
 
+    async def get_org_unresolved_alerts(self, organization_id: uuid.UUID) -> Sequence[Alert]:
+        """Fetch all unresolved alerts across an entire organization for caregiver oversight."""
+        result = await self.db.execute(
+            select(self.model)
+            .where(
+                self.model.organization_id == organization_id,
+                self.model.resolved_at == None
+            )
+            .order_by(self.model.created_at.desc())
+        )
+        return result.scalars().all()
+
     async def get_alert_history(self, patient_id: uuid.UUID, days: int = 30) -> Sequence[Alert]:
         """Fetch all safety incidents over a specific time window for trend analysis."""
         since_date = datetime.utcnow() - timedelta(days=days)

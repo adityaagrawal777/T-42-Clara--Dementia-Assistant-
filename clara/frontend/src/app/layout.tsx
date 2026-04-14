@@ -31,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${nunito.variable} ${dmSerif.variable}`}>
-      <body className="bg-[var(--sanctuary-bg)] text-[var(--sanctuary-green-900)] antialiased min-h-screen">
+      <body className="bg-clara-neutral-bg text-clara-neutral-text antialiased min-h-screen">
         <AlertNotification />
         <ConditionalShell>{children}</ConditionalShell>
       </body>

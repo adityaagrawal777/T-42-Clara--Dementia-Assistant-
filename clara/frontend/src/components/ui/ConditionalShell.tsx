@@ -25,7 +25,7 @@ export const ConditionalShell: React.FC<{ children: React.ReactNode }> = ({ chil
   return (
     <div className="flex w-full h-screen overflow-hidden">
       <Sidebar />
-      <main className="flex-1 flex flex-col relative overflow-hidden bg-[var(--sanctuary-bg)]">
+      <main className="flex-1 flex flex-col relative overflow-hidden bg-clara-neutral-bg">
         <ChatHeader />
         <div className="flex-1 overflow-y-auto no-scrollbar pb-36">
           {children}

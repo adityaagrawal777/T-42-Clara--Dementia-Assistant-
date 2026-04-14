@@ -4,15 +4,15 @@ from app.safety.distress_detector import DistressDetector
 def test_distress_detector_phrases():
     detector = DistressDetector()
     
-    # Critical - physical pain / acute fear
+    # Critical - medical emergency (can't breathe matches CRITICAL_PATTERNS)
     is_distressed, categories = detector.analyze("I can't breathe, please help")
     assert is_distressed
-    assert "physical_pain" in categories or "acute_fear" in categories
-    
+    assert "medical_emergency" in categories
+
     # High - acute fear
     is_distressed, categories = detector.analyze("I am scared and lost")
     assert is_distressed
-    assert "acute_fear" in categories or "acute_disorientation" in categories
+    assert "acute_fear" in categories
     
     # Low/Emotional
     is_distressed, categories = detector.analyze("nobody cares about me anymore")

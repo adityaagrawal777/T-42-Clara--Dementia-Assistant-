@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useClaraStore } from "@/store/claraStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, AlertCircle, X, ShieldAlert } from "lucide-react";

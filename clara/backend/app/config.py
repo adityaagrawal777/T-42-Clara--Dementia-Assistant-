@@ -79,7 +79,7 @@ class Settings(BaseSettings):
     )
 
     # ── App ───────────────────────────────────────────────────────────────────
-    allowed_origins: List[str] = ["http://localhost:3000"]
+    allowed_origins: List[str] = ["http://localhost:3000", "http://localhost:3001"]
 
     # ── Property-style access for backwards compatibility ─────────────────────
 
