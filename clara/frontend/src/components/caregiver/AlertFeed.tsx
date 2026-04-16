@@ -1,137 +1,172 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Alert } from "@/types";
-import { format } from "date-fns";
-import { Bell, CheckCircle, Loader2 } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { Bell, CheckCircle, Loader2, AlertTriangle, ShieldAlert, History, Clock, Activity, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import type { CaregiverAlertEntry } from "@/types";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Props {
   patientId?: string;
 }
 
-const transformAlert = (raw: any): Alert => ({
-  id: String(raw.id),
-  severity: raw.severity,
-  trigger_phrase: raw.trigger_phrase ?? "",
-  timestamp: raw.created_at,
-  is_resolved: !!raw.resolved_at,
-  notified_at: raw.notified_at ?? undefined,
-  resolved_at: raw.resolved_at ?? undefined,
-});
-
 export const AlertFeed: React.FC<Props> = ({ patientId }) => {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [alerts, setAlerts] = useState<CaregiverAlertEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
+
     const endpoint = patientId
       ? `/api/v1/caregiver/patients/${patientId}/alerts`
       : `/api/v1/caregiver/alerts`;
 
     apiFetch(endpoint)
-      .then((data: any[]) => setAlerts(data.map(transformAlert)))
+      .then((data: any) => setAlerts(data))
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
   }, [patientId]);
 
-  const resolve = async (id: string) => {
+  const resolve = async (alertId: string) => {
+    setAlerts((prev) => prev.filter((a) => a.id !== alertId));
     try {
-      await apiFetch(`/api/v1/caregiver/alerts/${id}/resolve`, {
+      await apiFetch(`/api/v1/caregiver/alerts/${alertId}/resolve`, {
         method: "PATCH",
-        body: JSON.stringify({ resolved_by: "caregiver" }),
       });
-      setAlerts((prev) => prev.filter((a) => a.id !== id));
     } catch {
-      // Optimistic remove already happened; silently ignore if server is unavailable
+      // Re-fetch or handle error silently as per previous logic
     }
   };
 
+  if (loading) {
+    return (
+      <div className="glass-card rounded-[2.5rem] border-white/[0.05] p-20 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-clara-primary" />
+          <p className="text-xs font-black text-clara-text-tertiary uppercase tracking-[0.2em]">Syncing Feed...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
-      <div className="flex justify-between items-center mb-10">
+    <div className="glass-card rounded-[2.5rem] border-white/[0.05] shadow-2xl overflow-hidden h-full flex flex-col">
+      <div className="p-8 flex items-center justify-between border-b border-white/[0.05] sticky top-0 bg-clara-surface/10 backdrop-blur-xl z-20">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-rose-50 rounded-2xl">
-            <Bell className="w-6 h-6 text-rose-500" />
+          <div className="w-12 h-12 bg-danger-muted border border-danger/20 rounded-2xl flex items-center justify-center text-danger">
+            <Bell size={22} strokeWidth={2.5} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-slate-800 tracking-tight">Priority Alerts</h3>
-            <p className="text-sm font-medium text-slate-400">Needs your immediate attention</p>
+            <h3 className="text-xl font-black text-white tracking-tight">Priority Queue</h3>
+            <p className="text-[10px] font-bold text-clara-text-tertiary uppercase tracking-widest mt-1">Pending Resolution</p>
           </div>
         </div>
-        {!loading && (
-          <span className="px-4 py-2 bg-rose-100 text-rose-600 rounded-xl text-xs font-bold uppercase tracking-widest">
-            {alerts.length} Active
-          </span>
+        {!error && alerts.length > 0 && (
+          <div className="px-4 py-2 bg-danger text-white rounded-xl text-[10px] font-black uppercase tracking-[0.1em] shadow-glow-sm">
+            {alerts.length} Incident{alerts.length > 1 ? 's' : ''}
+          </div>
         )}
       </div>
 
-      {loading && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
-        </div>
-      )}
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+        {error ? (
+          <div className="p-12 text-center bg-danger-muted/20 rounded-[2rem] border-2 border-dashed border-danger/30">
+            <p className="text-danger font-bold text-sm tracking-tight">{error}</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <AnimatePresence initial={false}>
+              {alerts.map((alert, idx) => {
+                const isCritical = alert.severity === "high" || alert.severity === "critical";
+                return (
+                  <motion.div
+                    key={alert.id}
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, x: 20 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className={`relative p-6 rounded-[2rem] border border-white/[0.08] group overflow-hidden transition-all hover:bg-white/[0.02] ${
+                      isCritical ? "bg-danger-muted/10" : "bg-white/[0.01]"
+                    }`}
+                  >
+                    {/* Urgency Line Indicator */}
+                    <div className={`absolute top-0 bottom-0 left-0 w-1.5 ${isCritical ? "bg-danger" : "bg-warning"}`}></div>
 
-      {!loading && error && (
-        <div className="p-8 text-center bg-rose-50/30 rounded-3xl border-2 border-dashed border-rose-200">
-          <p className="text-rose-600 font-semibold text-sm">{error}</p>
-        </div>
-      )}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 pl-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap gap-3 items-center mb-4">
+                          <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.15em] ${
+                              isCritical ? "bg-danger text-white shadow-glow-sm" : "bg-warning text-black"
+                            }`}>
+                            {alert.severity} Condition
+                          </span>
+                          <div className="flex items-center gap-1.5 text-clara-text-tertiary">
+                            <Clock size={12} strokeWidth={2.5} />
+                            <span className="text-[10px] font-black uppercase tracking-wider">
+                              {format(parseISO(alert.created_at), "h:mm a · MMM d")}
+                            </span>
+                          </div>
+                          {alert.mood_at_trigger && (
+                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-clara-text-secondary">
+                              <Activity size={10} />
+                              <span className="text-[10px] font-bold capitalize">Mood: {alert.mood_at_trigger}</span>
+                            </div>
+                          )}
+                        </div>
 
-      {!loading && !error && (
-        <div className="space-y-6">
-          {alerts.map((alert) => (
-            <div
-              key={alert.id}
-              className={`p-8 rounded-3xl border-2 transition-all hover:scale-[1.01] ${
-                alert.severity === "high" || alert.severity === "critical"
-                  ? "bg-rose-50/30 border-rose-100 hover:border-rose-200"
-                  : "bg-amber-50/30 border-amber-100 hover:border-amber-200"
-              }`}
-            >
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex gap-4 items-center mb-6">
-                    <span
-                      className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest ${
-                        alert.severity === "high" || alert.severity === "critical"
-                          ? "bg-rose-500 text-white"
-                          : "bg-amber-500 text-white"
-                      }`}
-                    >
-                      {alert.severity} Priority
-                    </span>
-                    <span className="text-xs font-semibold text-slate-400">
-                      {format(new Date(alert.timestamp), "h:mm a")}
-                    </span>
-                  </div>
-                  <p className="text-xl font-medium text-slate-800 italic leading-relaxed">
-                    &quot;{alert.trigger_phrase}&quot;
-                  </p>
+                        {alert.trigger_phrase && (
+                          <h4 className="text-base font-bold text-slate-100 leading-snug group-hover:text-white transition-colors">
+                            &ldquo;{alert.trigger_phrase}&rdquo;
+                          </h4>
+                        )}
+
+                        <div className="flex items-center gap-4 mt-3 opacity-60">
+                           <div className="flex items-center gap-1.5">
+                              <ShieldAlert size={12} />
+                              <span className="text-[10px] font-bold text-clara-text-tertiary uppercase tracking-widest">{alert.rule_name || "Unknown Rule"}</span>
+                           </div>
+                           <Link href={`/caregiver/patients/${alert.patient_id}`} className="flex items-center gap-1.5 hover:text-clara-primary transition-colors">
+                              <Users size={12} />
+                              <span className="text-[10px] font-bold text-clara-text-tertiary uppercase tracking-widest">Patient File</span>
+                           </Link>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => resolve(alert.id)}
+                        className="shrink-0 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/[0.04] hover:bg-success hover:text-white border border-white/[0.08] hover:border-success text-clara-text-secondary transition-all font-black text-xs uppercase tracking-widest group/btn shadow-inner-glow"
+                      >
+                        <CheckCircle size={16} className="group-hover/btn:scale-110 transition-transform" />
+                        Acknowledge
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+
+            {/* Empty State */}
+            {alerts.length === 0 && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="p-16 text-center border-2 border-dashed border-white/[0.05] rounded-[2.5rem] bg-white/[0.01]"
+              >
+                <div className="w-20 h-20 bg-success/10 rounded-[2rem] flex items-center justify-center text-success mx-auto mb-6 shadow-glow-sm">
+                  <CheckCircle size={40} />
                 </div>
-                <Button
-                  variant="outline"
-                  size="md"
-                  onClick={() => resolve(alert.id)}
-                  className="rounded-2xl border-slate-200 text-slate-500 hover:text-green-600 hover:border-green-600 hover:bg-green-50 transition-all group"
-                >
-                  <CheckCircle className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
-                  Resolve
-                </Button>
-              </div>
-            </div>
-          ))}
-          {alerts.length === 0 && (
-            <div className="p-12 text-center bg-green-50/30 rounded-3xl border-2 border-dashed border-green-200">
-              <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-              <p className="text-green-700 font-bold text-lg mb-1">System All Clear</p>
-              <p className="text-green-600/70 text-sm">No new alerts to process.</p>
-            </div>
-          )}
-        </div>
-      )}
+                <h4 className="text-xl font-black text-white mb-2 tracking-tight">Queue Clear</h4>
+                <p className="text-clara-text-secondary font-medium max-w-xs mx-auto text-sm">No unresolved priority alerts detected across the active cohort.</p>
+              </motion.div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -81,7 +81,7 @@ export const useClaraStore = create<ClaraState>()((set) => ({
   patientName: null,
   status: "idle",
   setSession: (config: { sessionId: string; patientId: string; patientName: string }) =>
-    set((state) => ({ ...state, ...config })),
+    set(config),
   setStatus: (status: SessionStatus) => set({ status }),
   clearSession: () => set({ sessionId: null, patientId: null, patientName: null, status: "idle" }),
 

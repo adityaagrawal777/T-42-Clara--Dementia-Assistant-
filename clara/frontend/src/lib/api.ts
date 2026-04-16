@@ -13,7 +13,12 @@ export const apiFetch = async (endpoint: string, options: FetchOptions = {}) => 
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
-  headers.set("Content-Type", "application/json");
+  // Only set Content-Type for requests that carry a body. Setting it on GET/HEAD
+  // requests triggers unnecessary CORS preflight and is semantically incorrect.
+  const method = (options.method ?? "GET").toUpperCase();
+  if (!["GET", "HEAD"].includes(method)) {
+    headers.set("Content-Type", "application/json");
+  }
 
   const url = new URL(`${API_BASE_URL}${endpoint}`);
   if (options.params) {

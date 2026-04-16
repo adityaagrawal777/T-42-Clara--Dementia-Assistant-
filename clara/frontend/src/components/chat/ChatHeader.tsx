@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Settings } from "lucide-react";
-import Image from "next/image";
+import { Share2, MoreHorizontal } from "lucide-react";
 import { MoodIndicator } from "./MoodIndicator";
 import { VoiceToggle } from "./VoiceToggle";
 import { useClaraStore } from "@/store/claraStore";
@@ -10,57 +9,58 @@ import { useClaraStore } from "@/store/claraStore";
 export const ChatHeader: React.FC = () => {
   const patientName = useClaraStore((state) => state.patientName);
 
-  // Build a deterministic avatar seed from the patient name for visual uniqueness
-  const avatarSeed = encodeURIComponent(patientName ?? "Clara");
-  const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
-
-  // Get first letter for fallback initials
-  const initial = patientName ? patientName.charAt(0).toUpperCase() : "?";
+  const initials = patientName
+    ? patientName
+        .split(" ")
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "??";
 
   return (
-    <header className="flex items-center justify-between px-6 lg:px-10 py-4 bg-clara-neutral-bg/60 backdrop-blur-xl border-b border-clara-beige-200 sticky top-0 z-40 shrink-0">
-      {/* Mobile brand */}
-      <div className="md:hidden flex items-center gap-2">
-        <div className="w-8 h-8 flex items-center justify-center bg-white rounded-full border border-clara-beige-200">
-           <span className="text-sm">🌿</span>
+    <header className="flex items-center justify-between px-6 lg:px-10 py-4 bg-clara-bg/40 backdrop-blur-3xl border-b border-white/[0.05] sticky top-0 z-40 shrink-0 select-none">
+      {/* Mobile brand / Mobile patient info */}
+      <div className="md:hidden flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-clara-primary to-clara-accent flex items-center justify-center shadow-glow-sm">
+           <span className="text-xl">🌿</span>
         </div>
-        <h1 className="text-lg font-bold text-clara-green-900 tracking-tight">Clara</h1>
+        <div>
+          <h1 className="text-lg font-black text-white leading-tight">Clara</h1>
+          <p className="text-[10px] font-bold text-clara-text-tertiary uppercase tracking-widest">Companoon</p>
+        </div>
       </div>
 
-      <div className="flex-1" />
+      <div className="hidden md:flex flex-col">
+        <h2 className="text-sm font-black text-white italic opacity-80">&quot;Always here for you&quot;</h2>
+      </div>
 
-      <div className="flex items-center gap-4 lg:gap-6">
-        {/* Mood + Voice */}
-        <div className="flex items-center gap-3 pr-4 lg:pr-6 border-r border-clara-beige-200">
+      <div className="flex items-center gap-3 lg:gap-6">
+        {/* Mood + Voice controls wrapped in a sub-glass pill */}
+        <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-1 shadow-inner-glow">
           <MoodIndicator />
           <VoiceToggle />
         </div>
 
-        {/* Settings */}
-        <button
-          className="w-10 h-10 rounded-full flex items-center justify-center text-clara-neutral-muted hover:bg-white hover:text-clara-green-900 transition-all hover:shadow-sm"
-          aria-label="Settings"
-          title="Settings"
-        >
-          <Settings size={20} strokeWidth={2.2} />
-        </button>
+        {/* Global actions */}
+        <div className="flex items-center gap-2 pl-4 border-l border-white/[0.08]">
+          <button className="w-10 h-10 rounded-xl flex items-center justify-center text-clara-text-tertiary hover:bg-white/[0.06] hover:text-white transition-all">
+            <Share2 size={18} strokeWidth={2.5} />
+          </button>
+          <button className="w-10 h-10 rounded-xl flex items-center justify-center text-clara-text-tertiary hover:bg-white/[0.06] hover:text-white transition-all">
+            <MoreHorizontal size={18} strokeWidth={2.5} />
+          </button>
+        </div>
 
-        {/* User Avatar + Name */}
-        <div className="flex items-center gap-3 cursor-pointer group">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-clara-green-100 group-hover:scale-105 transition-transform shrink-0">
-            <Image
-              src={avatarUrl}
-              alt={`${patientName ?? "User"} avatar`}
-              fill
-              className="object-cover"
-            />
-            <span className="absolute inset-0 flex items-center justify-center font-bold text-clara-green-800 -z-10">{initial}</span>
+        {/* User Profile Hook */}
+        <div className="flex items-center gap-3 pl-4 border-l border-white/[0.08]">
+          <div className="hidden lg:flex flex-col items-end">
+            <span className="text-xs font-black text-white tracking-tight">{patientName || "Guest"}</span>
+            <span className="text-[9px] font-bold text-clara-primary uppercase tracking-widest">Patient</span>
           </div>
-          {patientName && (
-            <span className="hidden lg:block text-sm font-bold text-clara-green-900 whitespace-nowrap group-hover:text-clara-green-700 transition-colors">
-              {patientName}
-            </span>
-          )}
+          <div className="w-10 h-10 rounded-xl border border-white/[0.1] shadow-glow-sm bg-clara-surface-2 flex items-center justify-center ring-2 ring-white/[0.05]">
+            <span className="text-xs font-bold text-clara-text-primary">{initials}</span>
+          </div>
         </div>
       </div>
     </header>

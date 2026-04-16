@@ -16,7 +16,7 @@ export const clearJWT = () => {
 export const decodeJWT = () => {
   const token = getJWT();
   if (!token) return null;
-  
+
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -30,4 +30,20 @@ export const decodeJWT = () => {
   } catch (e) {
     return null;
   }
+};
+
+/**
+ * Returns true only when a JWT exists AND has not yet expired.
+ * Any auth guard that currently does `if (!getJWT())` should use this instead
+ * so that an expired token doesn't pass the client-side check.
+ */
+export const isJWTValid = (): boolean => {
+  const payload = decodeJWT();
+  if (!payload) return false;
+  // `exp` is seconds since epoch; Date.now() is milliseconds
+  if (payload.exp && payload.exp < Date.now() / 1000) {
+    clearJWT();
+    return false;
+  }
+  return true;
 };

@@ -1,7 +1,7 @@
 # Clara Backend — ClaraSession Schemas
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, ConfigDict, Field
 
 class SessionBase(BaseModel):
@@ -29,5 +29,13 @@ class SessionResponse(SessionBase):
     started_at: datetime
     ended_at: Optional[datetime]
     created_at: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)
+
+class PaginatedSessionsResponse(BaseModel):
+    """Paginated response for a patient's session history."""
+    sessions: List[SessionResponse]
+    total: int
+    limit: int
+    offset: int
+    has_more: bool

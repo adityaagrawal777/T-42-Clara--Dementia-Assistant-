@@ -92,6 +92,22 @@ app.add_middleware(LoggingMiddleware)
 # ── Routing Discovery ────────────────────────────────────────────────────────
 
 # Root Health & Discovery
+@app.get("/", tags=["System"])
+async def root():
+    """API discovery: Service identity, version, and available endpoints."""
+    return {
+        "name": "Clara AI API",
+        "version": "1.0.0",
+        "description": "Empathetic Dementia Care AI Companion",
+        "status": "running",
+        "endpoints": {
+            "docs": "/docs",
+            "health": "/health",
+            "api": "/api/v1",
+        },
+    }
+
+
 @app.get("/health", status_code=status.HTTP_200_OK, tags=["System"])
 async def get_system_health():
     """Unauthenticated check: Status of AI, DB, and environment labels."""

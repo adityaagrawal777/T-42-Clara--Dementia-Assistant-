@@ -16,7 +16,6 @@ export const useClaraSocket = () => {
     setConnected,
     setStatus,
     setLastMessageDone,
-    reconnectAttempts,
     setReconnectAttempts,
     setSendMessage,
     setStreaming,
@@ -44,47 +43,51 @@ export const useClaraSocket = () => {
       const data = JSON.parse(event.data);
 
       switch (data.type) {
-        case "token":
+        case "token": {
           // Frontend fallback bracket stripping
           const displayToken = data.content.replace(/\[.*?\]/g, "");
           if (displayToken) {
             updateLastMessage(displayToken);
           }
           break;
-        case "mood":
+        }
+        case "mood": {
           setMood({
             mood: data.mood as Mood,
             confidence: data.confidence,
             timestamp: new Date().toISOString(),
           });
           break;
-        case "done":
+        }
+        case "done": {
           setStreaming(false);
           setLastMessageDone(new Date().getTime().toString());
           if (data.distress_detected) {
             const severity = data.distress_severity || "high";
             const categories = data.distress_categories || [];
-            
+
             // Trigger the large emergency card
             triggerEmergency(severity, categories);
-            
+
             // Also keep the discreet top-right alert for logging purposes
             useClaraStore.getState().addAlert({
               id: crypto.randomUUID(),
               severity: severity,
               trigger_phrase: `Clinical distress detected: ${categories.join(", ") || "General distress"}`,
               timestamp: new Date().toISOString(),
-              is_resolved: false,
             });
           }
           break;
-        case "error":
+        }
+        case "error": {
           console.error("[Clara] Server error:", data.content);
           setStreaming(false);
           break;
-        case "ping":
+        }
+        case "ping": {
           socket.send(JSON.stringify({ type: "pong" }));
           break;
+        }
       }
     };
 
@@ -92,14 +95,19 @@ export const useClaraSocket = () => {
       setConnected(false);
       setStreaming(false);
       console.log("[Clara] WebSocket closed:", event.reason);
-      
-      if (reconnectAttempts < RECONNECT_MAX_ATTEMPTS && !event.wasClean) {
-        const delay = RECONNECT_INITIAL_DELAY * Math.pow(2, reconnectAttempts);
+
+      // Read current attempt count directly from the store to avoid the stale
+      // closure bug — the captured `reconnectAttempts` from the dependency array
+      // is frozen at the value present when `connect` was last recreated.
+      const currentAttempts = useClaraStore.getState().reconnectAttempts;
+
+      if (currentAttempts < RECONNECT_MAX_ATTEMPTS && !event.wasClean) {
+        const delay = RECONNECT_INITIAL_DELAY * Math.pow(2, currentAttempts);
         reconnectTimeoutRef.current = setTimeout(() => {
-          setReconnectAttempts(reconnectAttempts + 1);
+          setReconnectAttempts(currentAttempts + 1);
           connect();
         }, delay);
-      } else if (reconnectAttempts >= RECONNECT_MAX_ATTEMPTS) {
+      } else if (currentAttempts >= RECONNECT_MAX_ATTEMPTS) {
         setStatus("error");
       }
     };
@@ -107,7 +115,7 @@ export const useClaraSocket = () => {
     socket.onerror = (error) => {
       console.error("[Clara] WebSocket error:", error);
     };
-  }, [sessionId, reconnectAttempts, setConnected, setStatus, setReconnectAttempts, updateLastMessage, setMood, setStreaming, setLastMessageDone, triggerEmergency]);
+  }, [sessionId, setConnected, setStatus, setReconnectAttempts, updateLastMessage, setMood, setStreaming, setLastMessageDone, triggerEmergency]);
 
   const sendMessage = useCallback((content: string, inputMode: InputMode) => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {

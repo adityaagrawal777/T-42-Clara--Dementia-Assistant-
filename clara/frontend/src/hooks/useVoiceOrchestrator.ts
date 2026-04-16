@@ -32,6 +32,9 @@ export const useVoiceOrchestrator = () => {
   const recognitionRef = useRef<any>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const femaleVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
+  // Accumulates confirmed final segments so they are never overwritten by a
+  // subsequent interim result from the same utterance.
+  const finalTranscriptRef = useRef("");
 
   const { isListening, isSpeaking, setListening, setSpeaking } = useClaraStore((state) => ({
     isListening: state.isListening,
@@ -41,8 +44,11 @@ export const useVoiceOrchestrator = () => {
   }));
 
   useEffect(() => {
+    // SSR guard — Web Speech APIs are browser-only
+    if (typeof window === "undefined") return;
+
     // Pre-load female voice — voices may not be available synchronously on first render
-    if (typeof window !== "undefined" && window.speechSynthesis) {
+    if (window.speechSynthesis) {
       const loadVoices = () => {
         femaleVoiceRef.current = pickFemaleVoice(window.speechSynthesis.getVoices());
       };
@@ -57,7 +63,10 @@ export const useVoiceOrchestrator = () => {
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
 
-      recognitionRef.current.onstart = () => setListening(true);
+      recognitionRef.current.onstart = () => {
+        finalTranscriptRef.current = "";
+        setListening(true);
+      };
       recognitionRef.current.onend = () => {
         setListening(false);
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -65,32 +74,42 @@ export const useVoiceOrchestrator = () => {
 
       recognitionRef.current.onresult = (event: any) => {
         let interimTranscript = "";
-        let finalTranscript = "";
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
+            // Append confirmed text so it can never be overwritten by a later
+            // interim result from the same utterance.
+            finalTranscriptRef.current += event.results[i][0].transcript;
           } else {
             interimTranscript += event.results[i][0].transcript;
           }
         }
 
-        setTranscript(interimTranscript || finalTranscript);
+        setTranscript(finalTranscriptRef.current + interimTranscript);
 
-        // Reset timeout on every result
+        // Reset idle timeout on every result
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
           recognitionRef.current?.stop();
         }, SPEECH_IDLE_TIMEOUT);
       };
     }
+
+    return () => {
+      // Clean up the voices listener to prevent memory leaks after unmount
+      if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [setListening]);
 
   const startListening = useCallback(() => {
     if (!voiceAvailable || isSpeaking) return;
     try {
-      recognitionRef.current?.start();
+      finalTranscriptRef.current = "";
       setTranscript("");
+      recognitionRef.current?.start();
     } catch (e) {
       console.error("SpeechRecognition error:", e);
     }

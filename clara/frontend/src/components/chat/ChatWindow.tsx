@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import Image from "next/image";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 import { EmergencyCard } from "./EmergencyCard";
 import { useClaraStore } from "@/store/claraStore";
+import { motion, AnimatePresence } from "framer-motion";
 
 function getGreeting(name: string): { greeting: string; subtitle: string } {
   const hour = new Date().getHours();
@@ -16,10 +16,10 @@ function getGreeting(name: string): { greeting: string; subtitle: string } {
   const displayName = name ? `, ${name}.` : ".";
 
   const subtitles = [
-    "The sun is shining beautifully today. Would you like to chat or share what's on your mind?",
-    "It's a lovely day. I'm here whenever you'd like to talk or reminisce.",
-    "I'm so glad you're here. What would you like to do today?",
-    "Take your time. I'm right here with you, whenever you're ready.",
+    "Ready to chat or share what's on your mind?",
+    "I'm here for you, whenever you'd like to talk.",
+    "What would you like to explore today?",
+    "Take a deep breath. I'm right here with you.",
   ];
   const subtitle = subtitles[hour % subtitles.length];
 
@@ -39,35 +39,36 @@ export const ChatWindow: React.FC = () => {
   const { greeting, subtitle } = getGreeting(patientName ?? "");
 
   return (
-    <div className="relative flex flex-col w-full h-full">
-      {/* Forest Decoration Backdrop */}
-      <div className="absolute top-0 right-0 w-[420px] h-[420px] opacity-20 translate-x-[15%] -translate-y-[15%] pointer-events-none select-none blur-[2px] saturate-[1.2] rounded-full overflow-hidden mix-blend-multiply flex-shrink-0">
-        <Image
-          src="/assets/forest.png"
-          alt="Nature decoration"
-          fill
-          className="object-cover"
-        />
-      </div>
+    <div className="relative flex flex-col w-full h-full min-h-[calc(100vh-80px)]">
+      <div className="flex flex-col px-6 lg:px-10 py-12 lg:py-20 gap-12 max-w-4xl mx-auto w-full z-10 relative">
 
-      <div className="flex flex-col px-6 lg:px-10 py-10 lg:py-16 gap-10 lg:gap-14 max-w-4xl mx-auto w-full z-10 relative">
-
-        {/* Hero Greeting */}
-        <section className="max-w-[640px] animate-in ease-out animate-duration-[500ms]">
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-clara-green-900 leading-[1.05] tracking-tight">
-            {greeting}
-          </h1>
-          <p className="text-lg text-clara-green-900/70 mt-5 leading-relaxed max-w-[500px]">
-            {subtitle}
-          </p>
-        </section>
+        {/* Dynamic Hero Section (Only shown when no messages) */}
+        <AnimatePresence>
+          {messages.length === 0 && (
+            <motion.section 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col items-center text-center py-10"
+            >
+              <div className="w-24 h-24 glass-card rounded-[2.5rem] flex items-center justify-center mb-8 shadow-glow-lg border-white/[0.12] scale-110">
+                <span className="text-5xl animate-float">🌿</span>
+              </div>
+              <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-tight text-white leading-tight">
+                {greeting}
+              </h1>
+              <p className="text-lg text-clara-text-secondary font-medium max-w-[500px] leading-relaxed">
+                {subtitle}
+              </p>
+            </motion.section>
+          )}
+        </AnimatePresence>
 
         {/* Message Thread */}
         <div className="flex flex-col gap-6 w-full">
           {messages.map((msg) => (
-            <div key={msg.id} className="animate-in ease-out animate-duration-[350ms]">
-              <MessageBubble message={msg} />
-            </div>
+            <MessageBubble key={msg.id} message={msg} />
           ))}
 
           {/* Typing Indicator */}
@@ -83,7 +84,7 @@ export const ChatWindow: React.FC = () => {
         {/* Emergency Alerts */}
         <EmergencyCard />
 
-        <div ref={messagesEndRef} className="h-10" />
+        <div ref={messagesEndRef} className="h-20" />
       </div>
     </div>
   );

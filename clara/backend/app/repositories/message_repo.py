@@ -81,6 +81,30 @@ class MessageRepository(BaseRepository[Message]):
         )
         return result.scalars().all()
 
+    async def get_session_messages_scoped(
+        self,
+        session_id: uuid.UUID,
+        patient_id: uuid.UUID,
+    ) -> Sequence[Message]:
+        """
+        Fetch all messages for a session with strict patient ownership enforcement.
+
+        patient_id is applied as the FIRST filter so Postgres prunes to this
+        patient's rows before evaluating session_id — eliminating any
+        possibility of cross-patient data leakage even if a session_id is
+        guessed or otherwise obtained by an unauthorised caller.
+        """
+        result = await self.db.execute(
+            select(self.model)
+            .where(
+                self.model.patient_id == patient_id,
+                self.model.session_id == session_id,
+                self.model.is_deleted == False,  # noqa: E712
+            )
+            .order_by(self.model.created_at.asc())
+        )
+        return result.scalars().all()
+
     async def get_recent_messages(
         self, session_id: uuid.UUID, limit: int = 20
     ) -> Sequence[Message]:

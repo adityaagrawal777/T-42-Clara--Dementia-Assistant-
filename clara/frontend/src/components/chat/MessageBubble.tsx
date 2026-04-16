@@ -16,33 +16,40 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
   return (
     <motion.div
-      className={`flex items-end gap-3 ${isClara ? "justify-start" : "justify-end"} w-full`}
-      initial={{ opacity: 0, y: 20, scale: 0.96 }}
+      className={`flex items-end gap-3 ${isClara ? "justify-start" : "justify-end"} w-full group/msg`}
+      initial={{ opacity: 0, y: 15, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: "spring", stiffness: 280, damping: 22 }}
+      transition={{ type: "spring", stiffness: 350, damping: 25 }}
     >
       {/* Clara Avatar */}
       {isClara && (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mb-1 bg-clara-beige-200 text-clara-green-800 border border-clara-beige-200/50 shadow-sm">
-          <Smile size={16} strokeWidth={2.4} />
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-1 bg-white/[0.04] text-clara-primary border border-white/[0.1] shadow-dark-sm group-hover/msg:border-clara-primary/30 transition-colors">
+          <Smile size={16} strokeWidth={2.5} />
         </div>
       )}
 
-      {/* Bubble */}
-      <div 
-        className={`max-w-[75%] md:max-w-[65%] px-5 py-4 text-[15px] md:text-base leading-relaxed font-medium relative ${
-          isClara 
-            ? "bg-white text-clara-green-900 rounded-[1.5rem] rounded-bl-[0.25rem] border border-clara-beige-200 shadow-sm" 
-            : "bg-clara-green-800 text-white rounded-[1.5rem] rounded-br-[0.25rem] shadow-md shadow-clara-green-800/20"
-        }`}
-      >
-        <p className="whitespace-pre-wrap break-words">{message.content}</p>
+      {/* Bubble Container */}
+      <div className={`flex flex-col ${isClara ? "items-start" : "items-end"} max-w-[80%] md:max-w-[70%]`}>
+        <div 
+          className={`px-5 py-3.5 text-[15px] md:text-base leading-relaxed tracking-tight font-medium relative transition-all duration-300 ${
+            isClara 
+              ? "bg-white/[0.04] text-slate-100 rounded-[1.25rem] rounded-bl-none border border-white/[0.08] shadow-dark-sm group-hover/msg:bg-white/[0.07]" 
+              : "bg-gradient-to-br from-clara-primary to-clara-primary-light text-white rounded-[1.25rem] rounded-br-none shadow-glow-sm"
+          }`}
+        >
+          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        </div>
+        
+        {/* Timestamp / Meta info */}
+        <span className="text-[10px] font-bold text-clara-text-muted mt-1.5 uppercase tracking-widest px-1 opacity-0 group-hover/msg:opacity-100 transition-opacity">
+          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
       </div>
 
       {/* User Avatar */}
       {!isClara && (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mb-1 bg-clara-green-100 text-clara-green-800 border border-clara-green-100/50 shadow-sm">
-          <User size={16} strokeWidth={2.4} />
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-1 bg-clara-primary/10 text-clara-primary-light border border-clara-primary/20 shadow-dark-sm">
+          <User size={16} strokeWidth={2.5} />
         </div>
       )}
     </motion.div>

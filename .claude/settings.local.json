@@ -57,7 +57,11 @@
       "Bash(tasklist /FI \"PID eq 26868\")",
       "Bash(taskkill //PID 10340 //F)",
       "Bash(taskkill //PID 26868 //F)",
-      "Bash(docker compose:*)"
+      "Bash(docker compose:*)",
+      "Bash(python3 -m py_compile app/api/v1/auth.py app/api/v1/patient_auth.py app/api/v1/patients.py app/api/v1/caregiver.py app/api/v1/chat.py app/api/v1/sessions.py)",
+      "Bash(sed 's/:from //g')",
+      "Bash(sed 's/ import.*//')",
+      "Bash(grep -n \"interface.*Props\" /d/ClaraCompanion/clara/frontend/src/components/**/*.tsx /d/ClaraCompanion/clara/frontend/src/app/**/*.tsx)"
     ]
   }
 }

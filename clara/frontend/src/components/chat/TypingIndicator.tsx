@@ -2,21 +2,39 @@
 
 import React from "react";
 import { Smile } from "lucide-react";
+import { motion } from "framer-motion";
 
 export const TypingIndicator: React.FC = () => {
   return (
-    <div className="flex items-end gap-3 w-full animate-in slide-in-from-bottom-2 fade-in duration-300">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex items-end gap-3 w-full"
+    >
       {/* Avatar */}
-      <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mb-1 bg-clara-beige-200 text-clara-green-800 border border-clara-beige-200/50 shadow-sm">
+      <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-1 bg-white/[0.04] text-clara-primary border border-white/[0.1] shadow-dark-sm">
         <Smile size={16} strokeWidth={2.4} />
       </div>
 
       {/* Bubble */}
-      <div className="flex items-center gap-1.5 bg-clara-beige-100 border border-clara-beige-200 rounded-[1.5rem] rounded-bl-[0.25rem] px-5 py-4 shadow-sm h-[48px]">
-        <div className="w-2 h-2 rounded-full bg-clara-neutral-muted/60 animate-bounce [animation-delay:-0.3s]" />
-        <div className="w-2 h-2 rounded-full bg-clara-neutral-muted/60 animate-bounce [animation-delay:-0.15s]" />
-        <div className="w-2 h-2 rounded-full bg-clara-neutral-muted/60 animate-bounce" />
+      <div className="flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.08] rounded-[1.25rem] rounded-bl-none px-5 py-4 shadow-dark-sm h-[48px]">
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            animate={{ 
+              scale: [1, 1.3, 1],
+              opacity: [0.4, 1, 0.4]
+            }}
+            transition={{ 
+              repeat: Infinity, 
+              duration: 1.2, 
+              delay: i * 0.15,
+              ease: "easeInOut"
+            }}
+            className="w-1.5 h-1.5 rounded-full bg-clara-primary shadow-glow-sm" 
+          />
+        ))}
       </div>
-    </div>
+    </motion.div>
   );
 };

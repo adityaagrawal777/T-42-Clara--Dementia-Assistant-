@@ -1,7 +1,7 @@
 # Clara Backend — Session Repository Implementation
 import uuid
 from datetime import datetime
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple
 from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.session import ClaraSession
@@ -82,3 +82,37 @@ class SessionRepository(BaseRepository[ClaraSession]):
             .values(alert_count=self.model.alert_count + 1)
         )
         await self.db.execute(stmt)
+
+    async def get_patient_sessions_paginated(
+        self,
+        patient_id: uuid.UUID,
+        organization_id: uuid.UUID,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> Tuple[Sequence[ClaraSession], int]:
+        """
+        Retrieve a patient's session history with pagination.
+
+        Both patient_id and organization_id are required to enforce strict
+        multi-tenant, per-patient isolation.  Soft-deleted sessions are
+        excluded so GDPR erasure is respected transparently.
+        """
+        base_where = [
+            self.model.patient_id == patient_id,
+            self.model.organization_id == organization_id,
+            self.model.is_deleted == False,  # noqa: E712
+        ]
+
+        total_result = await self.db.execute(
+            select(func.count(self.model.id)).where(*base_where)
+        )
+        total: int = total_result.scalar_one()
+
+        page_result = await self.db.execute(
+            select(self.model)
+            .where(*base_where)
+            .order_by(self.model.started_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        return page_result.scalars().all(), total

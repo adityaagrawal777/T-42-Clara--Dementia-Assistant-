@@ -1,27 +1,25 @@
 import type { Metadata } from "next";
-import { Nunito, DM_Serif_Display } from "next/font/google";
+import { Inter, DM_Serif_Display } from "next/font/google";
 import "@/styles/globals.css";
 import { ConditionalShell } from "@/components/ui/ConditionalShell";
 import { AlertNotification } from "@/components/ui/AlertNotification";
 
-const nunito = Nunito({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-nunito",
-  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-inter",
   display: "swap",
 });
 
 const dmSerif = DM_Serif_Display({
-  subsets: ["latin"],
-  variable: "--font-dm-serif",
   weight: "400",
-  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-serif",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Clara — Your Caring Companion",
-  description: "Clara is a compassionate AI companion designed for dementia care — always here for you.",
+  title: "Clara — Your Caring AI Companion",
+  description: "Clara is a compassionate AI companion designed for dementia care — always here for you with a modern, intuitive experience.",
 };
 
 export default function RootLayout({
@@ -30,8 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${nunito.variable} ${dmSerif.variable}`}>
-      <body className="bg-clara-neutral-bg text-clara-neutral-text antialiased min-h-screen">
+    <html lang="en" className={`${inter.variable} ${dmSerif.variable} dark`}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+      </head>
+      <body className="bg-clara-bg text-clara-text-primary antialiased min-h-screen selection:bg-clara-primary/30 selection:text-white">
         <AlertNotification />
         <ConditionalShell>{children}</ConditionalShell>
       </body>

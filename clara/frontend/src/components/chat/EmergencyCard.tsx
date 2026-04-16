@@ -3,7 +3,7 @@
 import React from "react";
 import { useClaraStore } from "@/store/claraStore";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, AlertCircle, X, ShieldAlert } from "lucide-react";
+import { Phone, AlertTriangle, X, ShieldAlert, Heart } from "lucide-react";
 
 export const EmergencyCard: React.FC = () => {
   const { emergency, dismissEmergency } = useClaraStore();
@@ -11,99 +11,86 @@ export const EmergencyCard: React.FC = () => {
   if (!emergency.active || !emergency.severity) return null;
 
   const isCritical = emergency.severity === "critical";
-  const emergencyNumber = "112"; // User requested not hardcoded but 112 is a safe default standard. Caregiver number might be in patient profile, but we don't fetch full patient profile in frontend yet, so we will use a configured number for now.
+  const emergencyNumber = process.env.NEXT_PUBLIC_EMERGENCY_NUMBER ?? "112";
 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
-        transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="w-full max-w-[90%] md:max-w-md mx-auto my-6"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+        className="w-full max-w-[90%] md:max-w-md mx-auto my-10"
       >
         <div
-          className={`relative overflow-hidden rounded-3xl border-2 shadow-2xl backdrop-blur-xl ${
+          className={`relative overflow-hidden rounded-[2.5rem] border-2 shadow-2xl backdrop-blur-3xl p-1 ${
             isCritical
-              ? "bg-red-50/95 border-red-500/30 shadow-red-500/20"
-              : "bg-orange-50/95 border-orange-500/30 shadow-orange-500/20"
+              ? "bg-danger-muted border-danger/30 shadow-danger/20"
+              : "bg-warning-muted border-warning/30 shadow-warning/20"
           }`}
         >
-          {/* Animated background pulse for critical */}
-          {isCritical && (
+          {/* Animated Background Mesh for Emergency */}
+          <div className={`absolute inset-0 opacity-20 ${isCritical ? "bg-danger" : "bg-warning"} blur-[80px] -z-10`}></div>
+          
+          <div className="relative z-10 glass-card rounded-[2.3rem] border-0 bg-transparent py-10 px-8 flex flex-col items-center text-center">
+            
+            {/* Header Icon */}
             <motion.div
-              animate={{ opacity: [0.1, 0.3, 0.1] }}
-              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-              className="absolute inset-0 bg-red-500 opacity-20"
-            />
-          )}
-
-          {/* Dismiss button */}
-          <button
-            onClick={dismissEmergency}
-            className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white/80 rounded-full transition-colors z-10"
-            aria-label="Dismiss alert"
-          >
-            <X className={`w-5 h-5 ${isCritical ? "text-red-700" : "text-orange-700"}`} />
-          </button>
-
-          <div className="px-6 pt-8 pb-6 relative z-10 flex flex-col items-center text-center">
-            {/* Icon header */}
-            <div
-              className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg mb-4 ${
-                isCritical ? "bg-red-500 text-white" : "bg-orange-500 text-white"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+              className={`w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-2xl mb-6 ${
+                isCritical ? "bg-danger text-white shadow-danger/40" : "bg-warning text-black shadow-warning/40"
               }`}
             >
-              {isCritical ? <ShieldAlert className="w-8 h-8" /> : <AlertCircle className="w-8 h-8" />}
-            </div>
+              {isCritical ? <ShieldAlert size={40} /> : <AlertTriangle size={40} />}
+            </motion.div>
 
-            <h2
-              className={`text-xl font-bold mb-2 tracking-tight ${
-                isCritical ? "text-red-900" : "text-orange-900"
-              }`}
-            >
-              {isCritical ? "Emergency Assistance" : "Require Assistance?"}
+            <h2 className={`text-2xl font-black mb-3 tracking-tighter ${isCritical ? "text-white" : "text-warning"}`}>
+              {isCritical ? "Immediate Assistance" : "Care Alert Active"}
             </h2>
 
-            <p
-              className={`text-[15px] max-w-sm mb-6 ${
-                isCritical ? "text-red-800" : "text-orange-800"
-              }`}
-            >
+            <p className="text-slate-200 text-sm font-medium leading-relaxed max-w-[280px] mb-8">
               {isCritical
-                ? "Clara has notified your care team. If you are in immediate danger, please call for help."
-                : "Clara noticed you might be feeling distressed. We've let your care team know."}
+                 ? "We've notified your care team immediately. Please stay calm and look for help nearby."
+                 : "I noticed you might be feeling overwhelmed. I've sent a gentle nudge to your caregiver."}
             </p>
 
-            {/* Emergency Action Buttons */}
+            {/* Action Buttons */}
             <div className="w-full flex flex-col gap-3">
               {isCritical && (
                 <a
                   href={`tel:${emergencyNumber}`}
-                  className="w-full py-4 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-2xl flex items-center justify-center gap-3 font-semibold text-lg transition-all shadow-md shadow-red-600/30 hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full py-4 bg-danger hover:bg-danger/80 text-white rounded-2xl flex items-center justify-center gap-3 font-black text-lg shadow-xl shadow-danger/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <Phone className="w-6 h-6 fill-current" />
-                  Call Emergency ({emergencyNumber})
+                  <Phone fill="currentColor" size={24} />
+                  Call Support ({emergencyNumber})
                 </a>
               )}
               
               <button
                 onClick={dismissEmergency}
-                className={`w-full py-3.5 rounded-2xl font-semibold transition-all ${
-                  isCritical
-                    ? "bg-white text-red-700 hover:bg-red-50 border border-red-200"
-                    : "bg-orange-600 text-white hover:bg-orange-700 shadow-md shadow-orange-600/30"
-                }`}
+                className="w-full py-4 glass-card border-white/[0.1] text-white hover:bg-white/[0.05] rounded-2xl font-black transition-all"
               >
-                {isCritical ? "I am okay now" : "Call my Caregiver"}
+                {isCritical ? "I am safe now" : "Everything is okay"}
               </button>
             </div>
             
-            <div className="mt-5 flex items-center justify-center gap-2">
-                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                 <span className="text-xs font-medium text-slate-600 uppercase tracking-wider">Care team notified</span>
+            <div className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.05] border border-white/[0.08]">
+                 <motion.div 
+                   animate={{ opacity: [0.4, 1, 0.4] }}
+                   transition={{ repeat: Infinity, duration: 2 }}
+                   className="w-2 h-2 rounded-full bg-success" 
+                 />
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Team Notified</span>
             </div>
           </div>
+
+          {/* Close button */}
+          <button
+            onClick={dismissEmergency}
+            className="absolute top-6 right-6 p-2 rounded-full bg-white/[0.05] text-slate-400 hover:text-white transition-colors"
+          >
+            <X size={20} />
+          </button>
         </div>
       </motion.div>
     </AnimatePresence>

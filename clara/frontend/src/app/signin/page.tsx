@@ -1,29 +1,49 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { setJWT } from "@/lib/tokens";
 import { useClaraStore } from "@/store/claraStore";
-import { EyeOff, User, Lock, Phone, Sparkles, ArrowRight, HelpCircle } from "lucide-react";
-import Image from "next/image";
+import { EyeOff, User, Lock, Phone, Sparkles, ArrowRight, HelpCircle, Mail, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Mode = "signin" | "register";
+type AuthType = "patient" | "caregiver";
 
-export default function SignInPage() {
+function SignInForm() {
   const router = useRouter();
   const setSession = useClaraStore((state) => state.setSession);
 
+  const [authType, setAuthType] = useState<AuthType>("patient");
   const [mode, setMode] = useState<Mode>("signin");
   const [form, setForm] = useState({
     name: "",
     passphrase: "",
     caregiverPhone: "",
+    email: "",
+    password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
 
-  const isValid = form.name.trim().length > 0 && form.passphrase.trim().length >= 4;
+  useEffect(() => {
+    const role = searchParams?.get("role");
+    if (role === "caregiver") {
+      setAuthType("caregiver");
+      setMode("signin");
+      setError(null);
+    }
+  }, [searchParams]);
+
+  const isPatientValid =
+    form.name.trim().length > 0 &&
+    form.passphrase.trim().length >= 4;
+  const isCaregiverValid =
+    form.email.trim().length > 0 &&
+    form.password.trim().length >= 4;
+  const isValid = authType === "caregiver" ? isCaregiverValid : isPatientValid;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -43,22 +63,37 @@ export default function SignInPage() {
     setError(null);
 
     try {
-      const endpoint =
-        mode === "register"
-          ? `/api/v1/auth/patient/register`
-          : `/api/v1/auth/patient/login`;
+      if (authType === "caregiver") {
+        const formData = new URLSearchParams();
+        formData.set("username", form.email.trim());
+        formData.set("password", form.password);
 
-      const body =
-        mode === "register"
-          ? {
-              name: form.name.trim(),
-              passphrase: form.passphrase,
-              caregiver_phone: form.caregiverPhone.trim() || null,
-            }
-          : {
-              name: form.name.trim(),
-              passphrase: form.passphrase,
-            };
+        let res: Response;
+        try {
+          res = await fetch("/api/v1/auth/token", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData.toString(),
+          });
+        } catch {
+          throw new Error("Clara service is unreachable. Please check your connection.");
+        }
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({ detail: "Invalid credentials" }));
+          throw new Error(data.detail || "Invalid caregiver credentials.");
+        }
+
+        const data = await res.json();
+        setJWT(data.access_token);
+        router.push("/caregiver");
+        return;
+      }
+
+      const endpoint = mode === "register" ? `/api/v1/auth/patient/register` : `/api/v1/auth/patient/login`;
+      const body = mode === "register" 
+        ? { name: form.name.trim(), passphrase: form.passphrase, caregiver_phone: form.caregiverPhone.trim() || null }
+        : { name: form.name.trim(), passphrase: form.passphrase };
 
       let res: Response;
       try {
@@ -68,43 +103,15 @@ export default function SignInPage() {
           body: JSON.stringify(body),
         });
       } catch {
-        throw new Error(
-          "Clara is not reachable right now. Please make sure the app is running and try again."
-        );
-      }
-
-      interface AuthResponse {
-        access_token: string;
-        session_id: string;
-        patient_id: string;
-        patient_name: string;
-        detail?: string;
-        message?: string;
-      }
-
-      let data: Partial<AuthResponse> = {};
-      try {
-        data = (await res.json()) as Partial<AuthResponse>;
-      } catch {
-        // JSON parse failed — surface a sensible error regardless of status
-        throw new Error(
-          `Server error (${res.status}). Please try again in a moment.`
-        );
+        throw new Error("Clara service is unreachable. Please check your connection.");
       }
 
       if (!res.ok) {
-        const msg =
-          data.detail ||
-          data.message ||
-          "Something went wrong. Please try again.";
-        throw new Error(msg);
+        const data = await res.json().catch(() => ({ detail: "Authentication failed" }));
+        throw new Error(data.detail || "Something went wrong.");
       }
 
-      // Validate all required fields are present before using them
-      if (!data.access_token || !data.session_id || !data.patient_id || !data.patient_name) {
-        throw new Error("Received an incomplete response from the server. Please try again.");
-      }
-
+      const data = await res.json();
       setJWT(data.access_token);
       setSession({
         sessionId: data.session_id,
@@ -113,314 +120,204 @@ export default function SignInPage() {
       });
 
       router.push("/chat");
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
-      setError(message);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="flex min-h-screen bg-clara-neutral-bg">
-      {/* ─── Left Panel ─────────────────────────────────────────────── */}
-      <div className="hidden md:flex flex-col w-[46%] relative px-10 py-10 bg-clara-neutral-bg overflow-hidden border-r border-clara-beige-200">
-        {mode === "signin" ? <SignInLeftPanel /> : <RegisterLeftPanel />}
-      </div>
+    <main className="min-h-screen flex items-center justify-center relative overflow-hidden bg-clara-bg p-6">
+      {/* Dynamic Background Effects */}
+      <div className="absolute inset-0 z-0 mesh-gradient opacity-40"></div>
+      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-clara-primary/10 blur-[120px] rounded-full"></div>
+      <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-clara-accent/10 blur-[120px] rounded-full"></div>
 
-      {/* ─── Right Panel ─────────────────────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center px-6 lg:px-10 py-12 overflow-y-auto w-full">
-        <div className="w-full max-w-[420px]">
-          {mode === "signin" ? (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="mb-8">
-                <h2 className="text-3xl font-extrabold text-clara-green-900 mb-2">What is your name?</h2>
-                <p className="text-clara-neutral-muted">Welcome back to your safe space.</p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                {/* Name */}
-                <div className="relative">
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    autoComplete="given-name"
-                    placeholder="Your name"
-                    value={form.name}
-                    onChange={handleChange}
-                    className="w-full py-4 pl-5 pr-12 rounded-2xl border-2 border-transparent bg-white shadow-sm text-clara-green-900 font-sans text-base outline-none transition-all focus:border-clara-green-700 focus:shadow-md focus:shadow-clara-green-900/5 hover:border-clara-beige-200"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-clara-neutral-muted">
-                    <User size={20} />
-                  </span>
-                </div>
-
-                {/* Passphrase */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-bold text-clara-green-900 ml-1">Your private key</label>
-                  <div className="relative">
-                    <input
-                      id="passphrase"
-                      name="passphrase"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      placeholder="••••••••"
-                      value={form.passphrase}
-                      onChange={handleChange}
-                      className="w-full py-4 pl-5 pr-12 rounded-2xl border-2 border-transparent bg-white shadow-sm text-clara-green-900 font-sans text-base outline-none transition-all focus:border-clara-green-700 focus:shadow-md focus:shadow-clara-green-900/5 hover:border-clara-beige-200"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-clara-neutral-muted hover:text-clara-green-800 transition-colors bg-transparent border-0 cursor-pointer p-1"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Lock size={20} />}
-                    </button>
-                  </div>
-                  {form.passphrase.length > 0 && form.passphrase.length < 4 && (
-                    <p className="text-red-500 text-xs mt-1 ml-2 font-medium">Passphrase must be at least 4 characters.</p>
-                  )}
-                </div>
-
-                {/* Error */}
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl px-4 py-3 text-sm leading-relaxed font-medium">
-                    {error}
-                  </div>
-                )}
-
-                {/* Submit */}
-                <button
-                  type="submit"
-                  id="signin-btn"
-                  disabled={!isValid || loading}
-                  className="w-full py-4 mt-2 rounded-[2rem] bg-clara-green-800 text-white font-sans text-base font-bold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md shadow-clara-green-800/20 hover:bg-clara-green-900 hover:-translate-y-0.5 hover:shadow-lg disabled:bg-clara-beige-200 disabled:text-clara-neutral-muted disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
-                >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Signing in…
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      Sign In <ArrowRight size={20} strokeWidth={2.5} />
-                    </span>
-                  )}
-                </button>
-
-                {/* Switch to register */}
-                <button
-                  type="button"
-                  onClick={() => switchMode("register")}
-                  className="w-full py-4 rounded-[2rem] bg-transparent text-clara-green-800 font-sans text-base font-bold border-2 border-dashed border-clara-green-700 cursor-pointer transition-colors hover:bg-clara-green-50"
-                >
-                  Create an Account
-                </button>
-
-                <p className="flex items-center justify-center gap-2 text-sm text-clara-neutral-muted mt-2">
-                  <HelpCircle size={16} />
-                  Forgot your passphrase? Ask your caregiver.
-                </p>
-              </form>
-            </div>
-          ) : (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="mb-8">
-                <h2 className="text-3xl font-extrabold text-clara-green-900 mb-2">Create your space</h2>
-                <p className="text-clara-neutral-muted">Welcome to your new digital home.</p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                {/* Name */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-bold text-clara-green-900 ml-1">Your Name</label>
-                  <div className="relative">
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      autoComplete="given-name"
-                      placeholder="How should we call you?"
-                      value={form.name}
-                      onChange={handleChange}
-                      className="w-full py-4 pl-5 pr-12 rounded-2xl border-2 border-transparent bg-white shadow-sm text-clara-green-900 font-sans text-base outline-none transition-all focus:border-clara-green-700 focus:shadow-md focus:shadow-clara-green-900/5 hover:border-clara-beige-200"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-clara-neutral-muted">
-                      <User size={20} />
-                    </span>
-                  </div>
-                </div>
-
-                {/* Passphrase */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-bold text-clara-green-900 ml-1">Passphrase</label>
-                  <div className="relative">
-                    <input
-                      id="passphrase"
-                      name="passphrase"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      placeholder="Create a secure passphrase"
-                      value={form.passphrase}
-                      onChange={handleChange}
-                      className="w-full py-4 pl-5 pr-12 rounded-2xl border-2 border-transparent bg-white shadow-sm text-clara-green-900 font-sans text-base outline-none transition-all focus:border-clara-green-700 focus:shadow-md focus:shadow-clara-green-900/5 hover:border-clara-beige-200"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-clara-neutral-muted hover:text-clara-green-800 transition-colors bg-transparent border-0 cursor-pointer p-1"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Lock size={20} />}
-                    </button>
-                  </div>
-                  {form.passphrase.length > 0 && form.passphrase.length < 4 && (
-                    <p className="text-red-500 text-xs mt-1 ml-2 font-medium">Passphrase must be at least 4 characters.</p>
-                  )}
-                </div>
-
-                {/* Caregiver phone */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-bold text-clara-green-900 ml-1">
-                    Caregiver&apos;s Phone <span className="font-medium text-clara-neutral-muted">(optional)</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="caregiverPhone"
-                      name="caregiverPhone"
-                      type="tel"
-                      autoComplete="tel"
-                      placeholder="+1 (555) 000-0000"
-                      value={form.caregiverPhone}
-                      onChange={handleChange}
-                      className="w-full py-4 pl-5 pr-12 rounded-2xl border-2 border-transparent bg-white shadow-sm text-clara-green-900 font-sans text-base outline-none transition-all focus:border-clara-green-700 focus:shadow-md focus:shadow-clara-green-900/5 hover:border-clara-beige-200"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-clara-neutral-muted">
-                      <Phone size={20} />
-                    </span>
-                  </div>
-                </div>
-
-                {/* Error */}
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl px-4 py-3 text-sm leading-relaxed font-medium">
-                    {error}
-                  </div>
-                )}
-
-                {/* Submit */}
-                <button
-                  type="submit"
-                  id="register-btn"
-                  disabled={!isValid || loading}
-                  className="w-full py-4 mt-2 rounded-[2rem] bg-clara-green-800 text-white font-sans text-base font-bold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md shadow-clara-green-800/20 hover:bg-clara-green-900 hover:-translate-y-0.5 hover:shadow-lg disabled:bg-clara-beige-200 disabled:text-clara-neutral-muted disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
-                >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Creating account…
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      Start Journey <ArrowRight size={20} strokeWidth={2.5} />
-                    </span>
-                  )}
-                </button>
-
-                {/* Already have account */}
-                <p className="text-center text-sm text-clara-neutral-muted mt-2">
-                  Already have an account?{" "}
-                  <button type="button" onClick={() => switchMode("signin")} className="font-bold text-clara-green-800 bg-transparent border-0 cursor-pointer underline underline-offset-4 decoration-clara-green-800/30 hover:decoration-clara-green-800 transition-colors">
-                    Sign in here
-                  </button>
-                </p>
-
-                {/* Help notice */}
-                <div className="flex items-start gap-3 bg-clara-green-900 text-white rounded-2xl px-5 py-4 text-sm leading-relaxed mt-2 shadow-sm">
-                  <HelpCircle size={20} className="shrink-0 opacity-80 mt-0.5" />
-                  <p>Need help? Our gentle guide is always available. Just look for the help icon if you get stuck.</p>
-                </div>
-              </form>
-            </div>
-          )}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative z-10 w-full max-w-[440px]"
+      >
+        {/* Logo Section */}
+        <div className="flex flex-col items-center mb-10 text-center">
+          <motion.div 
+            whileHover={{ scale: 1.05 }}
+            className="w-16 h-16 glass-card rounded-3xl flex items-center justify-center mb-4 shadow-glow-md"
+          >
+            <span className="text-3xl">🌿</span>
+          </motion.div>
+          <h1 className="text-4xl font-serif text-white mb-2 tracking-tight">Clara Companion</h1>
+          <p className="text-clara-text-secondary text-lg font-medium opacity-80">Your gentle guide to peaceful days.</p>
         </div>
-      </div>
+
+        {/* Auth Mode Toggle */}
+        <div className="glass-card p-1 rounded-2xl flex gap-1 mb-8 shadow-inner-glow">
+          <button
+            onClick={() => { setAuthType("patient"); setError(null); }}
+            className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              authType === "patient" 
+              ? "bg-clara-primary text-white shadow-glow-sm" 
+              : "text-clara-text-secondary hover:text-white"
+            }`}
+          >
+            Patient Access
+          </button>
+          <button
+            onClick={() => { setAuthType("caregiver"); setError(null); }}
+            className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              authType === "caregiver" 
+              ? "bg-clara-primary text-white shadow-glow-sm" 
+              : "text-clara-text-secondary hover:text-white"
+            }`}
+          >
+            Caregiver Portal
+          </button>
+        </div>
+
+        {/* Main Card */}
+        <div className="glass-card p-8 rounded-[2.5rem] border-white/[0.08] relative overflow-hidden shadow-2xl">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={authType + mode}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  {authType === "caregiver" ? "Welcome Back" : mode === "signin" ? "Hello there!" : "Join Clara"}
+                </h2>
+                <p className="text-clara-text-secondary text-sm font-medium">
+                  {authType === "caregiver" 
+                    ? "Enter your secure credentials to access the dashboard." 
+                    : mode === "signin" ? "Enter your details to start your session." : "Create your private space for peace and care."}
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {authType === "caregiver" ? (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-bold text-clara-text-tertiary uppercase tracking-widest px-1">Email Address</label>
+                      <div className="relative group">
+                        <input
+                          name="email" type="email" placeholder="email@example.com" value={form.email} onChange={handleChange}
+                          className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-3.5 pl-11 pr-4 text-white placeholder-clara-text-muted focus:bg-white/[0.06] focus:border-clara-primary/50 input-glow"
+                        />
+                        <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-clara-text-tertiary group-focus-within:text-clara-primary transition-colors" />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-bold text-clara-text-tertiary uppercase tracking-widest px-1">Secure Password</label>
+                      <div className="relative group">
+                        <input
+                          name="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={form.password} onChange={handleChange}
+                          className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-3.5 pl-11 pr-12 text-white placeholder-clara-text-muted focus:bg-white/[0.06] focus:border-clara-primary/50 input-glow"
+                        />
+                        <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-clara-text-tertiary group-focus-within:text-clara-primary transition-colors" />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-clara-text-tertiary hover:text-white transition-colors">
+                          {showPassword ? <EyeOff size={18} /> : <ShieldCheck size={18} />}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-bold text-clara-text-tertiary uppercase tracking-widest px-1">Your Name</label>
+                      <div className="relative group">
+                        <input
+                          name="name" type="text" placeholder="How should we call you?" value={form.name} onChange={handleChange}
+                          className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-3.5 pl-11 pr-4 text-white placeholder-clara-text-muted focus:bg-white/[0.06] focus:border-clara-primary/50 input-glow"
+                        />
+                        <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-clara-text-tertiary group-focus-within:text-clara-primary transition-colors" />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-bold text-clara-text-tertiary uppercase tracking-widest px-1">Passphrase</label>
+                      <div className="relative group">
+                        <input
+                          name="passphrase" type={showPassword ? "text" : "password"} placeholder="Your private key" value={form.passphrase} onChange={handleChange}
+                          className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-3.5 pl-11 pr-12 text-white placeholder-clara-text-muted focus:bg-white/[0.06] focus:border-clara-primary/50 input-glow"
+                        />
+                        <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-clara-text-tertiary group-focus-within:text-clara-primary transition-colors" />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-clara-text-tertiary hover:text-white transition-colors">
+                          {showPassword ? <EyeOff size={18} /> : <ShieldCheck size={18} />}
+                        </button>
+                      </div>
+                    </div>
+                    {mode === "register" && (
+                      <div className="space-y-1.5">
+                        <label className="text-[12px] font-bold text-clara-text-tertiary uppercase tracking-widest px-1">Caregiver Phone (Optional)</label>
+                        <div className="relative group">
+                          <input
+                            name="caregiverPhone" type="tel" placeholder="+1 (555) 000-0000" value={form.caregiverPhone} onChange={handleChange}
+                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-3.5 pl-11 pr-4 text-white placeholder-clara-text-muted focus:bg-white/[0.06] focus:border-clara-primary/50 input-glow"
+                          />
+                          <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-clara-text-tertiary group-focus-within:text-clara-primary transition-colors" />
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {error && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-danger-muted border border-danger/30 text-danger text-sm p-4 rounded-xl flex items-start gap-3"
+                  >
+                    <HelpCircle size={18} className="shrink-0 mt-0.5" />
+                    <p className="font-medium">{error}</p>
+                  </motion.div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={!isValid || loading}
+                  className="w-full py-4 bg-gradient-to-r from-clara-primary to-clara-primary-light text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-glow-md hover:shadow-glow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:scale-100 disabled:shadow-none mt-4"
+                >
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      {authType === "caregiver" ? "Access Portal" : mode === "signin" ? "Begin Session" : "Create Account"}
+                      <ArrowRight size={20} />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {authType === "patient" && (
+                <div className="mt-8 pt-6 border-t border-white/[0.08] text-center">
+                  <button 
+                    onClick={() => switchMode(mode === "signin" ? "register" : "signin")}
+                    className="text-sm font-bold text-clara-text-secondary hover:text-white transition-colors flex items-center justify-center gap-2 mx-auto"
+                  >
+                    {mode === "signin" ? "New to Clara? Create an account" : "Back to Sign In"}
+                    <Sparkles size={16} className="text-clara-primary" />
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Footer info */}
+        <p className="mt-10 text-center text-clara-text-muted text-xs font-bold uppercase tracking-[0.2em]">
+          Private • Secure • Always Available
+        </p>
+      </motion.div>
     </main>
   );
 }
 
-/* ───────────────────────────────────────────────
-   Left panel sub-components
-─────────────────────────────────────────────── */
-
-function SignInLeftPanel() {
+export default function SignInPage() {
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-700">
-      {/* Top plant image */}
-      <div className="relative w-36 h-36 rounded-full overflow-hidden ml-auto mb-10 shadow-lg shadow-black/10 shrink-0 border-4 border-white">
-        <Image
-          src="/assets/signin_plant.png"
-          alt="Calm nature decoration"
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
-
-      {/* Brand */}
-      <div className="flex items-center gap-2 mb-8">
-        <span className="text-2xl">🌿</span>
-        <span className="text-base font-bold text-clara-green-800 tracking-wide">Clara Companion</span>
-      </div>
-
-      {/* Hero text */}
-      <h1 className="font-serif text-[clamp(2.5rem,4vw,3.5rem)] font-bold text-clara-green-900 leading-[1.1] mb-6">
-        Welcome home,<br />it&apos;s lovely to<br />see you.
-      </h1>
-      <p className="text-base text-clara-neutral-muted leading-relaxed max-w-[340px] mb-12">
-        Take a deep breath. Clara is here to help you remember the beautiful moments and guide you through your day with warmth.
-      </p>
-
-      {/* Clara ready card */}
-      <div className="flex items-start gap-4 bg-clara-beige-50 border border-clara-beige-200 rounded-3xl p-5 max-w-[380px] shadow-sm">
-        <div className="w-12 h-12 rounded-full bg-clara-green-100 text-clara-green-800 flex items-center justify-center shrink-0">
-          <Sparkles size={24} />
-        </div>
-        <div className="pt-1">
-          <p className="font-bold text-clara-green-900 mb-1">Clara is ready</p>
-          <p className="text-sm text-clara-neutral-muted italic leading-relaxed">
-            &quot;I&apos;ve kept your memories and conversations ready for you.&quot;
-          </p>
-        </div>
-      </div>
-
-      {/* Decorative bottom pot icon */}
-      <div className="text-6xl opacity-20 mt-auto pt-10 leading-none grayscale filter mix-blend-multiply">🪴</div>
-    </div>
-  );
-}
-
-function RegisterLeftPanel() {
-  return (
-    <div className="flex flex-col h-full animate-in fade-in duration-700">
-      {/* Sunrise image */}
-      <div className="relative w-full rounded-3xl overflow-hidden shrink-0 basis-[55%] shadow-xl shadow-black/5 border-4 border-white mb-8">
-        <Image
-          src="/assets/register_sunrise.png"
-          alt="Peaceful sunrise landscape"
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
-
-      {/* Brand + tagline below image */}
-      <div className="mt-4">
-        <h1 className="font-serif text-[clamp(2.5rem,4vw,3.5rem)] font-bold text-clara-green-800 leading-[1.1] mb-4">Clara<br />Companion</h1>
-        <p className="text-base text-clara-neutral-muted leading-relaxed max-w-[340px]">
-          Join Clara on your journey to peace and companionship. A gentle space designed for focus and tranquility.
-        </p>
-      </div>
-    </div>
+    <React.Suspense fallback={<div className="min-h-screen bg-clara-bg flex items-center justify-center"><div className="w-12 h-12 border-4 border-clara-primary/30 border-t-clara-primary rounded-full animate-spin" /></div>}>
+      <SignInForm />
+    </React.Suspense>
   );
 }
