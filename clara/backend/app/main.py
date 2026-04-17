@@ -1,5 +1,6 @@
 # Clara Backend — Application Factory Main Entry
 import time
+import asyncio
 from contextlib import asynccontextmanager
 import structlog
 import sentry_sdk
@@ -38,10 +39,15 @@ async def lifespan(app: FastAPI):
             logger.warning("lifecycle_startup", ollama="disconnected", message="AI engine is not reachable on boot.")
         else:
             logger.info("lifecycle_startup", ollama="connected", model=settings.ollama.model)
-            # Warmup the model into VRAM to eliminate cold-start latency for the first patient
+            # Warm up BOTH models in parallel — loads weights into VRAM before first user query.
+            # The embedding model cold-start is the primary cause of first-query latency because
+            # _retrieve_memories() must await embed() before streaming can begin.
             try:
-                await ollama_client.chat([{"role": "user", "content": "hi"}], model=settings.ollama.model)
-                logger.info("lifecycle_startup", ollama="warmed_up")
+                await asyncio.gather(
+                    ollama_client.chat([{"role": "user", "content": "hi"}], model=settings.ollama.model),
+                    ollama_client.embed("warmup"),
+                )
+                logger.info("lifecycle_startup", ollama="warmed_up", models=[settings.ollama.model, settings.ollama.embedding_model])
             except Exception as e:
                 logger.warning("lifecycle_startup", ollama="warmup_failed", error=str(e))
 

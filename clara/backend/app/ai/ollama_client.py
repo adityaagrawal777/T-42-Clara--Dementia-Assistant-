@@ -20,12 +20,17 @@ class OllamaClient:
         self.limits = httpx.Limits(max_connections=50, max_keepalive_connections=10)
         self.timeout = httpx.Timeout(120.0, connect=5.0)
         self.base_url = settings.ollama.base_url
-        self._async_client = None
+        # Eagerly create the client so no allocation penalty hits the first request
+        self._async_client = httpx.AsyncClient(
+            base_url=self.base_url,
+            limits=self.limits,
+            timeout=self.timeout
+        )
 
     @property
     def client(self) -> httpx.AsyncClient:
-        """Lazy-loaded async client for connection reuse."""
-        if self._async_client is None or self._async_client.is_closed:
+        """Returns the shared async client, recreating it only if closed."""
+        if self._async_client.is_closed:
             self._async_client = httpx.AsyncClient(
                 base_url=self.base_url,
                 limits=self.limits,
