@@ -13,7 +13,9 @@ from app.db.session import get_db_session
 from app.models.patient import Patient
 from app.models.organization import Organization
 from app.models.session import ClaraSession
-from app.services.auth_service import auth_service
+from app.services.auth_service import auth_service, CurrentUser
+from app.schemas.patient import PatientResponse
+from app.api.deps import require_patient_session
 from app.config import get_settings
 
 router = APIRouter(prefix="/auth/patient", tags=["Patient Auth"])
@@ -143,6 +145,28 @@ async def register_patient(
         "patient_id": str(patient.id),
         "patient_name": patient.preferred_name or patient.name,
     }
+
+
+@router.get("/me", response_model=PatientResponse)
+async def get_my_profile(
+    user: CurrentUser = Depends(require_patient_session),
+    db: AsyncSession = Depends(get_db_session),
+) -> Patient:
+    """Patient self-service: fetch own profile including life memories and favourite topics."""
+    result = await db.execute(
+        select(Patient).where(
+            Patient.id == user.user_id,
+            Patient.is_deleted == False,
+            Patient.is_active == True,
+        )
+    )
+    patient = result.scalars().first()
+    if not patient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient profile not found.",
+        )
+    return patient
 
 
 @router.post("/login", response_model=PatientSessionResponse)

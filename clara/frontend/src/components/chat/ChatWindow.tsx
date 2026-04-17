@@ -3,7 +3,6 @@
 import React, { useEffect, useRef } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
-import { EmergencyCard } from "./EmergencyCard";
 import { useClaraStore } from "@/store/claraStore";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -80,9 +79,6 @@ export const ChatWindow: React.FC = () => {
             <TypingIndicator />
           )}
         </div>
-
-        {/* Emergency Alerts */}
-        <EmergencyCard />
 
         <div ref={messagesEndRef} className="h-20" />
       </div>

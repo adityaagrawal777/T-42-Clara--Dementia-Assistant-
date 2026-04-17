@@ -64,6 +64,15 @@ interface EmergencySlice {
   dismissEmergency: () => void;
 }
 
+export type ActivePanel = "profile" | "settings" | "about" | null;
+
+interface UiSlice {
+  prefillMessage: string | null;
+  setPrefillMessage: (msg: string | null) => void;
+  activePanel: ActivePanel;
+  setActivePanel: (panel: ActivePanel) => void;
+}
+
 interface ClaraState
   extends SessionSlice,
     MessagesSlice,
@@ -72,7 +81,8 @@ interface ClaraState
     ConnectionSlice,
     AlertsSlice,
     SocketSlice,
-    EmergencySlice {}
+    EmergencySlice,
+    UiSlice {}
 
 export const useClaraStore = create<ClaraState>()((set) => ({
   // Session
@@ -81,9 +91,32 @@ export const useClaraStore = create<ClaraState>()((set) => ({
   patientName: null,
   status: "idle",
   setSession: (config: { sessionId: string; patientId: string; patientName: string }) =>
-    set(config),
+    set({
+      ...config,
+      // Always start a new login with a completely blank slate
+      items: [],
+      lastMessageDone: null,
+      isStreaming: false,
+      isConnected: false,
+      reconnectAttempts: 0,
+      alerts: [],
+      emergency: { active: false, severity: null, categories: [], timestamp: null },
+    }),
   setStatus: (status: SessionStatus) => set({ status }),
-  clearSession: () => set({ sessionId: null, patientId: null, patientName: null, status: "idle" }),
+  clearSession: () =>
+    set({
+      sessionId: null,
+      patientId: null,
+      patientName: null,
+      status: "idle",
+      items: [],
+      lastMessageDone: null,
+      isStreaming: false,
+      isConnected: false,
+      reconnectAttempts: 0,
+      alerts: [],
+      emergency: { active: false, severity: null, categories: [], timestamp: null },
+    }),
 
   // Messages
   items: [],
@@ -135,6 +168,12 @@ export const useClaraStore = create<ClaraState>()((set) => ({
   setSendMessage: (fn) => set({ sendMessage: fn }),
   isStreaming: false,
   setStreaming: (isStreaming) => set({ isStreaming }),
+
+  // UI State
+  prefillMessage: null,
+  setPrefillMessage: (msg) => set({ prefillMessage: msg }),
+  activePanel: null,
+  setActivePanel: (panel) => set({ activePanel: panel }),
 
   // Emergency State
   emergency: {

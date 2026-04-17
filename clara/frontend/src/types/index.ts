@@ -29,6 +29,18 @@ export interface EmergencyState {
   timestamp: string | null;
 }
 
+// ── Life Memory — individual memory entry inside Patient.life_memories ─────────
+
+export interface LifeMemory {
+  title?: string;
+  description?: string;
+  date?: string;
+  tags?: string[];
+  emoji?: string;
+  category?: string;
+  [key: string]: unknown;
+}
+
 // ── Patient — mirrors backend PatientResponse exactly ─────────────────────────
 
 export interface Patient {

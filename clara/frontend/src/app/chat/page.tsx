@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { InputBar } from "@/components/chat/InputBar";
+import { EmergencyCard } from "@/components/chat/EmergencyCard";
 import { useClaraStore } from "@/store/claraStore";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useVoiceOrchestrator } from "@/hooks/useVoiceOrchestrator";
@@ -46,6 +47,9 @@ export default function ChatPage() {
 
       {/* ── Floating Input bar ── */}
       <InputBar />
+
+      {/* ── Emergency overlay — fixed z-[100], covers everything including InputBar ── */}
+      <EmergencyCard />
     </div>
   );
 }

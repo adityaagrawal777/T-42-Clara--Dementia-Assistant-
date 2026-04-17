@@ -5,6 +5,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.patient import Patient
 from app.repositories.base import BaseRepository
+import structlog
+
+logger = structlog.get_logger()
 
 class PatientRepository(BaseRepository[Patient]):
     """
@@ -44,6 +47,32 @@ class PatientRepository(BaseRepository[Patient]):
             return None
             
         return await self.update(patient_id, data)
+
+    async def append_topics(self, patient_id: uuid.UUID, new_topics: List[str]) -> bool:
+        """
+        Merge *new_topics* into the patient's existing favourite_topics list.
+        Deduplicates case-insensitively. Returns True when at least one new
+        topic was actually added; False when the list was already up-to-date.
+        """
+        patient = await self.get_by_id(patient_id)
+        if not patient:
+            return False
+
+        existing_lower = {t.lower() for t in (patient.favourite_topics or [])}
+        to_add = [t for t in new_topics if t.lower() not in existing_lower]
+
+        if not to_add:
+            return False
+
+        merged = list(patient.favourite_topics or []) + to_add
+        await self.update(patient_id, {"favourite_topics": merged})
+        logger.info(
+            "patient_topics_appended",
+            patient_id=str(patient_id),
+            added=to_add,
+            total=len(merged),
+        )
+        return True
 
     async def delete_scoped(self, patient_id: uuid.UUID, organization_id: uuid.UUID) -> bool:
         """Securely archive a patient record."""

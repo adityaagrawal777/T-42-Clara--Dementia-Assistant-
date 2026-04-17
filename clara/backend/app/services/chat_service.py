@@ -125,10 +125,11 @@ class ChatService:
                     session_id=str(session_id),
                 )
 
-            # 4. Fire background embedding task
+            # 4. Fire background tasks (embedding + interest extraction)
+            patient_text = content
+            clara_text = final_meta.full_response or ""
+
             if clara_message_id is not None:
-                patient_text = content
-                clara_text = final_meta.full_response or ""
                 asyncio.create_task(
                     self._embed_and_store(
                         clara_message_id=clara_message_id,
@@ -136,6 +137,14 @@ class ChatService:
                         clara_text=clara_text,
                     )
                 )
+
+            # Extract interests from what the patient said and update their profile
+            asyncio.create_task(
+                self._extract_and_update_topics(
+                    patient_id=patient.id,
+                    patient_message=patient_text,
+                )
+            )
 
             # 5. Final protocol messages
             yield {
@@ -175,6 +184,36 @@ class ChatService:
                 await session.commit()
         except Exception as store_err:
             logger.warning("chat_service_embedding_store_failed", message_id=str(clara_message_id), error=str(store_err))
+
+    async def _extract_and_update_topics(
+        self,
+        patient_id: uuid.UUID,
+        patient_message: str,
+    ) -> None:
+        """
+        Background task: extract explicit interest statements from the patient's
+        message and persist any newly discovered topics to their profile.
+        Uses its own DB session so the request session lifecycle is irrelevant.
+        """
+        from app.ai.interest_extractor import extract_interests
+        from app.db.session import async_session_factory
+
+        interests = extract_interests(patient_message)
+        if not interests:
+            return
+
+        try:
+            async with async_session_factory() as session:
+                repo = PatientRepository(session)
+                updated = await repo.append_topics(patient_id, interests)
+                if updated:
+                    await session.commit()
+        except Exception as err:
+            logger.warning(
+                "chat_service_topic_update_failed",
+                patient_id=str(patient_id),
+                error=str(err),
+            )
 
     async def get_patient_profile(self, patient_id: uuid.UUID, organization_id: uuid.UUID) -> Optional[Patient]:
         """Discovery: Load patient biodata ensuring organization-level security."""

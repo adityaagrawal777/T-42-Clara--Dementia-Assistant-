@@ -90,12 +90,23 @@ class ClaraEngine:
                 top_k=settings.memory.top_k,
                 similarity_threshold=settings.memory.similarity_threshold,
             )
-            if not memories: return []
-            
+            if not memories:
+                logger.debug("clara_engine_no_recalled_memories", patient_id=str(patient.id))
+                return []
+
+            logger.info(
+                "clara_engine_recalled_memories",
+                patient_id=str(patient.id),
+                count=len(memories),
+            )
             memory_lines = [f"- {msg.content.strip()}" for msg in memories]
-            recalled_block = "## Memories:\n" + "\n".join(memory_lines)
+            recalled_block = (
+                "## Recalled Memories (genuine excerpts from past conversations with this patient — "
+                "you MAY reference these specifically):\n" + "\n".join(memory_lines)
+            )
             return [{"role": "system", "content": recalled_block}]
-        except Exception:
+        except Exception as e:
+            logger.warning("clara_engine_memory_retrieval_failed", error=str(e), patient_id=str(patient.id))
             return []
 
     async def process_message(

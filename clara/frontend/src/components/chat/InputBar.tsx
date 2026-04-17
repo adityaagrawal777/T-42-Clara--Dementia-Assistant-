@@ -9,14 +9,25 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export const InputBar: React.FC = () => {
   const [content, setContent] = useState("");
-  const sendMessage = useClaraStore((state) => state.sendMessage);
-  const status      = useClaraStore((state) => state.status);
-  const isStreaming = useClaraStore((state) => state.isStreaming);
-  const isListening = useClaraStore((state) => state.isListening);
-  const mode        = useClaraStore((state) => state.mode);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const sendMessage    = useClaraStore((state) => state.sendMessage);
+  const status         = useClaraStore((state) => state.status);
+  const isStreaming    = useClaraStore((state) => state.isStreaming);
+  const isListening    = useClaraStore((state) => state.isListening);
+  const mode           = useClaraStore((state) => state.mode);
+  const prefillMessage = useClaraStore((state) => state.prefillMessage);
+  const setPrefillMessage = useClaraStore((state) => state.setPrefillMessage);
+  const textareaRef    = useRef<HTMLTextAreaElement>(null);
 
   const { voiceAvailable, startListening, stopListening, transcript } = useVoiceOrchestrator();
+
+  // When the user arrives from the Memories page, pre-fill and focus the input
+  useEffect(() => {
+    if (prefillMessage) {
+      setContent(prefillMessage);
+      setPrefillMessage(null);
+      setTimeout(() => textareaRef.current?.focus(), 100);
+    }
+  }, [prefillMessage, setPrefillMessage]);
 
   useEffect(() => {
     if (transcript) setContent(transcript);
