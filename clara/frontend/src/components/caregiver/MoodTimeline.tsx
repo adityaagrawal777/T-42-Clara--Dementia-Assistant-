@@ -12,10 +12,9 @@ import {
   Dot,
 } from "recharts";
 import { format, parseISO } from "date-fns";
-import { Loader2, TrendingUp, Activity } from "lucide-react";
+import { Loader2, Activity } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import type { MoodTimelineDay } from "@/types";
-import { motion } from "framer-motion";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 

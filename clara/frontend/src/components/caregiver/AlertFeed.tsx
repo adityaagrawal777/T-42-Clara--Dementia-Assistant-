@@ -2,8 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
-import { Bell, CheckCircle, Loader2, AlertTriangle, ShieldAlert, History, Clock, Activity, Users } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Bell, CheckCircle, Loader2, ShieldAlert, Clock, Activity, Users } from "lucide-react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import type { CaregiverAlertEntry } from "@/types";

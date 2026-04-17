@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { User, Heart, Tag, Save, Plus, X, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { User, Save, Plus, X, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import type { Patient } from "@/types";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Props {
   patient: Patient;
@@ -85,19 +86,19 @@ export const PatientProfileEditor: React.FC<Props> = ({
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-white p-12 rounded-[48px] border border-slate-100 shadow-xl max-w-4xl mx-auto w-full relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-48 h-48 bg-clara-calm-bg opacity-10 rounded-full blur-3xl -mr-24 -mt-24 pointer-events-none" />
+    <div className="glass-card p-10 lg:p-12 rounded-[3rem] border-white/[0.05] shadow-2xl w-full relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-48 h-48 bg-clara-primary/5 rounded-full blur-3xl -mr-24 -mt-24 pointer-events-none" />
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-12 relative">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 relative">
         <div className="flex items-center gap-6">
-          <div className="p-5 bg-clara-calm-bg rounded-3xl border-2 border-clara-calm-border shadow-sm">
-            <User className="w-8 h-8 text-clara-calm-text" />
+          <div className="w-14 h-14 bg-white/[0.03] border border-white/[0.08] rounded-2xl flex items-center justify-center text-clara-primary shadow-inner-glow">
+            <User size={28} strokeWidth={2.5} />
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-slate-800 tracking-tight">Patient Profile</h3>
-            <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest mt-1">
-              Clara&apos;s therapeutic context
+            <h3 className="text-3xl font-black text-white tracking-tight leading-tight">Identity Vault</h3>
+            <p className="text-[10px] font-black text-clara-text-tertiary uppercase tracking-[0.25em] mt-1.5 leading-none">
+              Compassionate Context Engine
             </p>
           </div>
         </div>
@@ -105,47 +106,58 @@ export const PatientProfileEditor: React.FC<Props> = ({
         <button
           onClick={handleSave}
           disabled={isSaving || !isDirty}
-          className="flex items-center gap-3 rounded-2xl px-8 py-4 bg-clara-calm-bg text-clara-calm-text border-2 border-clara-calm-border hover:bg-white transition-all font-bold text-base shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          className={`flex items-center justify-center gap-3 rounded-2xl px-8 py-4 transition-all font-black text-sm uppercase tracking-[0.1em] shadow-lg ${
+            isDirty 
+              ? "bg-clara-primary text-white shadow-glow-sm hover:scale-[1.02]" 
+              : "bg-white/[0.03] text-clara-text-muted cursor-not-allowed border border-white/[0.05]"
+          }`}
         >
           {isSaving ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : saveStatus === "success" ? (
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            <CheckCircle className="w-4 h-4" />
           ) : saveStatus === "error" ? (
-            <AlertCircle className="w-5 h-5 text-rose-500" />
+            <AlertCircle className="w-4 h-4" />
           ) : (
-            <Save className="w-5 h-5" />
+            <Save className="w-4 h-4" />
           )}
-          {isSaving ? "Saving…" : saveStatus === "success" ? "Saved" : "Update Profile"}
+          {isSaving ? "Syncing..." : saveStatus === "success" ? "Committed" : "Update Profile"}
         </button>
       </div>
 
       {/* Inline error banner */}
-      {saveStatus === "error" && saveError && (
-        <div className="mb-8 px-6 py-4 bg-rose-50 border border-rose-200 rounded-2xl text-sm font-semibold text-rose-600">
-          {saveError}
-        </div>
-      )}
+      <AnimatePresence>
+        {saveStatus === "error" && saveError && (
+            <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="mb-8 px-6 py-4 bg-danger/10 border border-danger/20 rounded-2xl text-xs font-bold text-danger uppercase tracking-wider"
+            >
+                Protocol Error: {saveError}
+            </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative">
         {/* Left column — name fields */}
         <div className="space-y-8">
-          <div className="bg-slate-50/50 p-8 rounded-3xl border border-slate-100">
-            <label className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-              <User className="w-4 h-4" /> Legal Name
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 text-[10px] font-black text-clara-text-tertiary uppercase tracking-[0.2em] px-2 opacity-60">
+               Full Name
             </label>
             <input
               type="text"
               value={patient.name}
               onChange={(e) => setPatient((p) => ({ ...p, name: e.target.value }))}
-              className="w-full bg-white px-6 py-4 rounded-2xl border-2 border-slate-100 focus:border-clara-calm-border outline-none transition-all text-lg font-medium text-slate-700 shadow-sm"
-              placeholder="Full Name"
+              className="w-full bg-white/[0.03] px-6 py-5 rounded-[1.5rem] border border-white/[0.08] focus:border-clara-primary/40 focus:bg-white/[0.06] outline-none transition-all text-base font-bold text-white shadow-inner-glow"
+              placeholder="Full Legal Name"
             />
           </div>
 
-          <div className="bg-slate-50/50 p-8 rounded-3xl border border-slate-100">
-            <label className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-              <Heart className="w-4 h-4" /> Preferred Name
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 text-[10px] font-black text-clara-text-tertiary uppercase tracking-[0.2em] px-2 opacity-60">
+               Preferred Moniker
             </label>
             <input
               type="text"
@@ -153,47 +165,52 @@ export const PatientProfileEditor: React.FC<Props> = ({
               onChange={(e) =>
                 setPatient((p) => ({ ...p, preferred_name: e.target.value || null }))
               }
-              className="w-full bg-white px-6 py-4 rounded-2xl border-2 border-slate-100 focus:border-clara-calm-border outline-none transition-all text-lg font-medium text-slate-700 shadow-sm"
-              placeholder="What Clara should call them…"
+              className="w-full bg-white/[0.03] px-6 py-5 rounded-[1.5rem] border border-white/[0.08] focus:border-clara-primary/40 focus:bg-white/[0.06] outline-none transition-all text-base font-bold text-white shadow-inner-glow"
+              placeholder="Clara's familiar name for them..."
             />
           </div>
         </div>
 
         {/* Right column — topics */}
-        <div>
-          <div className="bg-slate-50/50 p-8 rounded-3xl border border-slate-100">
-            <label className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">
-              <Tag className="w-4 h-4" /> Topics of Interest
-            </label>
-
-            <div className="flex flex-wrap gap-3 mb-6 min-h-[48px]">
-              {(patient.favourite_topics ?? []).map((topic) => (
-                <span
-                  key={topic}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-clara-happy-bg text-clara-happy-text border-2 border-clara-happy-border rounded-2xl text-sm font-bold shadow-sm transition-all hover:scale-105"
-                >
-                  {topic}
-                  <button
-                    type="button"
-                    onClick={() => removeTopic(topic)}
-                    aria-label={`Remove ${topic}`}
-                    className="hover:scale-125 transition-transform"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </span>
-              ))}
+        <div className="space-y-3">
+          <label className="flex items-center gap-2 text-[10px] font-black text-clara-text-tertiary uppercase tracking-[0.2em] px-2 opacity-60">
+             Therapeutic Anchor Topics
+          </label>
+          <div className="bg-white/[0.02] p-8 rounded-[2rem] border border-white/[0.08] min-h-[220px] flex flex-col justify-between">
+            
+            <div className="flex flex-wrap gap-2.5 mb-6">
+              <AnimatePresence>
+                {(patient.favourite_topics ?? []).map((topic) => (
+                    <motion.span
+                    layout
+                    key={topic}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="inline-flex items-center gap-2.5 px-4 py-2 bg-clara-primary/10 text-clara-primary-light border border-clara-primary/20 rounded-xl text-xs font-black uppercase tracking-tight shadow-sm hover:bg-clara-primary/15 transition-all"
+                    >
+                    {topic}
+                    <button
+                        type="button"
+                        onClick={() => removeTopic(topic)}
+                        className="p-1 hover:bg-white/[0.1] rounded-full transition-colors"
+                    >
+                        <X size={10} strokeWidth={3} />
+                    </button>
+                    </motion.span>
+                ))}
+              </AnimatePresence>
               {(patient.favourite_topics ?? []).length === 0 && (
-                <p className="text-sm text-slate-400 italic">No topics added yet</p>
+                <p className="text-[10px] text-clara-text-muted font-bold italic uppercase tracking-widest p-4 border border-dashed border-white/[0.05] rounded-xl w-full text-center">No anchors established</p>
               )}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <input
                 type="text"
                 value={newTopic}
-                placeholder="Add interest (e.g. Gardening)"
-                className="flex-1 bg-white px-5 py-3.5 rounded-2xl border-2 border-slate-100 focus:border-clara-calm-border outline-none transition-all text-sm shadow-sm"
+                placeholder="New anchor (e.g. Classical Music)"
+                className="flex-1 bg-white/[0.03] px-5 py-3.5 rounded-xl border border-white/[0.08] focus:border-clara-primary/20 outline-none transition-all text-xs font-bold text-white"
                 onChange={(e) => setNewTopic(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -205,10 +222,13 @@ export const PatientProfileEditor: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => addTopic(newTopic)}
-                className="w-12 h-12 flex items-center justify-center rounded-2xl border-2 border-slate-200 bg-white text-slate-400 hover:text-clara-calm-text hover:border-clara-calm-border transition-all shadow-sm"
-                aria-label="Add topic"
+                className={`w-12 h-12 flex items-center justify-center rounded-xl border transition-all ${
+                    newTopic.trim() 
+                    ? "bg-clara-primary border-clara-primary text-white shadow-glow-sm" 
+                    : "bg-white/[0.03] border-white/[0.08] text-clara-text-muted"
+                }`}
               >
-                <Plus className="w-5 h-5" />
+                <Plus size={20} />
               </button>
             </div>
           </div>

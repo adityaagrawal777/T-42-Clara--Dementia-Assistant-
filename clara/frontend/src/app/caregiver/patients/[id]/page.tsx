@@ -9,14 +9,16 @@ import {
   Loader2,
   AlertTriangle,
   Heart,
-  Globe,
+  Activity,
+  Zap,
 } from "lucide-react";
-import { PatientProfileEditor } from "@/components/caregiver/PatientProfileEditor";
-import { SessionList } from "@/components/caregiver/SessionList";
-import { MoodTimeline } from "@/components/caregiver/MoodTimeline";
-import { AlertFeed } from "@/components/caregiver/AlertFeed";
+import { PatientProfileEditor } from "../../../../components/caregiver/PatientProfileEditor";
+import { SessionList } from "../../../../components/caregiver/SessionList";
+import { MoodTimeline } from "../../../../components/caregiver/MoodTimeline";
+import { AlertFeed } from "../../../../components/caregiver/AlertFeed";
 import { apiFetch } from "@/lib/api";
 import type { Patient, SessionHistoryEntry } from "@/types";
+import { motion } from "framer-motion";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -78,8 +80,9 @@ export default function PatientDetailPage() {
 
   if (loadingPatient) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <Loader2 className="w-10 h-10 animate-spin text-slate-300" />
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <Loader2 className="w-10 h-10 animate-spin text-clara-primary" />
+        <p className="text-[10px] font-black text-clara-text-tertiary uppercase tracking-widest">Syincing Record...</p>
       </div>
     );
   }
@@ -88,11 +91,16 @@ export default function PatientDetailPage() {
 
   if (patientError || !patient) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4 text-center">
-        <AlertTriangle className="w-10 h-10 text-rose-400" />
-        <p className="font-bold text-slate-700 text-lg">
-          {patientError ?? "Patient not found."}
-        </p>
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-6 text-center">
+        <div className="w-20 h-20 bg-danger/10 border border-danger/20 rounded-[2.5rem] flex items-center justify-center text-danger shadow-glow-sm">
+            <AlertTriangle className="w-10 h-10" />
+        </div>
+        <div>
+            <h3 className="text-xl font-black text-white mb-2">Sync Interrupted</h3>
+            <p className="font-medium text-clara-text-secondary text-sm">
+            {patientError ?? "Patient record could not be retrieved from the cluster."}
+            </p>
+        </div>
       </div>
     );
   }
@@ -113,101 +121,106 @@ export default function PatientDetailPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-14 pb-24">
+    <div className="space-y-12 pb-24">
 
-      {/* ── Patient header ──────────────────────────────────────────────── */}
-      <div className="bg-white p-14 rounded-[48px] border border-slate-100 shadow-xl relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-clara-calm-bg opacity-5 rounded-full blur-[120px] -mr-48 -mt-48 transition-all group-hover:scale-110 pointer-events-none" />
+      {/* ── Patient Profile Header ──────────────────────────────────────────────── */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-card p-10 lg:p-14 rounded-[3.5rem] border-white/[0.05] shadow-2xl relative overflow-hidden group"
+      >
+        <div className="absolute top-0 right-0 w-96 h-96 bg-clara-primary/10 opacity-60 rounded-full blur-[120px] -mr-48 -mt-48 transition-all group-hover:scale-110 pointer-events-none" />
 
-        <div className="flex flex-col md:flex-row gap-10 items-center md:items-start relative">
-          {/* Avatar */}
-          <div className="w-28 h-28 rounded-[32px] bg-clara-calm-bg border-4 border-white shadow-2xl flex items-center justify-center text-3xl font-black text-clara-calm-text select-none shrink-0">
+        <div className="flex flex-col md:flex-row gap-12 items-center md:items-start relative z-10">
+          {/* Avatar / Portrait Block */}
+          <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-clara-surface-2 to-clara-surface-3 border border-white/[0.1] shadow-2xl flex items-center justify-center text-4xl font-black text-clara-primary group-hover:scale-105 transition-transform shrink-0">
             {initials}
           </div>
 
-          {/* Info */}
+          {/* Core Bio */}
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-4xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-serif text-white tracking-tight leading-tight">
               {patient.name}
             </h2>
             {patient.preferred_name && patient.preferred_name !== patient.name && (
-              <p className="text-base text-slate-500 font-semibold mt-1">
-                Preferred: &ldquo;{displayName}&rdquo;
+              <p className="text-lg text-clara-text-tertiary font-bold uppercase tracking-widest mt-2">
+                &ldquo;{displayName}&rdquo;
               </p>
             )}
 
-            {/* Meta badges */}
-            <div className="flex flex-wrap gap-3 mt-6 justify-center md:justify-start">
-              <span className="px-5 py-2 bg-slate-50 border border-slate-100 rounded-full text-slate-500 font-bold text-xs uppercase tracking-widest flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5" />
+            {/* Metric Pills */}
+            <div className="flex flex-wrap gap-3 mt-8 justify-center md:justify-start">
+              <span className="px-5 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-2xl text-clara-text-tertiary font-black text-[10px] uppercase tracking-[0.15em] flex items-center gap-2.5">
+                <Calendar className="w-4 h-4 text-clara-primary" />
                 Joined {format(parseISO(patient.created_at), "MMM yyyy")}
               </span>
 
-              <span className="px-5 py-2 bg-green-50 border border-green-100 rounded-full text-green-600 font-bold text-xs uppercase tracking-widest flex items-center gap-2">
-                <MessageCircle className="w-3.5 h-3.5" />
+              <span className="px-5 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-2xl text-clara-text-secondary font-black text-[10px] uppercase tracking-[0.15em] flex items-center gap-2.5">
+                <MessageCircle className="w-4 h-4 text-blue-400" />
                 {msgCount === null ? (
                   <Loader2 className="w-3 h-3 animate-spin" />
                 ) : (
-                  `${msgCount} Messages`
+                  `${msgCount} Transcripts`
                 )}
               </span>
 
               {alertCount !== null && alertCount > 0 && (
-                <span className="px-5 py-2 bg-rose-50 border border-rose-100 rounded-full text-rose-600 font-bold text-xs uppercase tracking-widest flex items-center gap-2">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  {alertCount} Alert{alertCount !== 1 ? "s" : ""}
+                <span className="px-5 py-2.5 bg-danger/10 border border-danger/30 rounded-2xl text-danger font-black text-[10px] uppercase tracking-[0.15em] flex items-center gap-2.5 shadow-glow-sm">
+                  <Zap className="w-4 h-4" />
+                  {alertCount} Intervention{alertCount !== 1 ? "s" : ""}
                 </span>
               )}
 
               <span
-                className={`px-5 py-2 rounded-full border font-bold text-xs uppercase tracking-widest flex items-center gap-2 ${
+                className={`px-5 py-2.5 rounded-2xl border font-black text-[10px] uppercase tracking-[0.15em] flex items-center gap-2.5 ${
                   patient.is_active
-                    ? "bg-green-50 border-green-100 text-green-600"
-                    : "bg-slate-100 border-slate-200 text-slate-400"
+                    ? "bg-success/10 border-success/30 text-success"
+                    : "bg-white/[0.01] border-white/[0.05] text-clara-text-muted"
                 }`}
               >
-                <Globe className="w-3.5 h-3.5" />
-                {patient.is_active ? "Active" : "Inactive"} &middot; {patient.language.toUpperCase()}
+                <Activity className="w-4 h-4" />
+                {patient.is_active ? "Live Engagement" : "Standby Mode"}
               </span>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* ── Main grid ───────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-14 items-start">
+      {/* ── Dashboard Grid ───────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 items-start">
 
-        {/* Left column */}
-        <div className="space-y-14">
+        {/* Clinical Sidebar — 4/12 width */}
+        <div className="xl:col-span-5 space-y-10">
           <PatientProfileEditor
             patient={patient}
             patientId={patientId}
             onSaved={(updated) => setPatient(updated)}
           />
 
-          {/* Therapeutic rapport note */}
+          {/* Perspective/Insight Card */}
           {activeTopic && (
-            <div className="bg-clara-happy-bg/40 p-10 rounded-[48px] border-2 border-clara-happy-border border-dashed text-center">
-              <Heart className="w-10 h-10 text-clara-happy-text mx-auto mb-5" />
-              <h3 className="text-xl font-bold text-clara-happy-text mb-2">
-                Compassion First
+            <div className="glass-card p-10 rounded-[2.5rem] border-clara-primary/10 bg-clara-primary/5 text-center relative overflow-hidden group">
+              <div className="absolute inset-0 bg-clara-primary/10 blur-[60px] -z-10 group-hover:scale-125 transition-all duration-700" />
+              <Heart className="w-10 h-10 text-clara-primary mx-auto mb-6" />
+              <h3 className="text-xl font-black text-white mb-2 tracking-tight">
+                Empathy Anchor
               </h3>
-              <p className="max-w-md mx-auto text-slate-600 font-medium text-sm leading-relaxed">
+              <p className="max-w-md mx-auto text-clara-text-secondary font-medium text-sm leading-relaxed">
                 Clara is currently using{" "}
-                <span className="font-bold underline decoration-clara-happy-border">
-                  {activeTopic}
+                <span className="text-white font-black italic">
+                  &ldquo;{activeTopic}&rdquo;
                 </span>{" "}
-                to build therapeutic rapport with {displayName}.
+                as a central pillar for therapeutic rapport with {displayName}.
               </p>
             </div>
           )}
 
-          {/* Unresolved alerts for this patient */}
+          {/* Active Alerts List */}
           <AlertFeed patientId={patientId} />
         </div>
 
-        {/* Right column */}
-        <div className="space-y-14">
+        {/* Analytical Focus — 7/12 width */}
+        <div className="xl:col-span-7 space-y-10">
           <MoodTimeline patientId={patientId} />
           <SessionList patientId={patientId} />
         </div>

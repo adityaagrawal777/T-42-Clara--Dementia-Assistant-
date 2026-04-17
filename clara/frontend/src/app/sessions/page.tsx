@@ -6,9 +6,7 @@ import { format, intervalToDuration, parseISO } from "date-fns";
 import {
   Clock,
   MessageSquare,
-  AlertTriangle,
   ChevronDown,
-  ChevronUp,
   Mic,
   RefreshCw,
   Calendar,
@@ -17,7 +15,7 @@ import {
 } from "lucide-react";
 import { decodeJWT } from "@/lib/tokens";
 import { apiFetch } from "@/lib/api";
-import type { SessionHistoryEntry, SessionMessageEntry, PaginatedSessionsResponse } from "@/types";
+import type { SessionHistoryEntry, SessionMessageEntry } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -184,7 +182,6 @@ const SessionCard: React.FC<{ session: SessionHistoryEntry }> = ({ session }) =>
 export default function SessionsPage() {
   const router = useRouter();
   const [sessions, setSessions] = useState<SessionHistoryEntry[]>([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -198,7 +195,6 @@ export default function SessionsPage() {
     try {
       const data = await apiFetch("/api/v1/sessions/history", { params: { limit: "50", offset: "0" } });
       setSessions(data.sessions);
-      setTotal(data.total);
     } catch (err: any) {
       setError(err.message);
     } finally {

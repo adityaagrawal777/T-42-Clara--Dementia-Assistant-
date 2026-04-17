@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useClaraStore } from "@/store/claraStore";
-import { AlertCircle, X, ShieldAlert, Info } from "lucide-react";
+import { X, ShieldAlert, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const AlertNotification = () => {

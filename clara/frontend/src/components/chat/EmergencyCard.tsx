@@ -3,7 +3,7 @@
 import React from "react";
 import { useClaraStore } from "@/store/claraStore";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, AlertTriangle, X, ShieldAlert, Heart } from "lucide-react";
+import { Phone, AlertTriangle, X, ShieldAlert } from "lucide-react";
 
 export const EmergencyCard: React.FC = () => {
   const { emergency, dismissEmergency } = useClaraStore();

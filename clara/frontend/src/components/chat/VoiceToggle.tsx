@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useClaraStore } from "@/store/claraStore";
-import { Headphones, Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const VoiceToggle: React.FC = () => {

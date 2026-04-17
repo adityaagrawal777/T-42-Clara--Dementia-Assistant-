@@ -8,10 +8,12 @@ import {
   Loader2,
   CalendarDays,
   Clock,
+  ChevronDown,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { SessionTranscript } from "./SessionTranscript";
 import type { SessionHistoryEntry } from "@/types";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -27,6 +29,17 @@ function sessionDuration(entry: SessionHistoryEntry): string {
   return parts.length ? parts.join(" ") : "< 1 min";
 }
 
+function moodLevel(mood: string | null): { color: string; dot: string } {
+    if (!mood) return { color: "text-clara-text-muted", dot: "bg-slate-700" };
+    const map: Record<string, { color: string; dot: string }> = {
+      calm: { color: "text-success", dot: "bg-success" },
+      happy: { color: "text-clara-primary-light", dot: "bg-clara-primary" },
+      confused: { color: "text-warning", dot: "bg-warning" },
+      distressed: { color: "text-danger", dot: "bg-danger" },
+    };
+    return map[mood.toLowerCase()] ?? { color: "text-clara-text-tertiary", dot: "bg-slate-500" };
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -37,6 +50,7 @@ export const SessionList: React.FC<Props> = ({ patientId }) => {
   const [sessions, setSessions] = useState<SessionHistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) return;
@@ -48,169 +62,127 @@ export const SessionList: React.FC<Props> = ({ patientId }) => {
       .finally(() => setLoading(false));
   }, [patientId]);
 
-  // ── No patient ────────────────────────────────────────────────────────────
-
-  if (!patientId) {
-    return (
-      <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
-        <h3 className="text-xl font-bold text-slate-800 tracking-tight mb-8">
-          Recent Sessions
-        </h3>
-        <div className="p-12 text-center bg-slate-50/30 rounded-3xl border-2 border-dashed border-slate-200">
-          <CalendarDays className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-500 font-semibold text-sm">
-            Select a patient to view sessions
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Loading ───────────────────────────────────────────────────────────────
+  if (!patientId) return null;
 
   if (loading) {
     return (
-      <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-center h-[200px]">
-        <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
+      <div className="glass-card rounded-[2.5rem] border-white/[0.05] flex flex-col items-center justify-center h-[300px] gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-clara-primary" />
+        <p className="text-[10px] font-black text-clara-text-tertiary uppercase tracking-widest">Reconstructing History...</p>
       </div>
     );
   }
-
-  // ── Error ─────────────────────────────────────────────────────────────────
-
-  if (error) {
-    return (
-      <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
-        <h3 className="text-xl font-bold text-slate-800 tracking-tight mb-6">
-          Recent Sessions
-        </h3>
-        <div className="p-8 text-center bg-rose-50/40 rounded-3xl border-2 border-dashed border-rose-200">
-          <p className="text-rose-600 font-semibold text-sm">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Empty ─────────────────────────────────────────────────────────────────
-
-  if (sessions.length === 0) {
-    return (
-      <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
-        <h3 className="text-xl font-bold text-slate-800 tracking-tight mb-6">
-          Recent Sessions
-        </h3>
-        <div className="p-12 text-center bg-slate-50/30 rounded-3xl border-2 border-dashed border-slate-200">
-          <CalendarDays className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-500 font-semibold text-sm">No sessions recorded yet</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Table ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm transition-all hover:shadow-md overflow-hidden">
-      {/* Table header */}
-      <div className="px-8 pt-8 pb-4 flex items-center justify-between">
-        <h3 className="text-xl font-bold text-slate-800 tracking-tight">Recent Sessions</h3>
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-          {sessions.length} session{sessions.length !== 1 ? "s" : ""}
-        </span>
+    <div className="glass-card rounded-[2.5rem] border-white/[0.05] shadow-2xl overflow-hidden flex flex-col">
+      <div className="p-8 pb-4 flex items-center justify-between border-b border-white/[0.05]">
+        <div>
+          <h3 className="text-xl font-black text-white tracking-tight">Record Timeline</h3>
+          <p className="text-[10px] font-bold text-clara-text-tertiary uppercase tracking-widest mt-1">Chat & Voice History</p>
+        </div>
+        <div className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-[10px] font-black text-clara-text-muted uppercase tracking-widest">
+           {sessions.length} Entry{sessions.length !== 1 ? "s" : ""}
+        </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 border-y border-slate-100">
-            <tr>
-              <th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                Date / Time
-              </th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                Duration
-              </th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">
-                Messages
-              </th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">
-                Alerts
-              </th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                Mood
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {sessions.map((session) => (
-              <React.Fragment key={session.id}>
-                <tr className="border-t border-slate-50 hover:bg-slate-50/30 transition-colors">
-                  {/* Date/Time */}
-                  <td className="px-8 py-5">
-                    <span className="font-bold text-slate-800 text-sm block">
-                      {format(parseISO(session.started_at), "MMM d, yyyy")}
+      <div className="divide-y divide-white/[0.03]">
+        {sessions.length === 0 && !error && (
+            <div className="p-20 text-center">
+                <CalendarDays className="w-12 h-12 text-white/[0.05] mx-auto mb-4" />
+                <p className="text-xs font-bold text-clara-text-muted uppercase tracking-widest italic opacity-40">No historical data found</p>
+            </div>
+        )}
+
+        {error && (
+            <div className="p-10 text-center bg-danger/5 border-danger/10">
+                <p className="text-xs font-bold text-danger uppercase tracking-widest">{error}</p>
+            </div>
+        )}
+
+        {sessions.map((session, idx) => {
+          const isExpanded = expandedId === session.id;
+          const mood = moodLevel(session.mood_summary);
+          
+          return (
+            <motion.div 
+              key={session.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              className="flex flex-col group overflow-hidden"
+            >
+              <button 
+                onClick={() => setExpandedId(isExpanded ? null : session.id)}
+                className={`flex items-center gap-6 p-6 transition-all text-left hover:bg-white/[0.02] ${isExpanded ? "bg-white/[0.03]" : ""}`}
+              >
+                {/* Date Plate */}
+                <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex flex-col items-center justify-center shrink-0">
+                  <span className="text-xs font-black text-white leading-none">{format(parseISO(session.started_at), "d")}</span>
+                  <span className="text-[8px] font-black text-clara-text-tertiary uppercase tracking-widest mt-0.5">{format(parseISO(session.started_at), "MMM")}</span>
+                </div>
+
+                {/* Details */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[11px] font-black text-white tracking-tight uppercase tracking-[0.05em]">
+                        {format(parseISO(session.started_at), "h:mm a")}
                     </span>
-                    <span className="text-xs font-semibold text-slate-400">
-                      {format(parseISO(session.started_at), "h:mm a")}
+                    <span className="text-white/20 px-1">·</span>
+                    <span className="text-[11px] font-medium text-clara-text-tertiary flex items-center gap-1.5 uppercase tracking-widest">
+                        <Clock size={10} /> {sessionDuration(session)}
                     </span>
-                  </td>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                     <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-clara-primary/5 text-clara-primary-light text-[9px] font-black uppercase tracking-widest border border-clara-primary/10">
+                        <MessageSquare size={10} /> {session.message_count}
+                     </div>
+                     {session.alert_count > 0 && (
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-danger/10 text-danger text-[9px] font-black uppercase tracking-widest border border-danger/20 animate-pulse">
+                            <AlertTriangle size={10} /> {session.alert_count}
+                        </div>
+                     )}
+                  </div>
+                </div>
 
-                  {/* Duration */}
-                  <td className="px-6 py-5">
-                    <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-600">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      {sessionDuration(session)}
-                    </span>
-                  </td>
-
-                  {/* Message count */}
-                  <td className="px-6 py-5">
-                    <div className="flex items-center justify-center gap-2 px-3 py-1.5 bg-clara-calm-bg text-clara-calm-text rounded-xl font-bold text-sm w-fit mx-auto border border-clara-calm-border">
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      {session.message_count}
-                    </div>
-                  </td>
-
-                  {/* Alert count */}
-                  <td className="px-6 py-5">
-                    <div
-                      className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl font-bold text-sm w-fit mx-auto border ${
-                        session.alert_count > 0
-                          ? "bg-rose-50 text-rose-500 border-rose-100"
-                          : "bg-slate-50 text-slate-400 border-slate-100"
-                      }`}
-                    >
-                      <AlertTriangle
-                        className={`w-3.5 h-3.5 ${session.alert_count > 0 ? "animate-pulse" : ""}`}
-                      />
-                      {session.alert_count}
-                    </div>
-                  </td>
-
-                  {/* Mood summary */}
-                  <td className="px-6 py-5">
+                {/* Mood Tag */}
+                <div className="hidden md:flex flex-col items-end gap-1.5">
                     {session.mood_summary ? (
-                      <span className="text-sm font-semibold text-slate-600 capitalize">
-                        {session.mood_summary}
-                      </span>
+                        <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.08] px-3 py-1 rounded-xl">
+                            <div className={`w-1.5 h-1.5 rounded-full ${mood.dot} shadow-glow-sm`} />
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${mood.color}`}>{session.mood_summary}</span>
+                        </div>
                     ) : (
-                      <span className="text-sm text-slate-300 italic">—</span>
+                        <span className="text-[9px] font-bold text-clara-text-muted italic px-3">Flat baseline</span>
                     )}
-                  </td>
-                </tr>
+                </div>
 
-                {/* Inline transcript expander */}
-                <tr className="border-t-0">
-                  <td colSpan={5} className="p-0">
-                    <SessionTranscript
-                      patientId={session.patient_id}
-                      sessionId={session.id}
-                    />
-                  </td>
-                </tr>
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
+                {/* Arrow */}
+                <div className={`text-clara-text-tertiary transition-transform duration-300 ml-4 ${isExpanded ? "rotate-180" : ""}`}>
+                  <ChevronDown size={18} />
+                </div>
+              </button>
+
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden border-t border-white/[0.05] bg-clara-surface/10"
+                  >
+                    <div className="p-8">
+                       <SessionTranscript
+                        patientId={session.patient_id}
+                        sessionId={session.id}
+                       />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

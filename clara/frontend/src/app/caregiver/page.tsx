@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, Clock, TrendingUp, Users, ArrowRight, Loader2, Zap, Activity } from "lucide-react";
+import { TrendingUp, Users, ArrowRight, Zap, Activity } from "lucide-react";
 import { AlertFeed } from "@/components/caregiver/AlertFeed";
 import { apiFetch } from "@/lib/api";
 import type { CaregiverAnalytics, PatientListItem } from "@/types";
@@ -127,7 +127,6 @@ const PatientRoster: React.FC<{
 export default function CaregiverDashboard() {
   const [analytics, setAnalytics] = useState<CaregiverAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
-  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
 
   const [patients, setPatients] = useState<PatientListItem[]>([]);
   const [patientsLoading, setPatientsLoading] = useState(true);
@@ -136,7 +135,7 @@ export default function CaregiverDashboard() {
   useEffect(() => {
     apiFetch("/api/v1/caregiver/analytics")
       .then((data: any) => setAnalytics(data))
-      .catch((err: Error) => setAnalyticsError(err.message))
+      .catch(() => {})
       .finally(() => setAnalyticsLoading(false));
 
     apiFetch("/api/v1/patients/")

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { decodeJWT, clearJWT } from "@/lib/tokens";
 import { Spinner } from "@/components/ui/Spinner";
-import { LayoutDashboard, Users, Bell, LogOut, Heart, Search, Settings, HelpCircle } from "lucide-react";
+import { LayoutDashboard, Users, Bell, LogOut, Heart, Search, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 

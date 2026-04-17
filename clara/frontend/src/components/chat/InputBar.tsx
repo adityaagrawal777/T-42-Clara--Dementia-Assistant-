@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useClaraStore } from "@/store/claraStore";
 import { useVoiceOrchestrator } from "@/hooks/useVoiceOrchestrator";
 import { SuggestedReplies } from "./SuggestedReplies";
-import { Mic, MicOff, SendHorizontal, Paperclip, Smile } from "lucide-react";
+import { Mic, MicOff, SendHorizontal, Paperclip } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const InputBar: React.FC = () => {
