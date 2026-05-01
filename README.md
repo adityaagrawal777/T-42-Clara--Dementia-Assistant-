@@ -3,7 +3,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Industrial_Pre--Alpha-emerald?style=for-the-badge&logo=openai" alt="Status Badge">
   <img src="https://img.shields.io/badge/Stack-Next.js_|_FastAPI_|_Ollama-blue?style=for-the-badge&logo=next.js" alt="Stack Badge">
-  <img src="https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge" alt="License Badge">
+  <img src="https://img.shields.io/badge
+  /License-Proprietary-red?style=for-the-badge" alt="License Badge">
 </p>
 
 ---

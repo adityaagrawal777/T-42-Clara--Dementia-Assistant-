@@ -23,7 +23,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     >
       {/* Clara Avatar */}
       {isClara && (
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-1 bg-white/[0.04] text-clara-primary border border-white/[0.1] shadow-dark-sm group-hover/msg:border-clara-primary/30 transition-colors">
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-1 bg-clara-surface-2 text-clara-primary border border-clara-warm/[0.20] shadow-dark-sm group-hover/msg:border-clara-primary/40 transition-colors">
           <Smile size={16} strokeWidth={2.5} />
         </div>
       )}
@@ -32,8 +32,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       <div className={`flex flex-col ${isClara ? "items-start" : "items-end"} max-w-[80%] md:max-w-[70%]`}>
         <div 
           className={`px-5 py-3.5 text-[15px] md:text-base leading-relaxed tracking-tight font-medium relative transition-all duration-300 ${
-            isClara 
-              ? "bg-white/[0.04] text-slate-100 rounded-[1.25rem] rounded-bl-none border border-white/[0.08] shadow-dark-sm group-hover/msg:bg-white/[0.07]" 
+            isClara
+              ? "bg-white text-clara-text-primary rounded-[1.25rem] rounded-bl-none border border-clara-warm/[0.14] shadow-dark-sm group-hover/msg:bg-clara-surface-2"
               : "bg-gradient-to-br from-clara-primary to-clara-primary-light text-white rounded-[1.25rem] rounded-br-none shadow-glow-sm"
           }`}
         >
@@ -48,7 +48,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
       {/* User Avatar */}
       {!isClara && (
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-1 bg-clara-primary/10 text-clara-primary-light border border-clara-primary/20 shadow-dark-sm">
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-1 bg-clara-primary/10 text-clara-primary border border-clara-primary/25 shadow-dark-sm">
           <User size={16} strokeWidth={2.5} />
         </div>
       )}

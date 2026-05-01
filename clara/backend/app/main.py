@@ -1,10 +1,9 @@
 # Clara Backend — Application Factory Main Entry
-import time
 import asyncio
 from contextlib import asynccontextmanager
 import structlog
 import sentry_sdk
-from fastapi import FastAPI, Depends, status
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.api.v1.router import api_router
@@ -50,6 +49,57 @@ async def lifespan(app: FastAPI):
                 logger.info("lifecycle_startup", ollama="warmed_up", models=[settings.ollama.model, settings.ollama.embedding_model])
             except Exception as e:
                 logger.warning("lifecycle_startup", ollama="warmup_failed", error=str(e))
+
+        # 3. Start: Database Auto-Provisioning
+        # On first run, ensure a default organization exists so patients can register
+        # immediately without any manual setup. Fully config-driven via .env.
+        try:
+            from app.db.session import async_session_factory
+            from sqlalchemy import select
+            from app.models.organization import Organization
+
+            async with async_session_factory() as db:
+                result = await db.execute(select(Organization).limit(1))
+                org = result.scalars().first()
+                if not org:
+                    org = Organization(
+                        name=settings.org_name,
+                        slug=settings.org_slug,
+                        admin_email=settings.org_admin_email,
+                        assistant_name=settings.org_assistant_name,
+                        is_active=True,
+                    )
+                    db.add(org)
+                    await db.commit()
+                    logger.info(
+                        "lifecycle_startup",
+                        org="auto_provisioned",
+                        name=settings.org_name,
+                        slug=settings.org_slug,
+                    )
+                else:
+                    logger.info("lifecycle_startup", org="exists", slug=org.slug)
+        except Exception as db_err:
+            # Non-fatal — the app can still start; patient registration will fail
+            # gracefully with a clear message if the DB is truly unavailable.
+            logger.error("lifecycle_startup", org="provisioning_failed", error=str(db_err))
+
+        # 4. Start: Email transport validation
+        # Confirms SMTP credentials are present so failures are caught at boot,
+        # not silently at alert-send time when a patient is already in distress.
+        if settings.smtp_user and settings.smtp_password:
+            logger.info(
+                "lifecycle_startup",
+                email="gmail_smtp_ready",
+                smtp_user=settings.smtp_user,
+                alert_to=settings.alert_email_to,
+            )
+        else:
+            logger.warning(
+                "lifecycle_startup",
+                email="smtp_credentials_missing",
+                detail="Set SMTP_USER and SMTP_PASSWORD in .env — caregiver emails will NOT be sent.",
+            )
 
         logger.info("lifecycle_startup", env=settings.obs.environment)
 

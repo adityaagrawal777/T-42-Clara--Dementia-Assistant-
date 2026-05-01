@@ -26,7 +26,11 @@ class Caregiver(Base, TenantMixin, SoftDeleteMixin, TimestampMixin):
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     
     # Patient Linkage
+    # associated_patient_ids kept for backward compatibility during transition.
+    # Primary source of truth is now Patient.caregiver_id (indexed FK).
     associated_patient_ids: Mapped[Optional[List[uuid.UUID]]] = mapped_column(JSON, nullable=True)
-    
-    # Relationship to Tenant
+
+    # Relationships
     organization = relationship("Organization", back_populates="caregivers")
+    patients = relationship("Patient", back_populates="caregiver", foreign_keys="Patient.caregiver_id")
+    notes = relationship("CaregiverNote", back_populates="caregiver", cascade="all, delete-orphan")

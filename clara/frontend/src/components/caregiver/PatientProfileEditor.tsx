@@ -86,7 +86,7 @@ export const PatientProfileEditor: React.FC<Props> = ({
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="glass-card p-10 lg:p-12 rounded-[3rem] border-white/[0.05] shadow-2xl w-full relative overflow-hidden">
+    <div className="glass-dark p-10 lg:p-12 rounded-[3rem] shadow-2xl w-full relative overflow-hidden">
       <div className="absolute top-0 right-0 w-48 h-48 bg-clara-primary/5 rounded-full blur-3xl -mr-24 -mt-24 pointer-events-none" />
 
       {/* Header */}

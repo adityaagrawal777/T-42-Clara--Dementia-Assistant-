@@ -66,7 +66,7 @@ export const SessionList: React.FC<Props> = ({ patientId }) => {
 
   if (loading) {
     return (
-      <div className="glass-card rounded-[2.5rem] border-white/[0.05] flex flex-col items-center justify-center h-[300px] gap-4">
+      <div className="glass-dark rounded-[2.5rem] flex flex-col items-center justify-center h-[300px] gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-clara-primary" />
         <p className="text-[10px] font-black text-clara-text-tertiary uppercase tracking-widest">Reconstructing History...</p>
       </div>
@@ -74,7 +74,7 @@ export const SessionList: React.FC<Props> = ({ patientId }) => {
   }
 
   return (
-    <div className="glass-card rounded-[2.5rem] border-white/[0.05] shadow-2xl overflow-hidden flex flex-col">
+    <div className="glass-dark rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
       <div className="p-8 pb-4 flex items-center justify-between border-b border-white/[0.05]">
         <div>
           <h3 className="text-xl font-black text-white tracking-tight">Record Timeline</h3>

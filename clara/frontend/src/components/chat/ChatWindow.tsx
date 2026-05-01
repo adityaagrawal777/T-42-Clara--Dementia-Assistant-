@@ -51,10 +51,10 @@ export const ChatWindow: React.FC = () => {
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-col items-center text-center py-10"
             >
-              <div className="w-24 h-24 glass-card rounded-[2.5rem] flex items-center justify-center mb-8 shadow-glow-lg border-white/[0.12] scale-110">
+              <div className="w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center mb-8 shadow-dark-md border border-clara-warm/[0.14] scale-110">
                 <span className="text-5xl animate-float">🌿</span>
               </div>
-              <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-tight text-white leading-tight">
+              <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-tight text-clara-text-primary leading-tight">
                 {greeting}
               </h1>
               <p className="text-lg text-clara-text-secondary font-medium max-w-[500px] leading-relaxed">

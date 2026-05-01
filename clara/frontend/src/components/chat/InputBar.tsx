@@ -70,18 +70,18 @@ export const InputBar: React.FC = () => {
           {/* External Shadow/Glow effect */}
           <div className="absolute -inset-1 bg-gradient-to-r from-clara-primary/20 to-clara-accent/20 rounded-[2.5rem] blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
           
-          <div className="relative flex flex-col glass-card rounded-[2rem] border-white/[0.1] shadow-2xl p-2 transition-all duration-300 focus-within:border-white/[0.15] focus-within:bg-white/[0.05]">
+          <div className="relative flex flex-col bg-white rounded-[2rem] border border-clara-warm/[0.18] shadow-dark-lg p-2 transition-all duration-300 focus-within:border-clara-primary/35 focus-within:shadow-glow-sm">
             
             <div className="flex items-end gap-2 pr-2">
               {/* Accessory Button */}
-              <button className="w-10 h-10 rounded-full flex items-center justify-center text-clara-text-muted hover:text-white hover:bg-white/[0.05] transition-all ml-1 mb-1 shrink-0">
+              <button className="w-10 h-10 rounded-full flex items-center justify-center text-clara-text-muted hover:text-clara-text-secondary hover:bg-clara-warm/[0.07] transition-all ml-1 mb-1 shrink-0">
                 <Paperclip size={20} />
               </button>
 
               {/* Textarea */}
               <textarea
                 ref={textareaRef}
-                className="flex-1 resize-none bg-transparent font-sans text-base text-slate-100 min-h-[48px] max-h-[150px] leading-relaxed py-3 px-3 font-medium border-0 focus:outline-none focus:ring-0 placeholder-clara-text-muted"
+                className="flex-1 resize-none bg-transparent font-sans text-base text-clara-text-primary min-h-[48px] max-h-[150px] leading-relaxed py-3 px-3 font-medium border-0 focus:outline-none focus:ring-0 placeholder:text-clara-text-muted"
                 placeholder="Message Clara..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
@@ -98,8 +98,8 @@ export const InputBar: React.FC = () => {
                   disabled={!voiceAvailable || isStreaming}
                   className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                     isListening
-                      ? "bg-danger text-white shadow-glow-sm animate-pulse"
-                      : "text-clara-text-secondary hover:text-white hover:bg-white/[0.05]"
+                      ? "bg-clara-danger text-white shadow-glow-sm animate-pulse"
+                      : "text-clara-text-tertiary hover:text-clara-text-secondary hover:bg-clara-warm/[0.07]"
                   }`}
                   aria-label={isListening ? "Stop listening" : "Voice input"}
                 >
@@ -113,9 +113,9 @@ export const InputBar: React.FC = () => {
                   whileHover={canSend ? { scale: 1.05 } : {}}
                   whileTap={canSend ? { scale: 0.95 } : {}}
                   className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all ${
-                    canSend 
-                      ? "bg-clara-primary text-white shadow-glow-sm" 
-                      : "bg-white/[0.03] text-clara-text-muted cursor-not-allowed"
+                    canSend
+                      ? "bg-clara-primary text-white shadow-glow-sm"
+                      : "bg-clara-surface-2 text-clara-text-muted cursor-not-allowed"
                   }`}
                 >
                   <SendHorizontal size={18} strokeWidth={2.5} />
@@ -133,8 +133,8 @@ export const InputBar: React.FC = () => {
                   className="px-4 overflow-hidden"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse"></span>
-                    <span className="text-[10px] font-black text-danger uppercase tracking-[0.2em]">Listening for your voice...</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-clara-danger animate-pulse"></span>
+                    <span className="text-[10px] font-black text-clara-danger uppercase tracking-[0.2em]">Listening for your voice...</span>
                   </div>
                 </motion.div>
               )}

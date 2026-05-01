@@ -25,10 +25,15 @@ settings = get_settings()
 # ─── Request / Response Schemas ──────────────────────────────────────────────
 
 class PatientRegisterRequest(BaseModel):
+    """
+    Minimal registration payload for patient self-service sign-up.
+
+    Caregiver assignment is managed exclusively through the Caregiver Portal.
+    Patients never need to know their caregiver's technical identifier at signup.
+    """
     name: str = Field(..., min_length=1, max_length=255, description="Patient's full name")
     preferred_name: Optional[str] = Field(None, max_length=100)
     passphrase: str = Field(..., min_length=4, description="Secret passphrase chosen by the patient")
-    caregiver_phone: Optional[str] = Field(None, max_length=50)
 
 
 class PatientLoginRequest(BaseModel):
@@ -80,6 +85,7 @@ def _issue_token(patient: Patient, session_id: uuid.UUID) -> str:
     )
 
 
+
 # ─── Endpoints ───────────────────────────────────────────────────────────────
 
 @router.post("/register", response_model=PatientSessionResponse, status_code=status.HTTP_201_CREATED)
@@ -104,7 +110,7 @@ async def register_patient(
             detail="No organization found. Please run the bootstrap script first.",
         )
 
-    # Duplicate name check scoped to the organization
+    # Check for existing patient with this name (case-insensitive)
     result = await db.execute(
         select(Patient).where(
             Patient.organization_id == org.id,
@@ -112,26 +118,45 @@ async def register_patient(
             Patient.is_active == True,
         )
     )
-    for p in result.scalars().all():
-        if p.name.strip().lower() == name_lower:
+    existing_patient = next(
+        (p for p in result.scalars().all() if p.name.strip().lower() == name_lower),
+        None,
+    )
+
+    if existing_patient:
+        if existing_patient.hashed_passphrase:
+            # Account already claimed — direct to sign in
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"An account with the name '{body.name}' already exists. Please sign in instead.",
             )
+        # Caregiver-created patient claiming their account for the first time
+        existing_patient.hashed_passphrase = auth_service.get_password_hash(body.passphrase)
+        await db.flush()
+        clara_session = await _create_session_record(db, existing_patient.id, existing_patient.organization_id)
+        await db.commit()
+        await db.refresh(existing_patient)
+        await db.refresh(clara_session)
+        token = _issue_token(existing_patient, clara_session.id)
+        return {
+            "access_token": token,
+            "session_id": str(clara_session.id),
+            "patient_id": str(existing_patient.id),
+            "patient_name": existing_patient.preferred_name or existing_patient.name,
+        }
 
-    # Hash passphrase and create patient record
+    # New patient — hash passphrase and create record
     patient = Patient(
         name=body.name.strip(),
         preferred_name=body.preferred_name or body.name.strip().split()[0],
         hashed_passphrase=auth_service.get_password_hash(body.passphrase),
-        caregiver_phone=body.caregiver_phone,
         organization_id=org.id,
         is_active=True,
     )
     db.add(patient)
     await db.flush()  # persist patient to get its UUID before session creation
 
-    # Create a Supabase session record (organization_id is NOT NULL in DB)
+    # Create a session record (organization_id is NOT NULL in DB)
     clara_session = await _create_session_record(db, patient.id, patient.organization_id)
     await db.commit()
     await db.refresh(patient)

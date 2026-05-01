@@ -8,7 +8,7 @@ export default function Unauthorized() {
       <p className="text-lg text-clara-neutral-muted mb-6">
         You need to be signed in as a caregiver to access this area.
       </p>
-      <Link href="/signin" className="px-6 py-3 bg-clara-green-800 text-white rounded-full font-bold hover:bg-clara-green-900 transition-colors">
+      <Link href="/caregiver/login" className="px-6 py-3 bg-clara-green-800 text-white rounded-full font-bold hover:bg-clara-green-900 transition-colors">
         Go to Sign In
       </Link>
     </div>

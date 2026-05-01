@@ -99,6 +99,26 @@ _PATTERNS: list[re.Pattern[str]] = [
         r"([\w][\w\s,&]*?)" + _CLAUSE_END,
         re.I,
     ),
+
+    # NEW: "I listen to / enjoy listening to / love listening to romantic music"
+    # Captures the object of listening — the most natural way patients state
+    # a music or audio preference.
+    re.compile(
+        r"\bi (?:really |always |do )?"
+        r"(?:listen to|enjoy listening to|love listening to|like listening to|prefer listening to)\s+"
+        r"([\w][\w\s,&]*?)" + _CLAUSE_END,
+        re.I,
+    ),
+
+    # NEW: "X helps me relax / sleep / calm down / unwind / feel better"
+    # Captures the subject (X) of a soothing activity — covers statements like
+    # "romantic music helps me relax" or "the romantic ones help me unwind".
+    # Group 1 = the activity/thing that helps.
+    re.compile(
+        r"([\w][\w\s]*?)\s+(?:helps?|makes?)\s+me\s+"
+        r"(?:relax|sleep|calm(?:\s+down)?|unwind|feel\s+(?:calm|better|peaceful|good|relaxed))",
+        re.I,
+    ),
 ]
 
 # Matches "and", ",", "&" as list separators within a phrase

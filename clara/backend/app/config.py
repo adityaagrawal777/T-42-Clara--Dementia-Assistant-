@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     # enriches context at the cost of token budget; lowering threshold surfaces
     # more but noisier memories.
     memory_top_k: int = Field(4, validation_alias="MEMORY_TOP_K")
-    memory_similarity_threshold: float = Field(0.65, validation_alias="MEMORY_SIMILARITY_THRESHOLD")
+    memory_similarity_threshold: float = Field(0.55, validation_alias="MEMORY_SIMILARITY_THRESHOLD")
 
     # ── Chat runtime ──────────────────────────────────────────────────────────
     # Timeout (seconds) for loading a patient profile from the DB before the
@@ -64,11 +64,23 @@ class Settings(BaseSettings):
     # Default mood_score used when the mood classifier returns no result.
     default_mood_score: float = Field(0.5, validation_alias="DEFAULT_MOOD_SCORE")
 
+    # ── Organization Auto-Provisioning ────────────────────────────────────────
+    # On first startup, if no organization exists in the DB, Clara will create
+    # one automatically using these values. Override via .env — no script needed.
+    org_name: str = Field("Clara Care", validation_alias="ORG_NAME")
+    org_slug: str = Field("clara-main", validation_alias="ORG_SLUG")
+    org_admin_email: str = Field("admin@clara-ai.com", validation_alias="ORG_ADMIN_EMAIL")
+    org_assistant_name: str = Field("Clara", validation_alias="ORG_ASSISTANT_NAME")
+
     # ── Safety Notifications ──────────────────────────────────────────────────
     firebase_project_id: Optional[str] = Field(None, validation_alias="FIREBASE_PROJECT_ID")
     firebase_server_key: Optional[str] = Field(None, validation_alias="FIREBASE_SERVER_KEY")
-    resend_api_key: Optional[str] = Field(None, validation_alias="RESEND_API_KEY")
-    alert_email_from: str = Field("alerts@clara-ai.com", validation_alias="ALERT_EMAIL_FROM")
+    # Gmail SMTP transport — replaces Resend (no domain verification required).
+    smtp_host: str = Field("smtp.gmail.com", validation_alias="SMTP_HOST")
+    smtp_port: int = Field(587, validation_alias="SMTP_PORT")
+    smtp_user: Optional[str] = Field(None, validation_alias="SMTP_USER")
+    smtp_password: Optional[str] = Field(None, validation_alias="SMTP_PASSWORD")
+    alert_email_from: str = Field("Clara Alerts <alerts@clara-ai.com>", validation_alias="ALERT_EMAIL_FROM")
     alert_email_to: str = Field("caregiver@example.com", validation_alias="ALERT_EMAIL_TO")
     frontend_url: str = Field("http://localhost:3000", validation_alias="FRONTEND_URL")
 
@@ -140,7 +152,10 @@ class Settings(BaseSettings):
         class Alert:
             fcm_project_id = self.firebase_project_id
             fcm_server_key = self.firebase_server_key
-            resend_api_key = self.resend_api_key
+            smtp_host = self.smtp_host
+            smtp_port = self.smtp_port
+            smtp_user = self.smtp_user
+            smtp_password = self.smtp_password
             email_from = self.alert_email_from
             email_to = self.alert_email_to
             frontend_url = self.frontend_url

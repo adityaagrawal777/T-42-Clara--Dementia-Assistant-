@@ -31,16 +31,16 @@ const ShareToast: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => (
     initial={{ opacity: 0, y: -12, scale: 0.95 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
     exit={{ opacity: 0, y: -8, scale: 0.95 }}
-    className="absolute top-full right-0 mt-3 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl bg-clara-surface-2 border border-white/[0.1] shadow-dark-lg min-w-[220px]"
+    className="absolute top-full right-0 mt-3 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-clara-warm/[0.16] shadow-dark-lg min-w-[220px]"
   >
     <div className="w-8 h-8 rounded-xl bg-clara-success/10 border border-clara-success/20 flex items-center justify-center text-clara-success shrink-0">
       <Check size={16} strokeWidth={2.5} />
     </div>
     <div className="flex-1 min-w-0">
-      <p className="text-xs font-black text-white">Copied to clipboard</p>
+      <p className="text-xs font-black text-clara-text-primary">Copied to clipboard</p>
       <p className="text-[10px] text-clara-text-muted font-medium mt-0.5">Session summary shared</p>
     </div>
-    <button onClick={onDismiss} className="text-clara-text-muted hover:text-white transition-colors">
+    <button onClick={onDismiss} className="text-clara-text-muted hover:text-clara-text-primary transition-colors">
       <X size={14} />
     </button>
   </motion.div>
@@ -66,20 +66,20 @@ const MoreDropdown: React.FC<MoreDropdownProps> = ({ onSettings, onAbout, onClos
       initial={{ opacity: 0, y: -8, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -6, scale: 0.97 }}
-      className="absolute top-full right-0 mt-3 z-50 w-64 rounded-2xl bg-clara-surface-2 border border-white/[0.08] shadow-dark-lg overflow-hidden"
+      className="absolute top-full right-0 mt-3 z-50 w-64 rounded-2xl bg-white border border-clara-warm/[0.14] shadow-dark-lg overflow-hidden"
     >
       <div className="p-2 space-y-0.5">
         {items.map(({ icon: Icon, label, sublabel, action }) => (
           <button
             key={label}
             onClick={() => { action(); onClose(); }}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/[0.05] transition-all group text-left"
+            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-clara-warm/[0.05] transition-all group text-left"
           >
-            <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-clara-text-tertiary group-hover:text-clara-primary-light group-hover:border-clara-primary/20 transition-all">
+            <div className="w-8 h-8 rounded-xl bg-clara-surface-2 border border-clara-warm/[0.14] flex items-center justify-center text-clara-text-tertiary group-hover:text-clara-primary group-hover:border-clara-primary/25 transition-all">
               <Icon size={15} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-black text-white leading-none mb-0.5">{label}</p>
+              <p className="text-xs font-black text-clara-text-primary leading-none mb-0.5">{label}</p>
               <p className="text-[10px] text-clara-text-muted font-medium">{sublabel}</p>
             </div>
             <ChevronRight size={13} className="text-clara-text-muted group-hover:text-clara-text-secondary transition-colors" />
@@ -98,7 +98,7 @@ const AboutPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => (
       <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-clara-primary to-clara-accent flex items-center justify-center shadow-glow-lg mb-5">
         <span className="text-4xl">🌿</span>
       </div>
-      <h3 className="text-xl font-black text-white tracking-tight">Clara Companion</h3>
+      <h3 className="text-xl font-black text-clara-text-primary tracking-tight">Clara Companion</h3>
       <p className="text-[10px] font-bold text-clara-text-muted uppercase tracking-[0.2em] mt-1 mb-4">Your AI Companion</p>
       <p className="text-sm text-clara-text-secondary leading-relaxed max-w-xs">
         Clara is designed to provide warm, compassionate companionship through meaningful conversation, gentle reminiscence, and emotional support.
@@ -110,10 +110,10 @@ const AboutPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => (
         { icon: Sparkles, label: "Memory-Aware", desc: "Remembers what matters to you" },
         { icon: Globe, label: "Multilingual", desc: "Speaks your language" },
       ].map(({ icon: Icon, label, desc }) => (
-        <div key={label} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-          <Icon size={16} className="text-clara-primary-light shrink-0" />
+        <div key={label} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-clara-surface-2 border border-clara-warm/[0.14]">
+          <Icon size={16} className="text-clara-primary shrink-0" />
           <div>
-            <p className="text-xs font-black text-white">{label}</p>
+            <p className="text-xs font-black text-clara-text-primary">{label}</p>
             <p className="text-[10px] text-clara-text-muted font-medium">{desc}</p>
           </div>
         </div>
@@ -156,8 +156,8 @@ const SettingsPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         {/* Text Size */}
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <Type size={14} className="text-clara-primary-light" />
-            <p className="text-xs font-black text-white uppercase tracking-wider">Text Size</p>
+            <Type size={14} className="text-clara-primary" />
+            <p className="text-xs font-black text-clara-text-primary uppercase tracking-wider">Text Size</p>
           </div>
           <div className="grid grid-cols-3 gap-2">
             {FONT_SIZES.map((f) => (
@@ -166,8 +166,8 @@ const SettingsPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 onClick={() => applyFontSize(f.id)}
                 className={`py-3 rounded-xl border text-center transition-all font-bold text-xs ${
                   fontSize === f.id
-                    ? "bg-clara-primary/10 border-clara-primary/40 text-clara-primary-light shadow-glow-sm"
-                    : "bg-white/[0.03] border-white/[0.07] text-clara-text-secondary hover:bg-white/[0.06] hover:text-white"
+                    ? "bg-clara-primary/10 border-clara-primary/40 text-clara-primary shadow-glow-sm"
+                    : "bg-clara-surface-2 border-clara-warm/[0.16] text-clara-text-secondary hover:bg-clara-surface-3 hover:text-clara-text-primary"
                 }`}
               >
                 <span style={{ fontSize: f.size === "16px" ? "14px" : f.size === "18px" ? "16px" : "18px" }}>Aa</span>
@@ -178,11 +178,11 @@ const SettingsPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
 
         {/* Appearance note */}
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-clara-surface-2 border border-clara-warm/[0.14]">
           <Moon size={15} className="text-clara-text-tertiary shrink-0" />
           <div>
-            <p className="text-xs font-black text-white">Dark Mode</p>
-            <p className="text-[10px] text-clara-text-muted font-medium">Clara uses dark mode for comfort</p>
+            <p className="text-xs font-black text-clara-text-primary">Warm Light Mode</p>
+            <p className="text-[10px] text-clara-text-muted font-medium">Clara uses a warm light theme</p>
           </div>
           <div className="ml-auto w-8 h-4 rounded-full bg-clara-primary/30 border border-clara-primary/40 flex items-center justify-end pr-0.5">
             <div className="w-3 h-3 rounded-full bg-clara-primary-light shadow-glow-sm" />
@@ -226,24 +226,24 @@ const ProfilePanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         {/* Avatar + Name */}
         <div className="flex flex-col items-center text-center py-4 mb-4">
           <div className="relative mb-4">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-clara-surface-2 to-clara-surface-3 border border-white/[0.1] flex items-center justify-center shadow-dark-lg ring-2 ring-clara-primary/20">
-              <span className="text-2xl font-black text-white">{initials}</span>
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-clara-surface-2 to-clara-surface-3 border border-clara-warm/[0.18] flex items-center justify-center shadow-dark-lg ring-2 ring-clara-primary/20">
+              <span className="text-2xl font-black text-clara-text-primary">{initials}</span>
             </div>
             <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-clara-success border-2 border-clara-bg flex items-center justify-center">
               <div className="w-2 h-2 rounded-full bg-white" />
             </div>
           </div>
-          <h3 className="text-lg font-black text-white tracking-tight">{patientName || "Guest"}</h3>
+          <h3 className="text-lg font-black text-clara-text-primary tracking-tight">{patientName || "Guest"}</h3>
           <p className="text-[10px] font-bold text-clara-primary uppercase tracking-[0.2em] mt-0.5">Active Patient</p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className="flex flex-col items-center py-3 px-2 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-xl font-black text-white leading-none">{items.length}</span>
+          <div className="flex flex-col items-center py-3 px-2 rounded-xl bg-clara-surface-2 border border-clara-warm/[0.14]">
+            <span className="text-xl font-black text-clara-text-primary leading-none">{items.length}</span>
             <span className="text-[9px] font-black text-clara-text-muted uppercase tracking-wider mt-1">Messages</span>
           </div>
-          <div className="flex flex-col items-center py-3 px-2 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+          <div className="flex flex-col items-center py-3 px-2 rounded-xl bg-clara-surface-2 border border-clara-warm/[0.14]">
             <span className={`text-sm font-black leading-none capitalize ${moodColors[mood.mood] ?? "text-clara-text-secondary"}`}>
               {mood.mood}
             </span>
@@ -255,13 +255,13 @@ const ProfilePanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="space-y-1 mb-4">
           <button
             onClick={() => { onClose(); router.push("/memories"); }}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/[0.05] transition-all group text-left"
+            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-clara-warm/[0.05] transition-all group text-left"
           >
-            <div className="w-8 h-8 rounded-xl bg-clara-primary/10 border border-clara-primary/20 flex items-center justify-center text-clara-primary-light">
+            <div className="w-8 h-8 rounded-xl bg-clara-primary/10 border border-clara-primary/25 flex items-center justify-center text-clara-primary">
               <Sparkles size={15} />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-black text-white">My Memories</p>
+              <p className="text-xs font-black text-clara-text-primary">My Memories</p>
               <p className="text-[10px] text-clara-text-muted font-medium">View your scrapbook</p>
             </div>
             <ChevronRight size={13} className="text-clara-text-muted group-hover:text-clara-text-secondary transition-colors" />
@@ -295,7 +295,7 @@ const SlidePanel: React.FC<{ children: React.ReactNode; title: string; onClose: 
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
     />
     {/* Panel */}
     <motion.div
@@ -303,13 +303,13 @@ const SlidePanel: React.FC<{ children: React.ReactNode; title: string; onClose: 
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: "100%", opacity: 0 }}
       transition={{ type: "spring", damping: 28, stiffness: 280 }}
-      className="fixed top-0 right-0 h-full w-80 z-50 bg-clara-surface/95 backdrop-blur-2xl border-l border-white/[0.07] shadow-dark-lg flex flex-col"
+      className="fixed top-0 right-0 h-full w-80 z-50 bg-clara-bg/98 backdrop-blur-2xl border-l border-clara-warm/[0.14] shadow-dark-lg flex flex-col"
     >
-      <div className="flex items-center justify-between px-5 py-5 border-b border-white/[0.06]">
-        <h2 className="text-sm font-black text-white tracking-tight">{title}</h2>
+      <div className="flex items-center justify-between px-5 py-5 border-b border-clara-warm/[0.12]">
+        <h2 className="text-sm font-black text-clara-text-primary tracking-tight">{title}</h2>
         <button
           onClick={onClose}
-          className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center text-clara-text-muted hover:text-white hover:bg-white/[0.08] transition-all"
+          className="w-8 h-8 rounded-xl bg-clara-surface-2 border border-clara-warm/[0.16] flex items-center justify-center text-clara-text-muted hover:text-clara-text-primary hover:bg-clara-surface-3 transition-all"
         >
           <X size={15} />
         </button>
@@ -366,38 +366,38 @@ export const ChatHeader: React.FC = () => {
 
   return (
     <>
-      <header className="flex items-center justify-between px-6 lg:px-10 py-4 bg-clara-bg/60 backdrop-blur-3xl border-b border-white/[0.05] sticky top-0 z-40 shrink-0 select-none">
+      <header className="flex items-center justify-between px-6 lg:px-10 py-4 bg-clara-bg/90 backdrop-blur-3xl border-b border-clara-warm/[0.14] sticky top-0 z-40 shrink-0 select-none">
         {/* Mobile brand */}
         <div className="md:hidden flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-clara-primary to-clara-accent flex items-center justify-center shadow-glow-sm">
             <span className="text-lg">🌿</span>
           </div>
           <div>
-            <h1 className="text-base font-black text-white leading-tight">Clara</h1>
+            <h1 className="text-base font-black text-clara-text-primary leading-tight">Clara</h1>
             <p className="text-[9px] font-bold text-clara-text-muted uppercase tracking-[0.2em] -mt-0.5">Companion</p>
           </div>
         </div>
 
         {/* Desktop tagline */}
         <div className="hidden md:flex flex-col">
-          <h2 className="text-sm font-black text-white italic opacity-70">&quot;Always here for you&quot;</h2>
+          <h2 className="text-sm font-black text-clara-text-secondary italic opacity-80">&quot;Always here for you&quot;</h2>
         </div>
 
         <div className="flex items-center gap-3 lg:gap-5">
           {/* Mood + Voice pill */}
-          <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-1 shadow-inner-glow">
+          <div className="flex items-center gap-2 bg-clara-surface-2 border border-clara-warm/[0.15] rounded-2xl p-1">
             <MoodIndicator />
             <VoiceToggle />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1 pl-4 border-l border-white/[0.08]">
+          <div className="flex items-center gap-1 pl-4 border-l border-clara-warm/[0.16]">
             {/* Share */}
             <div className="relative">
               <button
                 onClick={handleShare}
                 title="Share session"
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-clara-text-tertiary hover:bg-white/[0.06] hover:text-white transition-all"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-clara-text-tertiary hover:bg-clara-warm/[0.06] hover:text-clara-text-primary transition-all"
               >
                 <Share2 size={16} strokeWidth={2.5} />
               </button>
@@ -413,8 +413,8 @@ export const ChatHeader: React.FC = () => {
                 title="More options"
                 className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
                   showMoreMenu
-                    ? "bg-white/[0.08] text-white"
-                    : "text-clara-text-tertiary hover:bg-white/[0.06] hover:text-white"
+                    ? "bg-clara-warm/[0.08] text-clara-text-primary"
+                    : "text-clara-text-tertiary hover:bg-clara-warm/[0.06] hover:text-clara-text-primary"
                 }`}
               >
                 <MoreHorizontal size={16} strokeWidth={2.5} />
@@ -435,15 +435,15 @@ export const ChatHeader: React.FC = () => {
           <button
             onClick={() => setActivePanel("profile")}
             title="View profile"
-            className="flex items-center gap-3 pl-4 border-l border-white/[0.08] group"
+            className="flex items-center gap-3 pl-4 border-l border-clara-warm/[0.16] group"
           >
             <div className="hidden lg:flex flex-col items-end">
-              <span className="text-xs font-black text-white tracking-tight group-hover:text-clara-primary-light transition-colors">
+              <span className="text-xs font-black text-clara-text-primary tracking-tight group-hover:text-clara-primary transition-colors">
                 {patientName || "Guest"}
               </span>
               <span className="text-[9px] font-bold text-clara-primary uppercase tracking-widest">Patient</span>
             </div>
-            <div className="w-9 h-9 rounded-xl border border-white/[0.12] shadow-glow-sm bg-clara-surface-2 flex items-center justify-center ring-2 ring-clara-primary/10 group-hover:ring-clara-primary/30 group-hover:border-white/[0.2] transition-all">
+            <div className="w-9 h-9 rounded-xl border border-clara-warm/[0.20] shadow-dark-sm bg-clara-surface-2 flex items-center justify-center ring-2 ring-clara-primary/10 group-hover:ring-clara-primary/30 group-hover:border-clara-warm/[0.32] transition-all">
               <span className="text-xs font-black text-clara-text-primary">{initials}</span>
             </div>
           </button>

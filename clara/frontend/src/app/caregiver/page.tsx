@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { TrendingUp, Users, ArrowRight, Zap, Activity } from "lucide-react";
 import { AlertFeed } from "@/components/caregiver/AlertFeed";
@@ -8,116 +8,179 @@ import { apiFetch } from "@/lib/api";
 import type { CaregiverAnalytics, PatientListItem } from "@/types";
 import { motion } from "framer-motion";
 
-// ── KPI card ──────────────────────────────────────────────────────────────────
+// ── KPI Card ──────────────────────────────────────────────────────────────────
 
 interface StatCardProps {
   label: string;
   value: string;
   sub?: string;
   icon: React.ElementType;
-  className: string;
+  accent: string;       // hex or hsl colour for the icon tint
   loading: boolean;
   index: number;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ label, value, sub, icon: Icon, className, loading, index }) => (
-  <motion.div 
+const StatCard: React.FC<StatCardProps> = ({ label, value, sub, icon: Icon, accent, loading, index }) => (
+  <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: index * 0.1 }}
-    className="glass-card p-6 p-lg-8 rounded-[2rem] border-white/[0.05] shadow-2xl relative overflow-hidden group hover:bg-white/[0.05] transition-all"
+    transition={{ delay: index * 0.08 }}
+    className="relative overflow-hidden rounded-2xl p-6 flex flex-col gap-4 group transition-all"
+    style={{
+      background: "rgba(255,255,255,0.04)",
+      border: "1px solid rgba(255,255,255,0.08)",
+    }}
   >
-    <div className={`absolute top-0 right-0 w-24 h-24 blur-[60px] opacity-10 rounded-full bg-current ${className.split(' ').find(c => c.startsWith('text-'))}`}></div>
-    
-    <div className="flex flex-col gap-5 relative z-10">
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border border-white/[0.08] bg-white/[0.02] shadow-inner-glow transition-transform group-hover:scale-110 ${className}`}>
-        <Icon size={26} strokeWidth={2} />
-      </div>
-      
-      <div className="flex flex-col">
-        <span className="text-[11px] font-black text-clara-text-tertiary uppercase tracking-[0.25em] mb-3 opacity-60">
-          {label}
+    {/* Ambient glow */}
+    <div
+      className="absolute top-0 right-0 w-28 h-28 rounded-full blur-[50px] opacity-20 pointer-events-none"
+      style={{ background: accent }}
+    />
+
+    {/* Icon */}
+    <div
+      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105"
+      style={{
+        background: `${accent}20`,
+        border: `1px solid ${accent}40`,
+      }}
+    >
+      <Icon size={22} strokeWidth={2} style={{ color: accent }} />
+    </div>
+
+    {/* Metric */}
+    <div className="flex flex-col">
+      <span
+        className="text-[10px] font-black uppercase tracking-[0.25em] mb-2"
+        style={{ color: "rgba(255,255,255,0.45)" }}
+      >
+        {label}
+      </span>
+      {loading ? (
+        <div className="h-9 w-20 rounded-lg animate-pulse" style={{ background: "rgba(255,255,255,0.07)" }} />
+      ) : (
+        <span className="text-4xl font-bold text-white tracking-tight">{value}</span>
+      )}
+      {sub && !loading && (
+        <span className="text-xs font-medium mt-1.5" style={{ color: "rgba(255,255,255,0.4)" }}>
+          {sub}
         </span>
-        {loading ? (
-          <div className="h-10 w-24 bg-white/[0.05] animate-pulse rounded-lg" />
-        ) : (
-          <span className="text-4xl font-serif text-white tracking-tight">{value}</span>
-        )}
-        {sub && !loading && (
-          <span className="text-[11px] font-medium text-clara-text-muted mt-2 tracking-tight opacity-80">{sub}</span>
-        )}
-      </div>
+      )}
     </div>
   </motion.div>
 );
 
-// ── Patient roster panel ──────────────────────────────────────────────────────
+// ── Patient Roster Panel ───────────────────────────────────────────────────────
 
 const PatientRoster: React.FC<{
   patients: PatientListItem[];
   loading: boolean;
   error: string | null;
 }> = ({ patients, loading, error }) => (
-  <div className="glass-card rounded-[2.5rem] border-white/[0.05] shadow-2xl overflow-hidden h-full flex flex-col">
-    <div className="p-8 flex items-center justify-between border-b border-white/[0.05]">
+  <div
+    className="rounded-2xl overflow-hidden h-full flex flex-col"
+    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+  >
+    {/* Header */}
+    <div
+      className="px-6 py-5 flex items-center justify-between"
+      style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+    >
       <div>
-        <h3 className="text-xl font-black text-white tracking-tight">Active Roster</h3>
-        <p className="text-[10px] font-bold text-clara-text-tertiary uppercase tracking-widest mt-1">Patient Management</p>
+        <h3 className="text-base font-bold text-white tracking-tight">Active Roster</h3>
+        <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+          Patient Management
+        </p>
       </div>
       <Link
         href="/caregiver/patients"
-        className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-clara-text-secondary hover:text-white hover:bg-white/[0.06] transition-all"
+        className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
       >
-        <ArrowRight size={18} />
+        <ArrowRight size={16} style={{ color: "rgba(255,255,255,0.6)" }} />
       </Link>
     </div>
 
-    <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
-      {loading ? (
-        <div className="flex flex-col gap-4 p-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-16 bg-white/[0.02] rounded-2xl animate-pulse" />
-          ))}
-        </div>
-      ) : error ? (
-        <div className="p-10 text-center">
-          <p className="text-danger text-sm font-bold">{error}</p>
-        </div>
-      ) : patients.length === 0 ? (
-        <div className="p-10 text-center">
-          <Users className="w-10 h-10 text-clara-text-muted mx-auto mb-3 opacity-20" />
-          <p className="text-sm font-bold text-clara-text-muted italic">No patients registered</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {patients.map((p, idx) => (
-            <motion.div
-              key={p.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.05 }}
-            >
-              <Link
-                href={`/caregiver/patients/${p.id}`}
-                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/[0.04] border border-transparent hover:border-white/[0.08] transition-all group"
-              >
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-clara-surface-2 to-clara-surface-3 border border-white/[0.1] flex items-center justify-center text-xs font-black text-clara-primary group-hover:scale-105 transition-transform">
-                  {p.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-black text-white truncate group-hover:text-clara-primary-light transition-colors">{p.name}</p>
-                  <p className="text-[10px] font-bold text-clara-text-tertiary uppercase tracking-wider mt-0.5">
-                    {p.is_active ? "In Session" : "Idle State"}
-                  </p>
-                </div>
-
-                <div className={`w-2 h-2 rounded-full ${p.is_active ? "bg-success shadow-glow-sm animate-pulse" : "bg-clara-text-muted"}`}></div>
-              </Link>
-            </motion.div>
+    {/* Content */}
+    <div className="flex-1 overflow-y-auto p-4 space-y-1">
+      {loading && (
+        <div className="flex flex-col gap-3 p-2">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-14 rounded-xl animate-pulse"
+              style={{ background: "rgba(255,255,255,0.04)" }}
+            />
           ))}
         </div>
       )}
+
+      {!loading && error && (
+        <div className="p-8 text-center">
+          <p className="text-sm font-bold" style={{ color: "#f87171" }}>{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && patients.length === 0 && (
+        <div className="p-10 text-center">
+          <Users className="w-9 h-9 mx-auto mb-3 opacity-20" style={{ color: "rgba(255,255,255,0.5)" }} />
+          <p className="text-sm font-medium italic" style={{ color: "rgba(255,255,255,0.3)" }}>
+            No patients assigned yet
+          </p>
+        </div>
+      )}
+
+      {!loading && !error && patients.map((p, idx) => (
+        <motion.div
+          key={p.id}
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: idx * 0.04 }}
+        >
+          <Link
+            href={`/caregiver/patients/${p.id}`}
+            className="flex items-center gap-3 p-3 rounded-xl transition-all group"
+            style={{ border: "1px solid transparent" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.borderColor = "transparent";
+            }}
+          >
+            {/* Avatar */}
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black flex-shrink-0"
+              style={{
+                background: "rgba(107,158,140,0.15)",
+                border: "1px solid rgba(107,158,140,0.25)",
+                color: "#6ee7b7",
+              }}
+            >
+              {p.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-white truncate">{p.name}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+                {p.is_active ? "In Session" : "Idle"}
+              </p>
+            </div>
+
+            {/* Status dot */}
+            <div
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{
+                background: p.is_active ? "#4ade80" : "rgba(255,255,255,0.2)",
+                boxShadow: p.is_active ? "0 0 6px #4ade80" : "none",
+              }}
+            />
+          </Link>
+        </motion.div>
+      ))}
     </div>
   </div>
 );
@@ -127,89 +190,120 @@ const PatientRoster: React.FC<{
 export default function CaregiverDashboard() {
   const [analytics, setAnalytics] = useState<CaregiverAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
-
   const [patients, setPatients] = useState<PatientListItem[]>([]);
   const [patientsLoading, setPatientsLoading] = useState(true);
   const [patientsError, setPatientsError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchAnalytics = useCallback(() => {
     apiFetch("/api/v1/caregiver/analytics")
-      .then((data: any) => setAnalytics(data))
+      .then((data: unknown) => setAnalytics(data as CaregiverAnalytics))
       .catch(() => {})
       .finally(() => setAnalyticsLoading(false));
+  }, []);
 
+  const fetchPatients = useCallback(() => {
     apiFetch("/api/v1/patients/")
-      .then((data: any) => setPatients(data))
+      .then((data: unknown) => setPatients(data as PatientListItem[]))
       .catch((err: Error) => setPatientsError(err.message))
       .finally(() => setPatientsLoading(false));
   }, []);
 
-  const stats = [
+  useEffect(() => {
+    fetchAnalytics();
+    fetchPatients();
+
+    // Analytics: poll every 30 s — catches mood shifts and new alerts quickly
+    // Patients: poll every 60 s — assignment changes are infrequent
+    let analyticsInterval: ReturnType<typeof setInterval> | null = setInterval(fetchAnalytics, 30_000);
+    let patientsInterval: ReturnType<typeof setInterval> | null = setInterval(fetchPatients, 60_000);
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        if (analyticsInterval) { clearInterval(analyticsInterval); analyticsInterval = null; }
+        if (patientsInterval) { clearInterval(patientsInterval); patientsInterval = null; }
+      } else {
+        fetchAnalytics();
+        fetchPatients();
+        analyticsInterval = setInterval(fetchAnalytics, 30_000);
+        patientsInterval = setInterval(fetchPatients, 60_000);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      if (analyticsInterval) clearInterval(analyticsInterval);
+      if (patientsInterval) clearInterval(patientsInterval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [fetchAnalytics, fetchPatients]);
+
+
+  const hasAlerts = (analytics?.unresolved_alerts ?? 0) > 0;
+
+  const stats: StatCardProps[] = [
     {
       label: "Total Cohort",
-      value: analytics ? String(analytics.total_patients) : "0",
+      value: analytics ? String(analytics.total_patients) : "—",
       icon: Users,
-      className: "bg-clara-primary/10 text-clara-primary border-clara-primary/20",
+      accent: "#6ee7b7",
+      loading: analyticsLoading,
+      index: 0,
     },
     {
       label: "Live Monitor",
-      value: analytics ? String(analytics.active_sessions) : "0",
-      icon: Activity,
-      className: "bg-blue-500/10 text-blue-400 border-blue-400/20",
+      value: analytics ? String(analytics.active_sessions) : "—",
       sub: "Active connections",
+      icon: Activity,
+      accent: "#60a5fa",
+      loading: analyticsLoading,
+      index: 1,
     },
     {
       label: "System Health",
-      value: analytics?.stability_index ? `${analytics.stability_index}%` : "100%",
+      value: analytics?.stability_index ? `${analytics.stability_index}%` : "—",
       sub: "Mood stability index",
       icon: TrendingUp,
-      className: "bg-success/10 text-success border-success/20",
+      accent: "#4ade80",
+      loading: analyticsLoading,
+      index: 2,
     },
     {
       label: "Crisis Queue",
-      value: analytics ? String(analytics.unresolved_alerts) : "0",
+      value: analytics ? String(analytics.unresolved_alerts) : "—",
+      sub: "Unresolved incidents",
       icon: Zap,
-      className: analytics?.unresolved_alerts && analytics.unresolved_alerts > 0 
-        ? "bg-danger text-white border-danger/40 shadow-danger/30" 
-        : "bg-white/[0.03] text-clara-text-muted border-white/[0.08]",
-      sub: "Unresolved incidents"
+      accent: hasAlerts ? "#f87171" : "rgba(255,255,255,0.3)",
+      loading: analyticsLoading,
+      index: 3,
     },
   ];
 
   return (
     <div className="space-y-10">
-      {/* Header Info */}
-      <div className="flex flex-col gap-2 mb-12">
-        <h2 className="text-4xl md:text-5xl font-serif text-white tracking-tight">System Intelligence</h2>
-        <p className="text-clara-text-secondary text-lg font-medium">Real-time overview of your patient cluster and clinical alerts.</p>
+      {/* Hero header */}
+      <div className="flex flex-col gap-2">
+        <h2 className="text-4xl font-bold text-white tracking-tight">
+          System Intelligence
+        </h2>
+        <p className="text-base font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
+          Real-time overview of your patient cluster and clinical alerts.
+        </p>
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
-          <StatCard
-            key={stat.label}
-            loading={analyticsLoading}
-            index={i}
-            {...stat}
-          />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {stats.map((stat) => (
+          <StatCard key={stat.label} {...stat} />
         ))}
       </div>
 
-      {/* Main content */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-        {/* Alerts feed — 8/12 width */}
+      {/* Main content grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-stretch">
         <div className="lg:col-span-8 flex flex-col">
           <AlertFeed />
         </div>
-
-        {/* Patient roster — 4/12 width */}
         <div className="lg:col-span-4 flex flex-col">
-          <PatientRoster
-            patients={patients}
-            loading={patientsLoading}
-            error={patientsError}
-          />
+          <PatientRoster patients={patients} loading={patientsLoading} error={patientsError} />
         </div>
       </div>
     </div>

@@ -54,18 +54,20 @@ function toDominantMood(day: MoodTimelineDay): ChartPoint {
 
 interface Props {
   patientId?: string;
+  /** If true, poll every 30 s (use when patient session is active) */
+  isLive?: boolean;
 }
 
-export const MoodTimeline: React.FC<Props> = ({ patientId }) => {
+export const MoodTimeline: React.FC<Props> = ({ patientId, isLive }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [chartData, setChartData] = useState<ChartPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchTimeline = useCallback(
-    async (days: number) => {
+    async (days: number, silent = false) => {
       if (!patientId) return;
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       try {
         const raw = (await apiFetch(
@@ -76,7 +78,7 @@ export const MoodTimeline: React.FC<Props> = ({ patientId }) => {
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load mood data.");
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     },
     [patientId],
@@ -84,11 +86,16 @@ export const MoodTimeline: React.FC<Props> = ({ patientId }) => {
 
   useEffect(() => {
     fetchTimeline(TABS[activeTab].days);
-  }, [fetchTimeline, activeTab]);
+
+    // Poll silently every 30 s when a live session is active
+    if (!isLive) return;
+    const interval = setInterval(() => fetchTimeline(TABS[activeTab].days, true), 30_000);
+    return () => clearInterval(interval);
+  }, [fetchTimeline, activeTab, isLive]);
 
   if (!patientId) {
     return (
-      <div className="glass-card p-12 rounded-[2.5rem] border-white/[0.05] flex flex-col items-center justify-center min-h-[400px] text-center">
+      <div className="glass-dark p-12 rounded-[2.5rem] flex flex-col items-center justify-center min-h-[400px] text-center">
         <div className="w-16 h-16 rounded-[1.5rem] bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-clara-text-muted mb-6">
            <Activity size={32} />
         </div>
@@ -101,14 +108,14 @@ export const MoodTimeline: React.FC<Props> = ({ patientId }) => {
 
   if (loading) {
     return (
-      <div className="glass-card p-12 rounded-[2.5rem] border-white/[0.05] flex items-center justify-center min-h-[400px]">
+      <div className="glass-dark p-12 rounded-[2.5rem] flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-10 h-10 animate-spin text-clara-primary" />
       </div>
     );
   }
 
   return (
-    <div className="glass-card p-8 lg:p-10 rounded-[2.5rem] border-white/[0.05] shadow-2xl">
+    <div className="glass-dark p-8 lg:p-10 rounded-[2.5rem] shadow-2xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div>
           <h3 className="text-2xl font-black text-white tracking-tight">Emotional Trajectory</h3>

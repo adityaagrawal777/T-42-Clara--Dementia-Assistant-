@@ -18,8 +18,8 @@
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #050507;
-    color: #f1f5f9;
+    background-color: #faf7f2;
+    color: #2c1f14;
   }
 
   body {
@@ -28,7 +28,7 @@
 
   /* Typography Refinements */
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-bold text-slate-50;
+    @apply tracking-tight font-bold text-clara-text-primary;
   }
 
   button, input, textarea, select {
@@ -38,11 +38,22 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-dark-lg;
+    @apply bg-white backdrop-blur-xl border border-clara-warm/[0.14] shadow-dark-sm;
   }
-  
+
+  /* Dark glass variant — used exclusively in the caregiver portal */
+  .glass-dark {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .glass-dark:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
   .glass-card-hover {
-    @apply transition-all duration-300 hover:bg-white/[0.06] hover:border-white/[0.12] hover:shadow-glow-sm;
+    @apply transition-all duration-300 hover:bg-clara-surface-2 hover:border-clara-warm/[0.22] hover:shadow-glow-sm;
   }
 
   .premium-blur {
@@ -61,11 +72,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(130, 100, 70, 0.18);
     border-radius: 99px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(130, 100, 70, 0.32);
   }
 
   /* Hide scrollbar completely but allow scrolling */
@@ -78,13 +89,13 @@
   }
 
   .mesh-gradient {
-    background-image: radial-gradient(at 40% 20%, rgba(139, 92, 246, 0.1) 0px, transparent 50%),
-                      radial-gradient(at 80% 0%, rgba(236, 72, 153, 0.08) 0px, transparent 50%),
-                      radial-gradient(at 0% 50%, rgba(59, 130, 246, 0.06) 0px, transparent 50%);
+    background-image: radial-gradient(at 40% 20%, rgba(107, 158, 140, 0.09) 0px, transparent 50%),
+                      radial-gradient(at 80% 0%, rgba(201, 123, 90, 0.06) 0px, transparent 50%),
+                      radial-gradient(at 0% 50%, rgba(107, 140, 188, 0.05) 0px, transparent 50%);
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-br from-slate-50 via-slate-200 to-slate-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-stone-800 via-stone-600 to-stone-500;
   }
 
   .mask-edge-fade {
@@ -92,7 +103,7 @@
   }
 
   .input-glow:focus {
-    box-shadow: 0 0 15px -3px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 15px -3px rgba(107, 158, 140, 0.30);
   }
 
   /* Custom Scrollbar Utility */
@@ -104,10 +115,10 @@
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(130, 100, 70, 0.12);
     border-radius: 10px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(130, 100, 70, 0.25);
   }
 }

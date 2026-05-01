@@ -14,6 +14,7 @@ from app.models.session import ClaraSession
 from app.models.message import Message
 from app.models.alert import Alert
 from app.models.caregiver import Caregiver
+from app.models.caregiver_note import CaregiverNote
 from app.models.audit import AuditLog
 
 

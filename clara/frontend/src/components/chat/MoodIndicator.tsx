@@ -9,7 +9,7 @@ const MOOD_CONFIG: Record<string, { label: string; color: string; ring: string; 
   happy:      { label: "Happy",      color: "text-clara-primary-light", ring: "border-primary-muted",      dot: "bg-clara-primary", icon: "✨" },
   confused:   { label: "Confused",   color: "text-warning",      ring: "border-warning-muted",      dot: "bg-warning",      icon: "🤔" },
   distressed: { label: "Distressed", color: "text-danger",       ring: "border-danger-muted",       dot: "bg-danger",       icon: "⚠️" },
-  neutral:    { label: "Neutral",    color: "text-clara-text-secondary", ring: "border-white/[0.08]", dot: "bg-clara-text-tertiary", icon: "😶" },
+  neutral:    { label: "Neutral",    color: "text-clara-text-secondary", ring: "border-clara-warm/[0.18]", dot: "bg-clara-text-tertiary", icon: "😶" },
 };
 
 export const MoodIndicator: React.FC = () => {
@@ -17,7 +17,7 @@ export const MoodIndicator: React.FC = () => {
   const config = MOOD_CONFIG[currentMood] ?? MOOD_CONFIG.neutral;
 
   return (
-    <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl border-white/[0.06] bg-white/[0.02] transition-all duration-700`}>
+    <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl border border-clara-warm/[0.14] bg-clara-surface-2 transition-all duration-700`}>
       <AnimatePresence mode="wait">
         <motion.span
           key={currentMood}

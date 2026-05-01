@@ -20,8 +20,8 @@ export const VoiceToggle: React.FC = () => {
       aria-label={isVoiceEnabled ? "Disable Clara Voice" : "Enable Clara Voice"}
       className={`relative group flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl transition-all duration-300 ${
         isVoiceEnabled
-          ? "bg-clara-primary/10 text-clara-primary-light border border-clara-primary/20 shadow-inner-glow"
-          : "bg-white/[0.02] text-clara-text-tertiary border border-white/[0.05]"
+          ? "bg-clara-primary/10 text-clara-primary border border-clara-primary/25 shadow-inner-glow"
+          : "bg-clara-surface-2 text-clara-text-tertiary border border-clara-warm/[0.16]"
       }`}
       title={isVoiceEnabled ? "Voice Enabled" : "Voice Disabled (Text Only)"}
     >

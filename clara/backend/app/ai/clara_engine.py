@@ -132,21 +132,45 @@ class ClaraEngine:
                 message_content=user_message,
                 categories=distress_result.categories
             ))
-        
-        # 3. ONLY wait for critical components needed for prompt
-        # Mood is NOT critical for starting the stream
-        context, memory_messages = await asyncio.gather(context_task, memory_task)
-        
-        # 4. Build message payload
+            
         patient_name = patient.preferred_name or patient.name.split()[0]
-        system_prompt = self.prompt_builder.build_system_prompt(patient)
         
-        full_messages = (
-            [{"role": "system", "content": system_prompt}]
-            + memory_messages
-            + (context or [{"role": "system", "content": f"Session start with {patient_name}."}])
-            + [{"role": "user", "content": user_message}]
-        )
+        # 3. Dynamic Emergency Fast-Path (No hardcoded strings)
+        if distress_result.is_distressed and distress_result.severity in ["critical", "high"]:
+            # We skip memory and context retrieval entirely to save database/embedding latency
+            # and inject a highly urgent, stripped-down system prompt.
+            system_prompt = self.prompt_builder.build_emergency_prompt(
+                patient, 
+                distress_result.severity, 
+                distress_result.categories
+            )
+            full_messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ]
+            # Restrict token generation for maximum speed
+            llm_options = {
+                "temperature": 0.4,  # Lower temp for more deterministic, calming response
+                "num_predict": 60,   # Prevent long rambling
+                "num_ctx": 1024,
+            }
+        else:
+            # NORMAL PATH
+            # ONLY wait for critical components needed for prompt
+            # Mood is NOT critical for starting the stream
+            context, memory_messages = await asyncio.gather(context_task, memory_task)
+            
+            system_prompt = self.prompt_builder.build_system_prompt(patient)
+            full_messages = (
+                [{"role": "system", "content": system_prompt}]
+                + memory_messages
+                + (context or [{"role": "system", "content": f"Session start with {patient_name}."}])
+                + [{"role": "user", "content": user_message}]
+            )
+            llm_options = {
+                "temperature": settings.ollama.temperature,
+                "num_ctx": settings.ollama.num_ctx,
+            }
         
         # 5. STREAM IMMEDIATELY
         stream_buffer = _StreamBuffer(self.sanitizer, patient_name)
@@ -156,10 +180,7 @@ class ClaraEngine:
             async for delta in ollama_client.chat_stream(
                 full_messages,
                 model=settings.ollama.model,
-                options={
-                    "temperature": settings.ollama.temperature,
-                    "num_ctx": settings.ollama.num_ctx,
-                }
+                options=llm_options
             ):
                 full_response_raw += delta
                 token_to_send = stream_buffer.process_token(delta)

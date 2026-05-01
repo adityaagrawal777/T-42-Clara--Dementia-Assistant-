@@ -62,6 +62,7 @@ class ChatService:
                 
         # 3. Post-stream persistence (only on successful completion)
         clara_message_id: Optional[uuid.UUID] = None
+        patient_msg_id: Optional[uuid.UUID] = None
         if final_meta:
             mood_str = "calm"
             mood_score = settings.chat.default_mood_score
@@ -71,7 +72,7 @@ class ChatService:
 
             try:
                 # a. Save inbound patient message
-                await self.message_repo.add_message(
+                patient_msg = await self.message_repo.add_message(
                     organization_id=patient.organization_id,
                     patient_id=patient.id,
                     session_id=session_id,
@@ -81,7 +82,8 @@ class ChatService:
                     mood=mood_str,
                     mood_score=mood_score,
                 )
-                
+                patient_msg_id = patient_msg.id
+
                 # b. Save outbound Clara response
                 clara_msg = await self.message_repo.add_message(
                     organization_id=patient.organization_id,
@@ -130,11 +132,24 @@ class ChatService:
             clara_text = final_meta.full_response or ""
 
             if clara_message_id is not None:
+                # Embed the full interaction on the clara message row
                 asyncio.create_task(
                     self._embed_and_store(
                         clara_message_id=clara_message_id,
                         patient_text=patient_text,
                         clara_text=clara_text,
+                    )
+                )
+
+            # Also embed the patient's own message directly so their exact words
+            # are independently searchable in cross-session semantic recall.
+            # This ensures "romantic music helps me relax" is retrievable even
+            # if the combined interaction embedding falls below the threshold.
+            if patient_msg_id is not None:
+                asyncio.create_task(
+                    self._embed_patient_message(
+                        patient_message_id=patient_msg_id,
+                        patient_text=patient_text,
                     )
                 )
 
@@ -184,6 +199,42 @@ class ChatService:
                 await session.commit()
         except Exception as store_err:
             logger.warning("chat_service_embedding_store_failed", message_id=str(clara_message_id), error=str(store_err))
+
+    async def _embed_patient_message(
+        self,
+        patient_message_id: uuid.UUID,
+        patient_text: str,
+    ) -> None:
+        """
+        Background task: embed the patient's own raw message text and store it.
+        This makes the patient's exact words independently searchable in
+        cross-session semantic recall, separate from the combined interaction
+        embedding stored on the Clara message row.
+        """
+        from app.db.session import async_session_factory
+        from app.ai.ollama_client import ollama_client
+
+        try:
+            embedding = await ollama_client.embed(patient_text)
+        except Exception as embed_err:
+            logger.warning(
+                "chat_service_patient_embed_failed",
+                message_id=str(patient_message_id),
+                error=str(embed_err),
+            )
+            return
+
+        try:
+            async with async_session_factory() as session:
+                repo = MessageRepository(session)
+                await repo.update_embedding(patient_message_id, embedding)
+                await session.commit()
+        except Exception as store_err:
+            logger.warning(
+                "chat_service_patient_embedding_store_failed",
+                message_id=str(patient_message_id),
+                error=str(store_err),
+            )
 
     async def _extract_and_update_topics(
         self,

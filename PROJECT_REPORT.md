@@ -1,6 +1,6 @@
 # Clara Companion — Comprehensive Project Report
 
-> **Status**: Industrial Pre-Alpha &nbsp;|&nbsp; **License**: Proprietary &nbsp;|&nbsp; **Last Updated**: April 2026
+> **Status**: Industrial Pre-Alpha &nbsp;|&nbsp; **License**: Proprietary &nbsp;|&nbsp; **Last Updated**: May 2026
 
 ---
 
@@ -23,8 +23,9 @@
 15. [Docker & Deployment](#15-docker--deployment)
 16. [Security Architecture](#16-security-architecture)
 17. [Performance Design](#17-performance-design)
-18. [Known Limitations & Roadmap](#18-known-limitations--roadmap)
-19. [Developer Quick Start](#19-developer-quick-start)
+18. [Recent Milestones (May 2026)](#18-recent-milestones-may-2026)
+19. [Known Limitations & Roadmap](#19-known-limitations--roadmap)
+20. [Developer Quick Start](#20-developer-quick-start)
 
 ---
 
@@ -1371,7 +1372,19 @@ The system is explicitly engineered for minimal time from user input to first st
 
 ---
 
-## 18. Known Limitations & Roadmap
+## 18. Recent Milestones (May 2026)
+
+Since the initial architecture documentation in April 2026, the Clara Companion has seen several major feature additions and stability improvements:
+
+- **Apple-Style UI Modernization**: A high-end, minimalist dark mode overhaul for the patient-facing interface, achieving a premium look and feel akin to modern consumer software.
+- **Voice-to-Voice Conversation Integration**: Fully functional browser-based voice interaction mode using Web Speech API (STT/TTS), allowing patients to talk to Clara hands-free with mood-adaptive TTS voices.
+- **Improved Emergency Surveillance**: Implemented a zero-latency "Emergency Fast-Path" that bypasses standard LLM overhead for critical incidents, alongside a robust dual-channel notification dispatch.
+- **Softened Patient Emergency Alerts**: Refined the `EmergencyCard` component to use calming, supportive language instead of alarming UI, ensuring clinical safety while protecting patient emotional well-being.
+- **Dashboard Data Persistence Fixes**: Resolved transaction sequence conflicts in `chat_service.py` to ensure reliable message persistence and real-time dashboard updates.
+
+---
+
+## 19. Known Limitations & Roadmap
 
 ### Current Limitations
 
@@ -1409,7 +1422,7 @@ The system is explicitly engineered for minimal time from user input to first st
 
 ---
 
-## 19. Developer Quick Start
+## 20. Developer Quick Start
 
 ### Prerequisites
 
@@ -1510,6 +1523,6 @@ VALUES (gen_random_uuid(), '<org_id>', 'caregiver@demo.com', '<bcrypt_hash>', 'D
 
 ---
 
-*This report was generated from a full codebase audit conducted April 2026.*  
+*This report was generated from a full codebase audit conducted April 2026 and finalized in May 2026.*  
 *For architecture decisions and rationale, see `PROJECT_GUIDE.md`.*  
 *For voice feature implementation details, see `VOICE_AGENT_IMPLEMENTATION.md`.*

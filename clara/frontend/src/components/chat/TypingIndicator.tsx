@@ -12,12 +12,12 @@ export const TypingIndicator: React.FC = () => {
       className="flex items-end gap-3 w-full"
     >
       {/* Avatar */}
-      <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-1 bg-white/[0.04] text-clara-primary border border-white/[0.1] shadow-dark-sm">
+      <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-1 bg-clara-surface-2 text-clara-primary border border-clara-warm/[0.20] shadow-dark-sm">
         <Smile size={16} strokeWidth={2.4} />
       </div>
 
       {/* Bubble */}
-      <div className="flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.08] rounded-[1.25rem] rounded-bl-none px-5 py-4 shadow-dark-sm h-[48px]">
+      <div className="flex items-center gap-1.5 bg-white border border-clara-warm/[0.14] rounded-[1.25rem] rounded-bl-none px-5 py-4 shadow-dark-sm h-[48px]">
         {[0, 1, 2].map((i) => (
           <motion.div
             key={i}

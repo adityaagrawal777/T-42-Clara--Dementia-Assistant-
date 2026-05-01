@@ -1,27 +1,100 @@
 # Clara Backend — Caregiver Dashboard Data Endpoints
+"""
+All caregiver-facing endpoints.
+
+Assignment architecture (Priority 1):
+  Patient lookup now uses the indexed Patient.caregiver_id FK — no JSON-array
+  scanning. assign/unassign write both the FK (primary) and the JSON array
+  (backward compat) atomically.
+
+Caregiver Notes (Priority 6):
+  Private clinical observations. Strictly isolated from AI prompts and
+  patient-facing views. Hard-delete supported per GDPR erasure requirements.
+"""
 import uuid
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Sequence, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy import select, func, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db_session
 from app.api.deps import require_caregiver, CurrentUser
+from app.models.caregiver import Caregiver
 from app.models.message import Message
 from app.models.patient import Patient
 from app.models.session import ClaraSession
 from app.models.alert import Alert
 from app.repositories.alert_repo import AlertRepository
+from app.repositories.caregiver_note_repo import CaregiverNoteRepository
 from app.repositories.message_repo import MessageRepository
 from app.repositories.patient_repo import PatientRepository
 from app.repositories.session_repo import SessionRepository
 from app.schemas.alert import AlertResponse
 from app.schemas.caregiver import CaregiverAnalyticsResponse
+from app.schemas.caregiver_note import CaregiverNoteCreate, CaregiverNoteResponse
 from app.schemas.message import MessageResponse
+from app.schemas.patient import PatientResponse
 from app.schemas.session import SessionResponse
 
 router = APIRouter(prefix="/caregiver", tags=["Caregiver Dashboard"])
+
+
+# ── Internal helpers ──────────────────────────────────────────────────────────
+
+async def _get_caregiver(db: AsyncSession, caregiver_id: uuid.UUID) -> Caregiver | None:
+    result = await db.execute(select(Caregiver).where(Caregiver.id == caregiver_id))
+    return result.scalars().first()
+
+
+async def _caregiver_patient_ids(
+    db: AsyncSession,
+    caregiver_id: uuid.UUID,
+    organization_id: uuid.UUID,
+) -> List[uuid.UUID]:
+    """
+    Return the caregiver's assigned patient IDs using the indexed FK query.
+
+    Replaces the legacy JSON-array scan — O(assigned patients) indexed lookup
+    instead of full-table JSON parse.
+    """
+    result = await db.execute(
+        select(Patient.id).where(
+            Patient.organization_id == organization_id,
+            Patient.caregiver_id == caregiver_id,
+            Patient.is_deleted == False,  # noqa: E712
+        )
+    )
+    return list(result.scalars().all())
+
+
+async def _verify_patient_access(
+    db: AsyncSession,
+    patient_id: uuid.UUID,
+    caregiver_id: uuid.UUID,
+    organization_id: uuid.UUID,
+) -> Patient:
+    """
+    Confirm the patient exists in this org AND is assigned to this caregiver.
+    Raises 404 (not found) or 403 (access denied) with clear messages.
+    """
+    result = await db.execute(
+        select(Patient).where(
+            Patient.id == patient_id,
+            Patient.organization_id == organization_id,
+            Patient.is_deleted == False,  # noqa: E712
+        )
+    )
+    patient = result.scalars().first()
+    if not patient:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
+    if patient.caregiver_id != caregiver_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not assigned to this patient.",
+        )
+    return patient
 
 
 # ── Organisation-wide Endpoints ───────────────────────────────────────────────
@@ -31,32 +104,24 @@ async def get_caregiver_analytics(
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver),
 ) -> CaregiverAnalyticsResponse:
-    """
-    Dashboard KPIs: live aggregate metrics for the caregiver's organisation.
-
-    Four metrics are returned in a single round-trip:
-      • total_patients    — active, non-deleted patients in the org.
-      • active_sessions   — sessions with no ended_at (currently open).
-      • unresolved_alerts — safety alerts not yet resolved by a caregiver.
-      • stability_index   — % of positive-mood (calm + happy) messages out of
-                            all mood-classified messages in the last 7 days.
-                            Returns None when there is insufficient data.
-    """
+    """Dashboard KPIs scoped to the caregiver's assigned patients."""
     org_id = current_user.organization_id
+    patient_ids = await _caregiver_patient_ids(db, current_user.user_id, org_id)
 
-    # ── 1. Total active patients ──────────────────────────────────────────────
-    patient_count_result = await db.execute(
-        select(func.count(Patient.id)).where(
-            Patient.organization_id == org_id,
-            Patient.is_active == True,       # noqa: E712
-            Patient.is_deleted == False,     # noqa: E712
+    total_patients = len(patient_ids)
+
+    if not patient_ids:
+        return CaregiverAnalyticsResponse(
+            total_patients=0,
+            active_sessions=0,
+            unresolved_alerts=0,
+            stability_index=None,
         )
-    )
-    total_patients: int = patient_count_result.scalar_one()
 
-    # ── 2. Currently open sessions (not yet ended) ────────────────────────────
+    # Currently open sessions for assigned patients
     active_sessions_result = await db.execute(
         select(func.count(ClaraSession.id)).where(
+            ClaraSession.patient_id.in_(patient_ids),
             ClaraSession.organization_id == org_id,
             ClaraSession.ended_at.is_(None),
             ClaraSession.is_deleted == False,  # noqa: E712
@@ -64,16 +129,17 @@ async def get_caregiver_analytics(
     )
     active_sessions: int = active_sessions_result.scalar_one()
 
-    # ── 3. Unresolved safety alerts ───────────────────────────────────────────
+    # Unresolved safety alerts for assigned patients
     unresolved_alerts_result = await db.execute(
         select(func.count(Alert.id)).where(
+            Alert.patient_id.in_(patient_ids),
             Alert.organization_id == org_id,
             Alert.resolved_at.is_(None),
         )
     )
     unresolved_alerts: int = unresolved_alerts_result.scalar_one()
 
-    # ── 4. Stability index (rolling 7-day positive-mood ratio) ────────────────
+    # Stability index: % of calm/happy messages in rolling 7 days
     since_7d = datetime.utcnow() - timedelta(days=7)
     stability_result = await db.execute(
         select(
@@ -84,8 +150,10 @@ async def get_caregiver_analytics(
                     else_=0,
                 )
             ).label("positive"),
-        ).where(
-            Message.organization_id == org_id,
+        )
+        .join(ClaraSession, Message.session_id == ClaraSession.id)
+        .where(
+            ClaraSession.patient_id.in_(patient_ids),
             Message.created_at >= since_7d,
             Message.mood.isnot(None),
         )
@@ -108,9 +176,18 @@ async def list_org_unresolved_alerts(
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver),
 ) -> Sequence[Alert]:
-    """Safety oversight: All unresolved alerts across the caregiver's organisation."""
+    """Unresolved alerts scoped to the caregiver's assigned patients."""
+    patient_ids = await _caregiver_patient_ids(
+        db, current_user.user_id, current_user.organization_id
+    )
+    if not patient_ids:
+        return []
     repo = AlertRepository(db)
-    return await repo.get_org_unresolved_alerts(current_user.organization_id)
+    all_alerts: list = []
+    for pid in patient_ids:
+        alerts = await repo.get_unresolved_alerts(pid, current_user.organization_id)
+        all_alerts.extend(alerts)
+    return all_alerts
 
 
 @router.patch("/alerts/{alert_id}/resolve", response_model=AlertResponse)
@@ -127,6 +204,84 @@ async def resolve_alert(
     return resolved
 
 
+# ── Patient Assignment Endpoints ──────────────────────────────────────────────
+
+@router.get("/org-patients", response_model=List[PatientResponse])
+async def list_all_org_patients(
+    db: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_caregiver),
+) -> Sequence[Patient]:
+    """All active patients in the organisation — used by the assign-patient modal."""
+    repo = PatientRepository(db)
+    return await repo.get_active_patients(current_user.organization_id)
+
+
+@router.post("/patients/{patient_id}/assign", status_code=status.HTTP_200_OK)
+async def assign_patient(
+    patient_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_caregiver),
+) -> Dict[str, str]:
+    """
+    Assign a patient to the requesting caregiver.
+
+    Dual-write strategy:
+      1. Writes Patient.caregiver_id (primary, indexed FK).
+      2. Updates Caregiver.associated_patient_ids JSON array (backward compat).
+    Both writes are flushed inside the same transaction.
+    """
+    patient_repo = PatientRepository(db)
+    assigned = await patient_repo.set_caregiver(
+        patient_id=patient_id,
+        caregiver_id=current_user.user_id,
+        organization_id=current_user.organization_id,
+    )
+    if not assigned:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
+
+    # Backward-compat: keep JSON array in sync
+    caregiver = await _get_caregiver(db, current_user.user_id)
+    if caregiver:
+        existing = [str(pid) for pid in (caregiver.associated_patient_ids or [])]
+        pid_str = str(patient_id)
+        if pid_str not in existing:
+            caregiver.associated_patient_ids = existing + [pid_str]
+
+    await db.commit()
+    return {"message": "Patient assigned."}
+
+
+@router.delete("/patients/{patient_id}/assign", status_code=status.HTTP_200_OK)
+async def unassign_patient(
+    patient_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_caregiver),
+) -> Dict[str, str]:
+    """
+    Remove the caregiver assignment from a patient.
+
+    Dual-write strategy: clears Patient.caregiver_id and removes from
+    Caregiver.associated_patient_ids JSON array.
+    """
+    patient_repo = PatientRepository(db)
+    cleared = await patient_repo.clear_caregiver(
+        patient_id=patient_id,
+        organization_id=current_user.organization_id,
+    )
+    if not cleared:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
+
+    # Backward-compat: keep JSON array in sync
+    caregiver = await _get_caregiver(db, current_user.user_id)
+    if caregiver:
+        pid_str = str(patient_id)
+        existing = [str(pid) for pid in (caregiver.associated_patient_ids or [])]
+        caregiver.associated_patient_ids = [p for p in existing if p != pid_str]
+
+    await db.commit()
+    return {"message": "Patient unassigned."}
+
+
 # ── Per-patient Endpoints ─────────────────────────────────────────────────────
 
 @router.get("/patients/{patient_id}/mood-timeline")
@@ -137,11 +292,19 @@ async def get_patient_mood_timeline(
     current_user: CurrentUser = Depends(require_caregiver),
 ) -> List[Dict[str, Any]]:
     """
-    Analytic tracking: Day-by-day mood distribution for a patient.
+    Day-by-day mood distribution for a patient.
 
-    Returns one entry per calendar day with a breakdown of mood counts, ordered
-    chronologically.  Only days that contain mood-classified messages appear.
+    IMPORTANT: Only patient-role messages are counted.
+    Clara's response messages are stored with the same mood label as the
+    patient's message. Including them would double-count every mood and
+    could cause the dominant-mood algorithm on the frontend to resolve a
+    \"distressed\" day as \"calm\" (e.g. 1 distressed patient msg is countered
+    by 2 calm: the greeting turn + Clara's mirrored reply, tipping the
+    dominant mood to calm). Filtering to role='patient' ensures the graph
+    reflects the patient's true emotional state.
     """
+    # Security: confirm the patient belongs to this caregiver's organisation.
+    await _verify_patient_access(db, patient_id, current_user.user_id, current_user.organization_id)
     since_date = datetime.utcnow() - timedelta(days=days)
 
     stmt = (
@@ -153,8 +316,10 @@ async def get_patient_mood_timeline(
         .join(ClaraSession, Message.session_id == ClaraSession.id)
         .where(
             ClaraSession.patient_id == patient_id,
-            ClaraSession.organization_id == current_user.organization_id,
-            Message.organization_id == current_user.organization_id,
+            # Only patient-authored messages carry a clinically meaningful mood
+            # classification. Clara's response messages inherit the mood label
+            # from the turn but do not represent an independent emotional signal.
+            Message.role == "patient",
             Message.created_at >= since_date,
             Message.mood.isnot(None),
         )
@@ -183,9 +348,8 @@ async def list_patient_sessions(
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver),
 ) -> Sequence[ClaraSession]:
-    """Audit oversight: Paginated list of interaction sessions for a specific patient."""
+    """Paginated list of interaction sessions for a specific patient."""
     repo = SessionRepository(db)
-    # get_patient_sessions_paginated enforces both patient_id and org isolation
     sessions, _ = await repo.get_patient_sessions_paginated(
         patient_id=patient_id,
         organization_id=current_user.organization_id,
@@ -205,30 +369,17 @@ async def get_patient_session_transcript(
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver),
 ) -> List[MessageResponse]:
-    """
-    Full message transcript for a specific patient session.
-
-    Access control is two-level:
-      1. Patient must belong to the caregiver's organisation.
-      2. Session must belong to that patient within the same organisation.
-
-    Any caregiver within the organisation can view any patient's transcript
-    for legitimate clinical oversight.  The message query itself applies
-    patient_id as the primary filter (matching the repository security contract).
-    """
-    # ── Verify patient belongs to this organisation ───────────────────────────
+    """Full message transcript for a specific patient session."""
     patient_repo = PatientRepository(db)
     patient = await patient_repo.get_by_id_scoped(patient_id, current_user.organization_id)
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found.")
 
-    # ── Verify session belongs to this patient within the organisation ─────────
     session_repo = SessionRepository(db)
     session = await session_repo.get_by_id_scoped(session_id, current_user.organization_id)
     if not session or session.patient_id != patient_id:
         raise HTTPException(status_code=404, detail="Session not found.")
 
-    # ── Fetch messages with patient_id as primary isolation filter ────────────
     msg_repo = MessageRepository(db)
     messages = await msg_repo.get_session_messages_scoped(
         session_id=session_id,
@@ -243,14 +394,7 @@ async def list_patient_unresolved_alerts(
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver),
 ) -> Sequence[Alert]:
-    """
-    Safety oversight: Current unresolved incidents for a specific patient.
-
-    Access control is two-level:
-      1. Patient must belong to the caregiver's organisation.
-      2. Alerts are scoped by both patient_id and organization_id to prevent
-         cross-tenant data exposure.
-    """
+    """Current unresolved incidents for a specific patient."""
     patient_repo = PatientRepository(db)
     patient = await patient_repo.get_by_id_scoped(patient_id, current_user.organization_id)
     if not patient:
@@ -258,3 +402,208 @@ async def list_patient_unresolved_alerts(
 
     repo = AlertRepository(db)
     return await repo.get_unresolved_alerts(patient_id, current_user.organization_id)
+
+
+# ── Caregiver Notes Endpoints (Priority 6) ────────────────────────────────────
+
+@router.get(
+    "/patients/{patient_id}/notes",
+    response_model=List[CaregiverNoteResponse],
+    summary="List clinical notes for a patient",
+)
+async def list_patient_notes(
+    patient_id: uuid.UUID,
+    limit: int = Query(50, ge=1, le=200),
+    db: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_caregiver),
+) -> Sequence[CaregiverNoteResponse]:
+    """
+    Retrieve private clinical notes written by any caregiver about this patient.
+    Scoped to the requesting caregiver's organisation.
+    Notes are ordered newest-first.
+
+    IMPORTANT: These notes are NEVER exposed to the patient or injected into
+    AI system prompts. They exist exclusively in the caregiver dashboard.
+    """
+    # Confirm the patient is in this org (does not enforce assignment —
+    # any caregiver in the org can read notes for cross-handover visibility)
+    patient_repo = PatientRepository(db)
+    patient = await patient_repo.get_by_id_scoped(patient_id, current_user.organization_id)
+    if not patient:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
+
+    note_repo = CaregiverNoteRepository(db)
+    return await note_repo.get_patient_notes(
+        patient_id=patient_id,
+        organization_id=current_user.organization_id,
+        limit=limit,
+    )
+
+
+@router.post(
+    "/patients/{patient_id}/notes",
+    response_model=CaregiverNoteResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a clinical note",
+)
+async def create_patient_note(
+    patient_id: uuid.UUID,
+    payload: CaregiverNoteCreate,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_caregiver),
+) -> CaregiverNoteResponse:
+    """
+    Write a private clinical observation for a patient.
+    The note is immediately persisted and returned.
+    It is never transmitted to the patient or to Clara's AI engine.
+    """
+    patient_repo = PatientRepository(db)
+    patient = await patient_repo.get_by_id_scoped(patient_id, current_user.organization_id)
+    if not patient:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
+
+    note_repo = CaregiverNoteRepository(db)
+    note = await note_repo.create_note(
+        organization_id=current_user.organization_id,
+        caregiver_id=current_user.user_id,
+        patient_id=patient_id,
+        content=payload.content,
+    )
+    await db.commit()
+    await db.refresh(note)
+    return CaregiverNoteResponse.model_validate(note)
+
+
+@router.delete(
+    "/patients/{patient_id}/notes/{note_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Permanently delete a clinical note",
+)
+async def delete_patient_note(
+    patient_id: uuid.UUID,
+    note_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_caregiver),
+) -> None:
+    """
+    Permanently delete a note written by the requesting caregiver.
+    Caregivers can only delete their own notes (caregiver_id scoped).
+    A caregiver cannot delete notes written by a colleague.
+    """
+    note_repo = CaregiverNoteRepository(db)
+    deleted = await note_repo.delete_note(
+        note_id=note_id,
+        caregiver_id=current_user.user_id,
+        organization_id=current_user.organization_id,
+    )
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Note not found or you do not have permission to delete it.",
+        )
+    await db.commit()
+
+
+# ── Live Status Endpoint ──────────────────────────────────────────────────────
+
+@router.get(
+    "/patients/{patient_id}/live-status",
+    summary="Real-time patient status — polled by the caregiver dashboard",
+)
+async def get_patient_live_status(
+    patient_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_caregiver),
+) -> Dict[str, Any]:
+    """
+    Returns a lightweight snapshot of a patient's current activity state.
+
+    Designed to be polled every 15 seconds by the caregiver dashboard.
+    All counts are computed fresh from the source tables — never from
+    the denormalized message_count/alert_count columns, which may lag
+    during an ongoing session.
+
+    Response shape:
+      {
+        "is_session_active": bool,
+        "active_session_id": str | null,
+        "session_started_at": ISO datetime | null,
+        "total_messages": int,          -- all messages across all sessions
+        "active_session_messages": int, -- messages in the live session only
+        "unresolved_alerts": int,
+        "latest_mood": str | null,      -- most recent message mood
+        "session_count": int,
+      }
+    """
+    await _verify_patient_access(db, patient_id, current_user.user_id, current_user.organization_id)
+    org_id = current_user.organization_id
+
+    # ── 1. Active session ─────────────────────────────────────────────────────
+    active_session_result = await db.execute(
+        select(ClaraSession).where(
+            ClaraSession.patient_id == patient_id,
+            ClaraSession.organization_id == org_id,
+            ClaraSession.ended_at.is_(None),
+            ClaraSession.is_deleted == False,  # noqa: E712
+        ).order_by(ClaraSession.started_at.desc()).limit(1)
+    )
+    active_session: Optional[ClaraSession] = active_session_result.scalars().first()
+
+    # ── 2. Total sessions ─────────────────────────────────────────────────────
+    session_count_result = await db.execute(
+        select(func.count(ClaraSession.id)).where(
+            ClaraSession.patient_id == patient_id,
+            ClaraSession.is_deleted == False,  # noqa: E712
+        )
+    )
+    session_count: int = session_count_result.scalar_one()
+
+    # ── 3. Total messages — patient_id is the security boundary ───────────────
+    total_msg_result = await db.execute(
+        select(func.count(Message.id)).where(
+            Message.patient_id == patient_id,
+        )
+    )
+    total_messages: int = total_msg_result.scalar_one()
+
+    # ── 4. Active session message count ───────────────────────────────────────
+    active_session_messages = 0
+    if active_session:
+        active_msg_result = await db.execute(
+            select(func.count(Message.id)).where(
+                Message.session_id == active_session.id,
+            )
+        )
+        active_session_messages = active_msg_result.scalar_one()
+
+    # ── 5. Unresolved alerts ──────────────────────────────────────────────────
+    alert_count_result = await db.execute(
+        select(func.count(Alert.id)).where(
+            Alert.patient_id == patient_id,
+            Alert.resolved_at.is_(None),
+        )
+    )
+    unresolved_alerts: int = alert_count_result.scalar_one()
+
+    # ── 6. Latest mood — most recent patient message with a mood classification
+    latest_mood_result = await db.execute(
+        select(Message.mood).where(
+            Message.patient_id == patient_id,
+            Message.mood.isnot(None),
+            Message.role == "patient",
+        ).order_by(Message.created_at.desc()).limit(1)
+    )
+    latest_mood: Optional[str] = latest_mood_result.scalar_one_or_none()
+
+    return {
+        "is_session_active": active_session is not None,
+        "active_session_id": str(active_session.id) if active_session else None,
+        "session_started_at": active_session.started_at.isoformat() if active_session else None,
+        "total_messages": total_messages,
+        "active_session_messages": active_session_messages,
+        "unresolved_alerts": unresolved_alerts,
+        "latest_mood": latest_mood,
+        "session_count": session_count,
+    }
+
+

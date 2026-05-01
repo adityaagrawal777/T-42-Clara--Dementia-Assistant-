@@ -49,8 +49,10 @@ export interface Patient {
   preferred_name: string | null;
   is_active: boolean;
   language: string;
+  date_of_birth: string | null;
+  hometown: string | null;
   occupation_history: string | null;
-  family_names: Record<string, unknown> | null;
+  family_names: Record<string, string> | null;
   favourite_topics: string[] | null;
   life_memories: Array<Record<string, unknown>> | null;
   created_at: string;
@@ -152,3 +154,16 @@ export interface MoodTimelineDay {
   date: string; // "YYYY-MM-DD"
   moods: Array<{ mood: string; count: number }>;
 }
+
+// ── Caregiver Notes ─────────────────────────────────────────────────────────────
+
+export interface CaregiverNote {
+  id: string;
+  patient_id: string;
+  caregiver_id: string;
+  organization_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+

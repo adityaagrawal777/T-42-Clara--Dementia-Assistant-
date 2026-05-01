@@ -2,7 +2,7 @@
 import uuid
 from datetime import date
 from typing import Optional, List, Dict
-from sqlalchemy import String, Date, JSON, Boolean
+from sqlalchemy import String, Date, JSON, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, TenantMixin, SoftDeleteMixin, TimestampMixin
@@ -33,4 +33,14 @@ class Patient(Base, TenantMixin, SoftDeleteMixin, TimestampMixin):
     life_memories: Mapped[Optional[List[Dict]]] = mapped_column(JSON, nullable=True)
 
     # ── Relations ────────────────────────────────────────────────────────────
+    # caregiver_id: nullable FK — populated on assignment, cleared on unassign.
+    # SET NULL on caregiver deletion preserves patient records.
+    caregiver_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("caregivers.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
     organization = relationship("Organization", back_populates="patients")
+    caregiver = relationship("Caregiver", back_populates="patients", foreign_keys=[caregiver_id])

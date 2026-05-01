@@ -171,7 +171,7 @@ class MessageRepository(BaseRepository[Message]):
                 FROM   messages
                 WHERE  patient_id       = :patient_id
                   AND  session_id       != :current_session_id
-                  AND  role             = 'clara'
+                  AND  role             IN ('clara', 'patient')
                   AND  embedding        IS NOT NULL
                   AND  is_deleted       = FALSE
                   AND  (embedding <=> CAST(:vec AS vector)) < :threshold

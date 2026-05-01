@@ -25,7 +25,15 @@ export const SuggestedReplies: React.FC = () => {
 
   const isReady = status === "active" && !isStreaming;
   const lastMessage = items[items.length - 1];
-  const shouldShow = isReady && (!lastMessage || lastMessage.role === "clara");
+
+  // Suggestions are a conversation-starter affordance only.
+  // Show them exclusively after Clara's first (and only) greeting message —
+  // i.e. exactly 1 item in the thread, and it is from Clara.
+  // Once the patient replies, they are hidden for the entire session.
+  const isOpeningGreeting =
+    items.length === 1 && lastMessage?.role === "clara";
+
+  const shouldShow = isReady && isOpeningGreeting;
 
   if (!shouldShow) return null;
 
@@ -44,7 +52,7 @@ export const SuggestedReplies: React.FC = () => {
           transition={{ delay: i * 0.1 }}
           onClick={() => handleSuggest(text)}
           disabled={!isReady}
-          className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white font-bold text-xs whitespace-nowrap cursor-pointer shadow-dark-sm hover:bg-white/[0.06] hover:border-clara-primary/40 hover:shadow-glow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 rounded-xl bg-white border border-clara-warm/[0.14] text-clara-text-secondary font-bold text-xs whitespace-nowrap cursor-pointer shadow-dark-sm hover:bg-clara-surface-2 hover:border-clara-primary/40 hover:text-clara-text-primary hover:shadow-glow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {text}
         </motion.button>

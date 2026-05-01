@@ -41,7 +41,7 @@ class AuditService:
         )
         
         self.db.add(log)
-        await self.db.commit()
+        await self.db.flush()
         
         logger.info("audit_log_created", action=action, target=resource_type)
         return log

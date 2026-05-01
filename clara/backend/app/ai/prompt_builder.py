@@ -38,7 +38,33 @@ class PromptBuilder:
             self._safety_protocol_block(assistant_name),
         ]))
 
+    def build_emergency_prompt(self, patient: Patient, severity: str, categories: list[str], assistant_name: str = "Clara") -> str:
+        """
+        Build a stripped-down, highly urgent system prompt designed for extreme
+        low-latency inference. Bypasses long-term memory grounding to focus purely
+        on immediate emotional stabilization and caregiver assurance.
+        """
+        return "\n\n".join(filter(None, [
+            self._identity_block(patient, assistant_name),
+            self._dementia_care_protocol_block(),
+            self._emergency_override_block(severity, categories),
+        ]))
+
     # ─── Private builders ────────────────────────────────────────────────────
+
+    def _emergency_override_block(self, severity: str, categories: list[str]) -> str:
+        cats = ", ".join(categories) if categories else "distress"
+        return (
+            "## URGENT CLINICAL EMERGENCY OVERRIDE\n"
+            f"The patient's message indicates a {severity.upper()} level distress signal (Categories: {cats}).\n"
+            "CRITICAL INSTRUCTIONS:\n"
+            "1. You MUST respond immediately with extreme warmth and reassurance.\n"
+            "2. Keep it incredibly short: 1 to 2 sentences maximum.\n"
+            "3. Explicitly assure the patient that their caregiver has been alerted and will check on them.\n"
+            "4. Tell them to stay safe (e.g., stay seated, take deep breaths).\n"
+            "5. Do NOT ask any questions. Just provide grounding, calming support.\n"
+            "6. Remember to act exactly as a loving human companion, not an AI."
+        )
 
     def _identity_block(self, patient: Patient, assistant_name: str) -> str:
         name = patient.preferred_name or patient.name.split()[0]
@@ -134,20 +160,42 @@ class PromptBuilder:
             return None
         name = patient.preferred_name or patient.name.split()[0]
         return (
-            f"## Grounding {name} through memory\n"
-            f"- CRITICAL ANTI-HALLUCINATION RULE: You may ONLY reference specific past conversations and shared events "
-            f"that appear verbatim in the '## Recalled Memories' section of your context. "
-            f"If no '## Recalled Memories' section is present, or it does not contain a specific detail, "
-            f"do NOT invent, imply, or fabricate that conversation. NEVER say things like "
-            f"'I remember when we talked about X' or 'last time you mentioned Y' unless that exact content is in '## Recalled Memories'.\n"
-            f"- PROFILE KNOWLEDGE vs RECALLED CONVERSATION: You know {name}'s interests and profile facts (listed in '## About {name}' above). "
-            f"You may ALWAYS confidently reference these — say 'I know you love music' or 'You've always loved cars'. "
-            f"But knowing a topic ≠ remembering a specific conversation about it. Only claim a specific conversation if it appears in '## Recalled Memories'.\n"
-            f"- MEMORY CONFIDENCE RULE: When {name} asks 'do you remember my interests?' or 'do you know what I like?' — "
-            f"confidently affirm what IS in their profile. Say 'Of course! You love [topics].' NEVER hedge with 'I'm not sure if we went into details' when the topics are known.\n"
-            f"- Use reminiscence therapy: gently anchor {name} with familiar topics from their profile (interests, hometown, family names).\n"
-            "- If they seem lost or confused, ground them with familiar, positive things — a favourite topic, a place they loved, a family member's name.\n"
-            "- Never quiz them on facts or test their memory. Focus only on warmth and connection."
+            f"## Memory Grounding for {name}\n"
+
+            f"### ABSOLUTE ANTI-HALLUCINATION RULE (violation = critical error)\n"
+            f"You may reference a specific past conversation or shared event ONLY if it "
+            f"appears verbatim in the '## Recalled Memories' section below. "
+            f"If '## Recalled Memories' is absent, empty, or does not contain a specific detail, "
+            f"you MUST NOT invent, paraphrase, imply, or guess that conversation.\n"
+            f"FORBIDDEN examples (never say these unless the fact is in ## Recalled Memories):\n"
+            f"  ✗ 'You mentioned that classic jazz helps you unwind.'\n"
+            f"  ✗ 'Last time you told me you love gardening.'\n"
+            f"  ✗ 'I remember you said you like classical music.'\n"
+            f"CORRECT when the memory is NOT recalled:\n"
+            f"  ✓ 'I'd love to hear about it again — what kind of music makes you feel relaxed?'\n"
+            f"  ✓ 'Please remind me — you mentioned something lovely about music?'\n\n"
+
+            f"### When {name} asks 'Do you remember what I told you?'\n"
+            f"• If the exact detail IS in '## Recalled Memories': state it confidently and warmly.\n"
+            f"• If the exact detail is NOT in '## Recalled Memories': "
+            f"DO NOT guess. Instead, warmly invite {name} to share again. "
+            f"Example: 'I'd love to hear you tell me again — my memory of it isn't quite clear!'\n"
+            f"Never fabricate a specific answer when you are uncertain.\n\n"
+
+            f"### Profile Knowledge vs. Recalled Conversations\n"
+            f"You know {name}'s interests and profile facts (listed in '## About {name}' above). "
+            f"You may ALWAYS reference these confidently: 'I know you love music' or 'You enjoy nature.' "
+            f"But knowing a topic ≠ remembering a specific conversation about it. "
+            f"Only claim a SPECIFIC CONVERSATION if it appears in '## Recalled Memories'.\n\n"
+
+            f"### Memory Confidence\n"
+            f"When {name} asks 'Do you know what I like?' — confidently affirm what IS in their profile. "
+            f"Say 'Of course — you love [topics from profile]!' NEVER hedge when the topics are known.\n\n"
+
+            f"### Reminiscence Therapy\n"
+            f"Gently anchor {name} with familiar topics from their profile (interests, hometown, family names). "
+            f"If they seem lost or confused, ground them with positive familiarity.\n"
+            f"Never quiz or test their memory. Focus only on warmth and connection."
         )
 
     def _dementia_care_protocol_block(self) -> str:
