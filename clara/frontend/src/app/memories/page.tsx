@@ -33,21 +33,21 @@ import Link from "next/link";
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
 const MEMORY_PALETTES = [
-  { bg: "from-violet-950/70 to-purple-950/50", border: "border-violet-500/25", accent: "text-violet-300", glow: "bg-violet-400" },
-  { bg: "from-rose-950/70 to-pink-950/50",    border: "border-rose-500/25",   accent: "text-rose-300",   glow: "bg-rose-400" },
-  { bg: "from-sky-950/70 to-blue-950/50",     border: "border-sky-500/25",    accent: "text-sky-300",    glow: "bg-sky-400" },
-  { bg: "from-emerald-950/70 to-teal-950/50", border: "border-emerald-500/25",accent: "text-emerald-300",glow: "bg-emerald-400" },
-  { bg: "from-amber-950/70 to-yellow-950/50", border: "border-amber-500/25",  accent: "text-amber-300",  glow: "bg-amber-400" },
-  { bg: "from-fuchsia-950/70 to-purple-950/50",border:"border-fuchsia-500/25",accent: "text-fuchsia-300",glow: "bg-fuchsia-400" },
+  { bg: "from-violet-50 to-purple-50",   border: "border-violet-200/70",  accent: "text-violet-600",  glow: "bg-violet-300", text: "text-violet-900",  sub: "text-violet-500",  btn: "bg-violet-100 hover:bg-violet-200 text-violet-700 border-violet-200" },
+  { bg: "from-rose-50 to-pink-50",       border: "border-rose-200/70",    accent: "text-rose-600",    glow: "bg-rose-300",   text: "text-rose-900",    sub: "text-rose-500",    btn: "bg-rose-100 hover:bg-rose-200 text-rose-700 border-rose-200" },
+  { bg: "from-sky-50 to-blue-50",        border: "border-sky-200/70",     accent: "text-sky-600",     glow: "bg-sky-300",    text: "text-sky-900",     sub: "text-sky-500",     btn: "bg-sky-100 hover:bg-sky-200 text-sky-700 border-sky-200" },
+  { bg: "from-emerald-50 to-teal-50",    border: "border-emerald-200/70", accent: "text-emerald-600", glow: "bg-emerald-300",text: "text-emerald-900", sub: "text-emerald-500", btn: "bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border-emerald-200" },
+  { bg: "from-amber-50 to-yellow-50",    border: "border-amber-200/70",   accent: "text-amber-600",   glow: "bg-amber-300",  text: "text-amber-900",   sub: "text-amber-500",   btn: "bg-amber-100 hover:bg-amber-200 text-amber-700 border-amber-200" },
+  { bg: "from-fuchsia-50 to-purple-50",  border: "border-fuchsia-200/70", accent: "text-fuchsia-600", glow: "bg-fuchsia-300",text: "text-fuchsia-900", sub: "text-fuchsia-500", btn: "bg-fuchsia-100 hover:bg-fuchsia-200 text-fuchsia-700 border-fuchsia-200" },
 ];
 
 const TOPIC_PALETTES = [
-  { bg: "from-indigo-950/60 to-violet-950/40", border: "border-indigo-500/20", accent: "text-indigo-300", icon: "bg-indigo-500/15 border-indigo-500/25 text-indigo-300" },
-  { bg: "from-teal-950/60 to-emerald-950/40",  border: "border-teal-500/20",   accent: "text-teal-300",   icon: "bg-teal-500/15 border-teal-500/25 text-teal-300" },
-  { bg: "from-pink-950/60 to-rose-950/40",     border: "border-pink-500/20",   accent: "text-pink-300",   icon: "bg-pink-500/15 border-pink-500/25 text-pink-300" },
-  { bg: "from-orange-950/60 to-amber-950/40",  border: "border-orange-500/20", accent: "text-orange-300", icon: "bg-orange-500/15 border-orange-500/25 text-orange-300" },
-  { bg: "from-cyan-950/60 to-sky-950/40",      border: "border-cyan-500/20",   accent: "text-cyan-300",   icon: "bg-cyan-500/15 border-cyan-500/25 text-cyan-300" },
-  { bg: "from-lime-950/60 to-green-950/40",    border: "border-lime-500/20",   accent: "text-lime-300",   icon: "bg-lime-500/15 border-lime-500/25 text-lime-300" },
+  { bg: "from-indigo-50 to-violet-50", border: "border-indigo-200/70", accent: "text-indigo-600", icon: "bg-indigo-100 border-indigo-200 text-indigo-600", btn: "bg-indigo-100 hover:bg-indigo-200 text-indigo-700 border-indigo-200" },
+  { bg: "from-teal-50 to-emerald-50",  border: "border-teal-200/70",   accent: "text-teal-600",   icon: "bg-teal-100 border-teal-200 text-teal-600",       btn: "bg-teal-100 hover:bg-teal-200 text-teal-700 border-teal-200" },
+  { bg: "from-pink-50 to-rose-50",     border: "border-pink-200/70",   accent: "text-pink-600",   icon: "bg-pink-100 border-pink-200 text-pink-600",       btn: "bg-pink-100 hover:bg-pink-200 text-pink-700 border-pink-200" },
+  { bg: "from-orange-50 to-amber-50",  border: "border-orange-200/70", accent: "text-orange-600", icon: "bg-orange-100 border-orange-200 text-orange-600", btn: "bg-orange-100 hover:bg-orange-200 text-orange-700 border-orange-200" },
+  { bg: "from-cyan-50 to-sky-50",      border: "border-cyan-200/70",   accent: "text-cyan-600",   icon: "bg-cyan-100 border-cyan-200 text-cyan-600",       btn: "bg-cyan-100 hover:bg-cyan-200 text-cyan-700 border-cyan-200" },
+  { bg: "from-lime-50 to-green-50",    border: "border-lime-200/70",   accent: "text-lime-700",   icon: "bg-lime-100 border-lime-200 text-lime-700",       btn: "bg-lime-100 hover:bg-lime-200 text-lime-700 border-lime-200" },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -85,7 +85,7 @@ const TopicCard: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.06, ease: [0.16, 1, 0.3, 1] }}
       className={`relative flex flex-col rounded-2xl border ${p.border} bg-gradient-to-br ${p.bg}
-                  overflow-hidden group hover:scale-[1.02] transition-transform duration-300 cursor-default`}
+                  overflow-hidden group hover:scale-[1.02] transition-transform duration-300 cursor-default shadow-sm`}
     >
       <div className="p-5 flex flex-col gap-3">
         {/* Topic icon */}
@@ -95,8 +95,8 @@ const TopicCard: React.FC<{
 
         {/* Topic name */}
         <div>
-          <p className="font-black text-white text-sm leading-tight tracking-tight">{topic}</p>
-          <p className={`text-[10px] font-bold mt-0.5 uppercase tracking-wider ${p.accent} opacity-70`}>
+          <p className="font-black text-clara-text-primary text-sm leading-tight tracking-tight">{topic}</p>
+          <p className={`text-[10px] font-bold mt-0.5 uppercase tracking-wider ${p.accent} opacity-80`}>
             Your interest
           </p>
         </div>
@@ -104,8 +104,8 @@ const TopicCard: React.FC<{
         {/* CTA */}
         <button
           onClick={() => onTalkToClara(topic)}
-          className={`w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border ${p.border}
-                      bg-white/[0.03] hover:bg-white/[0.08] transition-all font-bold text-[11px] ${p.accent} hover:text-white`}
+          className={`w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border
+                      transition-all font-bold text-[11px] ${p.btn}`}
         >
           <MessageSquare size={12} strokeWidth={2.5} className="shrink-0" />
           Talk to Clara about this
@@ -131,18 +131,18 @@ const MemoryCard: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.07, ease: [0.16, 1, 0.3, 1] }}
       className={`relative flex flex-col rounded-3xl border ${p.border} bg-gradient-to-br ${p.bg}
-                  backdrop-blur-sm overflow-hidden group hover:scale-[1.015] transition-transform duration-300`}
+                  overflow-hidden group hover:scale-[1.015] transition-transform duration-300 shadow-sm`}
     >
       {/* Ambient glow */}
-      <div className={`absolute top-0 left-0 w-32 h-32 rounded-full ${p.glow} opacity-[0.04] blur-3xl pointer-events-none`} />
+      <div className={`absolute top-0 left-0 w-32 h-32 rounded-full ${p.glow} opacity-[0.12] blur-3xl pointer-events-none`} />
 
       <div className="relative z-10 p-6 flex flex-col h-full">
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-2xl shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 flex items-center justify-center text-2xl shrink-0 shadow-sm">
             {emoji}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-black text-white text-base leading-tight tracking-tight line-clamp-2">{title}</h3>
+            <h3 className={`font-black text-base leading-tight tracking-tight line-clamp-2 ${p.text}`}>{title}</h3>
             {date && (
               <div className={`flex items-center gap-1.5 mt-1.5 ${p.accent}`}>
                 <Calendar size={11} strokeWidth={2.5} />
@@ -163,8 +163,8 @@ const MemoryCard: React.FC<{
             {tags.slice(0, 4).map((tag) => (
               <span
                 key={tag}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.05]
-                            border border-white/[0.08] text-[10px] font-bold ${p.accent} uppercase tracking-wider`}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/60
+                            border border-white/80 text-[10px] font-bold ${p.accent} uppercase tracking-wider`}
               >
                 <Tag size={9} />
                 {tag}
@@ -175,8 +175,8 @@ const MemoryCard: React.FC<{
 
         <button
           onClick={() => onTalkToClara(memory)}
-          className={`w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl border ${p.border}
-                      bg-white/[0.04] hover:bg-white/[0.09] transition-all font-black text-xs ${p.accent} hover:text-white`}
+          className={`w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl border
+                      transition-all font-black text-xs ${p.btn}`}
         >
           <MessageSquare size={14} strokeWidth={2.5} className="shrink-0" />
           Talk to Clara about this
@@ -195,15 +195,15 @@ const SectionHeader: React.FC<{
   badge?: string;
 }> = ({ icon, title, count, badge }) => (
   <div className="flex items-center gap-3 mb-5">
-    <div className="w-8 h-8 rounded-xl bg-clara-primary/10 border border-clara-primary/20 flex items-center justify-center text-clara-primary-light">
+    <div className="w-8 h-8 rounded-xl bg-clara-primary/10 border border-clara-primary/20 flex items-center justify-center text-clara-primary">
       {icon}
     </div>
-    <h2 className="text-base font-black text-white tracking-tight">{title}</h2>
-    <span className="px-2.5 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-[10px] font-black text-clara-text-muted uppercase tracking-wider">
+    <h2 className="text-base font-black text-clara-text-primary tracking-tight">{title}</h2>
+    <span className="px-2.5 py-0.5 rounded-full bg-clara-surface-2 border border-clara-warm/[0.18] text-[10px] font-black text-clara-text-muted uppercase tracking-wider">
       {count}
     </span>
     {badge && (
-      <span className="px-2.5 py-0.5 rounded-full bg-clara-primary/10 border border-clara-primary/20 text-[10px] font-black text-clara-primary-light uppercase tracking-wider flex items-center gap-1">
+      <span className="px-2.5 py-0.5 rounded-full bg-clara-primary/10 border border-clara-primary/20 text-[10px] font-black text-clara-primary uppercase tracking-wider flex items-center gap-1">
         <Zap size={9} />
         {badge}
       </span>
@@ -214,8 +214,8 @@ const SectionHeader: React.FC<{
 // ── Empty section hint ────────────────────────────────────────────────────────
 
 const EmptySectionHint: React.FC<{ message: string; cta?: React.ReactNode }> = ({ message, cta }) => (
-  <div className="flex flex-col items-center text-center py-10 px-6 rounded-3xl border border-dashed border-white/[0.07] bg-white/[0.01]">
-    <p className="text-clara-text-muted text-sm font-medium leading-relaxed max-w-xs">{message}</p>
+  <div className="flex flex-col items-center text-center py-10 px-6 rounded-3xl border border-dashed border-clara-warm/[0.25] bg-clara-surface-2/40">
+    <p className="text-clara-text-secondary text-sm font-medium leading-relaxed max-w-xs">{message}</p>
     {cta && <div className="mt-4">{cta}</div>}
   </div>
 );
@@ -228,10 +228,10 @@ const TotalEmptyState: React.FC<{ hasSearch: boolean }> = ({ hasSearch }) => (
     animate={{ opacity: 1, y: 0 }}
     className="flex flex-col items-center text-center py-24 px-8"
   >
-    <div className="w-24 h-24 rounded-[2rem] bg-white/[0.03] border border-white/[0.07] flex items-center justify-center mb-6 text-clara-primary">
+    <div className="w-24 h-24 rounded-[2rem] glass-card flex items-center justify-center mb-6 text-clara-primary">
       {hasSearch ? <Search size={36} /> : <BookOpen size={36} />}
     </div>
-    <h3 className="text-xl font-black text-white tracking-tight mb-2">
+    <h3 className="text-xl font-black text-clara-text-primary tracking-tight mb-2">
       {hasSearch ? "No results found" : "Your garden is waiting"}
     </h3>
     <p className="text-clara-text-secondary text-sm max-w-sm leading-relaxed">
@@ -242,7 +242,7 @@ const TotalEmptyState: React.FC<{ hasSearch: boolean }> = ({ hasSearch }) => (
     {!hasSearch && (
       <Link
         href="/chat"
-        className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-clara-primary/10 border border-clara-primary/30 text-clara-primary-light font-black text-sm hover:bg-clara-primary/20 transition-all"
+        className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-clara-primary/10 border border-clara-primary/30 text-clara-primary font-black text-sm hover:bg-clara-primary/20 transition-all"
       >
         <MessageSquare size={15} />
         Chat with Clara
@@ -338,12 +338,12 @@ function MemoriesContent() {
         <div className="flex items-center gap-4">
           <Link
             href="/chat"
-            className="w-10 h-10 glass-card rounded-2xl flex items-center justify-center text-clara-text-tertiary hover:text-white transition-all shrink-0"
+            className="w-10 h-10 glass-card rounded-2xl flex items-center justify-center text-clara-text-tertiary hover:text-clara-text-primary transition-all shrink-0"
           >
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tighter flex items-center gap-3">
+            <h1 className="text-3xl font-black text-clara-text-primary tracking-tighter flex items-center gap-3">
               <Sparkles size={26} className="text-clara-primary" />
               Memory Garden
             </h1>
@@ -357,7 +357,7 @@ function MemoriesContent() {
           onClick={fetchProfile}
           disabled={loading}
           title="Refresh"
-          className="w-10 h-10 glass-card rounded-2xl flex items-center justify-center text-clara-text-tertiary hover:text-white transition-all disabled:opacity-40"
+          className="w-10 h-10 glass-card rounded-2xl flex items-center justify-center text-clara-text-tertiary hover:text-clara-text-primary transition-all disabled:opacity-40"
         >
           <RefreshCw size={17} className={loading ? "animate-spin" : ""} />
         </button>
@@ -366,19 +366,19 @@ function MemoriesContent() {
       {/* ── Stats row ── */}
       {!loading && !error && (
         <div className="flex flex-wrap gap-3 mb-8">
-          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.07]">
-            <Sparkles size={14} className="text-clara-primary-light" />
-            <span className="text-sm font-black text-white">{memoryCount}</span>
+          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl glass-card">
+            <Sparkles size={14} className="text-clara-primary" />
+            <span className="text-sm font-black text-clara-text-primary">{memoryCount}</span>
             <span className="text-[11px] font-bold text-clara-text-muted uppercase tracking-wider">Life Memories</span>
           </div>
-          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.07]">
-            <Heart size={14} className="text-clara-primary-light" />
-            <span className="text-sm font-black text-white">{topicCount}</span>
+          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl glass-card">
+            <Heart size={14} className="text-clara-primary" />
+            <span className="text-sm font-black text-clara-text-primary">{topicCount}</span>
             <span className="text-[11px] font-bold text-clara-text-muted uppercase tracking-wider">Interests</span>
           </div>
           {topicCount === 0 && (
-            <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-clara-primary/[0.05] border border-clara-primary/20">
-              <Zap size={13} className="text-clara-primary-light" />
+            <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-clara-primary/[0.07] border border-clara-primary/20">
+              <Zap size={13} className="text-clara-primary" />
               <span className="text-[11px] font-medium text-clara-text-secondary">
                 Tell Clara about your interests — they&apos;ll appear here!
               </span>
@@ -395,9 +395,9 @@ function MemoriesContent() {
             placeholder="Search memories and interests..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-3 pl-11 pr-10 text-sm font-medium
+            className="w-full bg-clara-surface-2/60 border border-clara-warm/[0.2] rounded-2xl py-3 pl-11 pr-10 text-sm font-medium
                        text-clara-text-primary placeholder:text-clara-text-muted
-                       focus:bg-white/[0.05] focus:border-clara-primary/40 focus:shadow-glow-sm transition-all"
+                       focus:bg-white focus:border-clara-primary/40 focus:shadow-glow-sm transition-all"
           />
           <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-clara-text-muted" />
           <AnimatePresence>
@@ -407,7 +407,7 @@ function MemoriesContent() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 onClick={() => setSearchQuery("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-clara-text-muted hover:text-white transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-clara-text-muted hover:text-clara-text-primary transition-colors"
               >
                 <X size={14} />
               </motion.button>
@@ -425,15 +425,15 @@ function MemoriesContent() {
       {loading && (
         <div className="space-y-10">
           <div>
-            <div className="h-5 w-40 rounded-xl bg-white/[0.05] animate-pulse mb-4" />
+            <div className="h-5 w-40 rounded-xl bg-clara-warm/[0.12] animate-pulse mb-4" />
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {[1,2,3,4].map(i => <div key={i} className="h-36 rounded-2xl bg-white/[0.03] animate-pulse" />)}
+              {[1,2,3,4].map(i => <div key={i} className="h-36 rounded-2xl bg-clara-surface-2 animate-pulse" />)}
             </div>
           </div>
           <div>
-            <div className="h-5 w-40 rounded-xl bg-white/[0.05] animate-pulse mb-4" />
+            <div className="h-5 w-40 rounded-xl bg-clara-warm/[0.12] animate-pulse mb-4" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1,2,3].map(i => <div key={i} className="h-56 rounded-3xl bg-white/[0.03] animate-pulse" />)}
+              {[1,2,3].map(i => <div key={i} className="h-56 rounded-3xl bg-clara-surface-2 animate-pulse" />)}
             </div>
           </div>
         </div>
@@ -446,10 +446,10 @@ function MemoriesContent() {
           <div className="w-16 h-16 rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4 text-red-400">
             <X size={28} />
           </div>
-          <p className="text-white font-black mb-1">Could not load your garden</p>
+          <p className="text-clara-text-primary font-black mb-1">Could not load your garden</p>
           <p className="text-clara-text-muted text-sm mb-4">{error}</p>
           <button onClick={fetchProfile}
-            className="px-4 py-2 rounded-xl bg-clara-primary/10 border border-clara-primary/30 text-clara-primary-light font-black text-sm hover:bg-clara-primary/20 transition-all">
+            className="px-4 py-2 rounded-xl bg-clara-primary/10 border border-clara-primary/30 text-clara-primary font-black text-sm hover:bg-clara-primary/20 transition-all">
             Try again
           </button>
         </motion.div>
@@ -561,10 +561,10 @@ export default function MemoriesPage() {
         <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
           {[1, 2].map((s) => (
             <div key={s}>
-              <div className="h-5 w-40 rounded-xl bg-white/[0.05] animate-pulse mb-4" />
+              <div className="h-5 w-40 rounded-xl bg-clara-warm/[0.12] animate-pulse mb-4" />
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-36 rounded-2xl bg-white/[0.03] animate-pulse" />
+                  <div key={i} className="h-36 rounded-2xl bg-clara-surface-2 animate-pulse" />
                 ))}
               </div>
             </div>

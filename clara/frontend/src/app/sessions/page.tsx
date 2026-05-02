@@ -11,9 +11,11 @@ import {
   RefreshCw,
   Calendar,
   Zap,
-  Loader2
+  Loader2,
+  AlertTriangle,
+  LogIn,
 } from "lucide-react";
-import { decodeJWT } from "@/lib/tokens";
+import { isJWTValid, getJWT } from "@/lib/tokens";
 import { apiFetch } from "@/lib/api";
 import type { SessionHistoryEntry, SessionMessageEntry } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
@@ -119,11 +121,7 @@ const SessionCard: React.FC<{ session: SessionHistoryEntry }> = ({ session }) =>
   const mood = moodLabel(session.mood_summary);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass-card rounded-3xl shadow-dark-md overflow-hidden mb-3 hover:bg-clara-surface-2 transition-colors"
-    >
+    <div className="glass-card rounded-3xl shadow-dark-md overflow-hidden hover:bg-clara-surface-2 transition-colors">
       <button
         onClick={handleExpand}
         className="w-full flex items-center justify-between p-6 text-left group"
@@ -186,7 +184,7 @@ const SessionCard: React.FC<{ session: SessionHistoryEntry }> = ({ session }) =>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };
 
@@ -195,59 +193,146 @@ export default function SessionsPage() {
   const [sessions, setSessions] = useState<SessionHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [authReady, setAuthReady] = useState(false);
 
+  // ── Auth guard: runs once on mount (client-side only) ──────────────────────
   useEffect(() => {
-    const payload = decodeJWT();
-    if (!payload) router.replace("/signin");
+    if (!isJWTValid()) {
+      router.replace("/signin");
+    } else {
+      setAuthReady(true);
+    }
   }, [router]);
 
+  // ── Fetch sessions — only after we know auth is valid ─────────────────────
   const fetchSessions = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const data = await apiFetch("/api/v1/sessions/history", { params: { limit: "50", offset: "0" } });
-      setSessions(data.sessions);
+      const token = getJWT();
+      if (!token) {
+        router.replace("/signin");
+        return;
+      }
+      const data = await apiFetch("/api/v1/sessions/history", {
+        params: { limit: "50", offset: "0" },
+      });
+      setSessions(Array.isArray(data?.sessions) ? data.sessions : []);
     } catch (err: any) {
-      setError(err.message);
+      const msg: string = err?.message ?? "Unknown error";
+      if (msg.includes("401") || msg.toLowerCase().includes("unauthorized") || msg.toLowerCase().includes("credentials")) {
+        // Token expired or invalid — clear and redirect
+        router.replace("/signin");
+        return;
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
-  useEffect(() => { fetchSessions(); }, [fetchSessions]);
+  useEffect(() => {
+    if (authReady) fetchSessions();
+  }, [authReady, fetchSessions]);
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
+      {/* ── Page Header ── */}
       <div className="flex items-center justify-between mb-10">
         <div>
-          <h1 className="text-3xl font-black text-clara-text-primary tracking-tighter">Your Sanctuary Wall</h1>
+          <h1 className="text-3xl font-black text-clara-text-primary tracking-tighter">
+            Your Sanctuary Wall
+          </h1>
           <p className="text-clara-text-secondary font-medium mt-1">
-             Revisit your records of peace and companionship.
+            Revisit your records of peace and companionship.
           </p>
         </div>
         <button
           onClick={fetchSessions}
           disabled={loading}
+          title="Refresh history"
           className="w-12 h-12 glass-card rounded-2xl flex items-center justify-center text-clara-text-tertiary hover:text-clara-text-primary transition-all disabled:opacity-40"
         >
           <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
         </button>
       </div>
 
-      {loading && sessions.length === 0 ? (
+      {/* ── Loading skeletons ── */}
+      {loading && (
         <div className="space-y-4">
-          {[1, 2, 3].map(i => <div key={i} className="h-24 glass-card rounded-3xl animate-pulse" />)}
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-24 glass-card rounded-3xl animate-pulse"
+              style={{ animationDelay: `${(i - 1) * 120}ms` }}
+            />
+          ))}
         </div>
-      ) : (
+      )}
+
+      {/* ── Error state ── */}
+      {!loading && error && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card rounded-[2.5rem] py-20 flex flex-col items-center text-center px-8"
+        >
+          <div className="w-20 h-20 bg-red-500/10 rounded-[2.5rem] flex items-center justify-center mb-6 text-red-400">
+            <AlertTriangle size={36} />
+          </div>
+          <h4 className="text-xl font-black text-clara-text-primary mb-2">Could not load history</h4>
+          <p className="text-clara-text-secondary max-w-xs mb-6 leading-relaxed text-sm">
+            {error}
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchSessions}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-clara-primary text-white text-sm font-bold hover:opacity-90 transition-opacity"
+            >
+              <RefreshCw size={15} />
+              Try again
+            </button>
+            <button
+              onClick={() => router.replace("/signin")}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-clara-warm/[0.24] text-clara-text-secondary text-sm font-bold hover:text-clara-text-primary transition-colors"
+            >
+              <LogIn size={15} />
+              Sign in again
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── Session cards ── */}
+      {!loading && !error && (
         <div className="space-y-4">
-          {sessions.map((s) => <SessionCard key={s.id} session={s} />)}
-          {sessions.length === 0 && !error && (
-            <div className="glass-card rounded-[2.5rem] py-32 flex flex-col items-center text-center">
-               <div className="w-20 h-20 bg-clara-surface-2 rounded-[2.5rem] flex items-center justify-center mb-6 text-clara-primary">
-                  <Calendar size={40} />
-               </div>
-               <h4 className="text-xl font-black text-clara-text-primary mb-2">The wall is empty</h4>
-               <p className="text-clara-text-secondary max-w-xs px-10">Your journey of companionship is just beginning. Your chat history will appear here.</p>
-            </div>
+          <AnimatePresence>
+            {sessions.map((s, idx) => (
+              <motion.div
+                key={s.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.05 }}
+              >
+                <SessionCard session={s} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {sessions.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="glass-card rounded-[2.5rem] py-32 flex flex-col items-center text-center"
+            >
+              <div className="w-20 h-20 bg-clara-surface-2 rounded-[2.5rem] flex items-center justify-center mb-6 text-clara-primary">
+                <Calendar size={40} />
+              </div>
+              <h4 className="text-xl font-black text-clara-text-primary mb-2">The wall is empty</h4>
+              <p className="text-clara-text-secondary max-w-xs px-10">
+                Your journey of companionship is just beginning. Your chat history will appear here.
+              </p>
+            </motion.div>
           )}
         </div>
       )}

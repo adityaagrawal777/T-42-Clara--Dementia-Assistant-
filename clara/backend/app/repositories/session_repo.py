@@ -1,6 +1,6 @@
 # Clara Backend — Session Repository Implementation
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, Sequence, Tuple
 from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -116,3 +116,31 @@ class SessionRepository(BaseRepository[ClaraSession]):
             .offset(offset)
         )
         return page_result.scalars().all(), total
+
+    async def close_stale_sessions(
+        self,
+        organization_id: uuid.UUID,
+        patient_id: uuid.UUID,
+        stale_after_hours: int = 4,
+    ) -> int:
+        """
+        Auto-close any sessions that are still marked open (ended_at IS NULL)
+        but whose started_at is older than `stale_after_hours`.
+
+        These are orphaned records created before the WebSocketDisconnect fix
+        or from abnormal process terminations. Returns the count of rows fixed.
+        """
+        cutoff = datetime.utcnow() - timedelta(hours=stale_after_hours)
+        stmt = (
+            update(self.model)
+            .where(
+                self.model.organization_id == organization_id,
+                self.model.patient_id == patient_id,
+                self.model.ended_at.is_(None),
+                self.model.is_deleted == False,  # noqa: E712
+                self.model.started_at <= cutoff,
+            )
+            .values(ended_at=datetime.utcnow())
+        )
+        result = await self.db.execute(stmt)
+        return result.rowcount  # type: ignore[return-value]

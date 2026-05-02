@@ -194,6 +194,15 @@ export default function CaregiverDashboard() {
   const [patientsLoading, setPatientsLoading] = useState(true);
   const [patientsError, setPatientsError] = useState<string | null>(null);
 
+  // Request browser notification permission so AlertFeed push alerts can fire
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    }
+  }, []);
+
   const fetchAnalytics = useCallback(() => {
     apiFetch("/api/v1/caregiver/analytics")
       .then((data: unknown) => setAnalytics(data as CaregiverAnalytics))

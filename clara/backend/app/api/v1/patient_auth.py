@@ -33,7 +33,7 @@ class PatientRegisterRequest(BaseModel):
     """
     name: str = Field(..., min_length=1, max_length=255, description="Patient's full name")
     preferred_name: Optional[str] = Field(None, max_length=100)
-    passphrase: str = Field(..., min_length=4, description="Secret passphrase chosen by the patient")
+    passphrase: str = Field(..., min_length=6, description="Secret passphrase — at least 6 characters")
 
 
 class PatientLoginRequest(BaseModel):
@@ -202,10 +202,27 @@ async def login_patient(
     """
     Sign in an existing patient.
     - Verifies name + bcrypt passphrase
+    - Brute-force protection: 5 failed attempts locks the account for 10 min
     - Opens a new ClaraSession row in Supabase for this interaction
     - Returns a signed JWT session token
     """
+    from app.db.redis import redis_client
+
     name_lower = body.name.strip().lower()
+    lockout_key = f"auth:fail:{name_lower}"
+
+    # Brute-force check — Redis fail-open (if Redis is down, skip check)
+    try:
+        fail_count = await redis_client.get(lockout_key)
+        if fail_count and int(fail_count) >= 5:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many failed attempts. Please try again in 10 minutes.",
+            )
+    except HTTPException:
+        raise
+    except Exception:
+        pass  # Redis unavailable — fail open
 
     # Fetch the default organization first so login is org-scoped
     org_result = await db.execute(select(Organization).limit(1))
@@ -229,16 +246,36 @@ async def login_patient(
     )
 
     if not patient or not patient.hashed_passphrase:
+        try:
+            pipe = redis_client.pipeline()
+            pipe.incr(lockout_key)
+            pipe.expire(lockout_key, 600)  # 10 min window
+            await pipe.execute()
+        except Exception:
+            pass
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Name or passphrase is incorrect.",
         )
 
     if not auth_service.verify_password(body.passphrase, patient.hashed_passphrase):
+        try:
+            pipe = redis_client.pipeline()
+            pipe.incr(lockout_key)
+            pipe.expire(lockout_key, 600)
+            await pipe.execute()
+        except Exception:
+            pass
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Name or passphrase is incorrect.",
         )
+
+    # Successful login — clear failure counter
+    try:
+        await redis_client.delete(lockout_key)
+    except Exception:
+        pass
 
     # Create a Supabase session record for this login (organization_id is NOT NULL in DB)
     clara_session = await _create_session_record(db, patient.id, patient.organization_id)

@@ -127,6 +127,7 @@ export interface CaregiverAlertEntry {
   id: string;
   session_id: string;
   patient_id: string;
+  patient_name: string | null;
   severity: "low" | "medium" | "high" | "critical";
   trigger_phrase: string | null;
   rule_name: string | null;

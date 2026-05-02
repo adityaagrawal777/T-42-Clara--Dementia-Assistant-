@@ -34,43 +34,51 @@ class DistressDetector:
         - MEDIUM:   Emotional distress — confusion, loneliness, caregiver absence
     """
 
+    # ─── POSITIVE CONTEXT WORDS — used to suppress false positives ───────────
+    # If a message contains these words AND only matches ambiguous patterns,
+    # we do NOT downgrade severity — dementia patients can be simultaneously
+    # distressed AND using positive words. These are checked per-pattern below.
+    _POSITIVE_EMOTION_RE = re.compile(
+        r"\b(so (happy|excited|thrilled|joyful|wonderful)|with (excitement|joy|delight)|because (i'?m |i am )?(happy|excited|thrilled))\b",
+        re.IGNORECASE,
+    )
+
     # ─── CRITICAL: Life-threatening signals ───────────────────────────────────
     CRITICAL_PATTERNS = [
         # Suicidal / self-harm ideation
-        (r"\b(kill myself|want to die|end it( all)?|don'?t want to (live|be here)|no reason to live|give up on life)\b", "suicidal_ideation"),
+        (r"\b(kill myself|want to die|end it( all)?|don'?t want to (live|be here)|no reason to live|give up on life|top myself|do myself in)\b", "suicidal_ideation"),
         # Dying / death expressions
         (r"\b(i'?m dying|i am dying|i think i'?m dying|i'?m going to die|i feel like dying|going to die)\b", "dying"),
-        # Acute cardiac / respiratory medical emergencies
-        # NOTE: "heart attack", "stroke", etc. are explicit; the second pattern
-        # catches descriptive symptom language patients naturally use instead of
-        # clinical terms (e.g. "my heartbeats are increasing", "chest is tight").
+        # Unambiguous medical emergencies — explicit clinical terms only
         (r"\b(heart attack|having a stroke|seizure|can'?t breathe|choking|overdose|bleeding (a lot|heavily|everywhere)|unconscious)\b", "medical_emergency"),
-        (r"\b(heart(beat)?s? (is |are )?(racing|pounding|increasing|beating (too )?fast|going too fast)|chest (pain|tightness|pressure)|short(ness)? of breath|trouble breathing|difficulty breathing|can'?t catch my breath)\b", "cardiac_respiratory_emergency"),
+        # Chest symptoms — unambiguous pain/pressure language (NOT racing/pounding which can be positive)
+        (r"\b(chest (pain|tightness|pressure)|short(ness)? of breath|trouble breathing|difficulty breathing|can'?t catch my breath)\b", "cardiac_respiratory_emergency"),
         # Cannot move / paralysis
         (r"\b(can'?t move|can'?t feel my|paralyzed|collapsed|fell (down|over)|i fell|i'?ve fallen)\b", "immobility"),
     ]
 
     # ─── HIGH: Acute distress ─────────────────────────────────────────────────
     HIGH_PATTERNS = [
-        # Physical pain signals (specific enough to avoid false positives)
-        (r"\b(hurts?|aching|burning|stinging|sore|numb|chest tight|headache|throbbing)\b", "physical_pain"),
-        (r"\b(i('?m| am) in pain|i have (a )?(bad |severe )?pain|it (really )?hurts)\b", "physical_pain"),
-        # Acute fear / panic — NOTE: bare "help me" is deliberately excluded.
-        # It matches benign sentences like "they help me relax" or
-        # "music helps me sleep". Only unambiguous panic signals are listed.
-        (r"\b(scared|terrified|panic(king)?|trapped|get me out|afraid|in danger|hide|lock (me|the door))\b", "acute_fear"),
-        # Explicit cry for help — context-anchored so they cannot appear in
-        # normal positive conversation.
-        (r"\b(please help me|help me please|somebody help me|someone help me|help me i'?m|help me i am|help me get out|i need help( now)?|i need someone to help me)\b", "cry_for_help"),
-        # Bare "help me" at the END of an utterance — e.g. "my heart is racing, help me".
-        # This pattern is deliberately end-anchored (\s*[.!?]*\s*$) to avoid matching
-        # mid-sentence benign uses like "music helps me relax" or "they help me cope".
-        # It MUST come after the therapeutic CALM_PHRASES check in MoodClassifier Tier 1.
+        # Cardiac symptom language — heart racing/pounding moved here from CRITICAL
+        # because "my heart is racing with excitement" is a common benign phrase.
+        # Requires co-occurrence with a body symptom word to avoid pure-emotion matches.
+        (r"\b(heart(beat)?s? (is |are )?(racing|pounding|beating (too )?fast|going too fast)|my heart won'?t stop (pounding|racing))\b", "cardiac_symptoms"),
+        # Physical pain — first-person anchored to avoid "sore subject", "it hurts to miss you"
+        (r"\b(i('?m| am) in (a lot of |severe |intense |terrible |bad )?pain|it (really |so |terribly )?hurts|i hurt (so much|a lot|badly|terribly))\b", "physical_pain"),
+        (r"\b(my (back|head|chest|stomach|arm|leg|knee|hip|neck|shoulder|body|throat|jaw) (hurts?|aches?|is (burning|numb|throbbing|sore|very tight)))\b", "physical_pain"),
+        (r"\b(i have a (bad |severe |terrible |horrible |splitting )?headache|i can'?t stand the pain)\b", "physical_pain"),
+        # Acute fear / panic — unambiguous signals only
+        (r"\b(terrified|panic(king)?|trapped|get me out|in danger|lock (me|the door))\b", "acute_fear"),
+        (r"\b(i'?m (so |very |really )?scared|i am (so |very |really )?scared|i'?m afraid (something|they|he|she))\b", "acute_fear"),
+        # Explicit cry for help — context-anchored
+        (r"\b(please help me|help me please|somebody help me|someone help me|help me i'?m|help me i am|help me get out|i need help( now| urgently| immediately)?|i need someone to help me)\b", "cry_for_help"),
+        # Bare "help me" end-anchored only
         (r"\bhelp\s+me[.!?]*\s*$", "cry_for_help_terminal"),
-        # Dizziness / fainting — strong urgent-surveillance signal
-        (r"\b(dizzy|dizziness|faint(ing)?|light[- ]?head(ed)?|blacking? out|losing consciousness|feel(ing)? sick|nauseated|vomiting|sweating (a lot|profusely|badly))\b", "physical_distress"),
-        # Exit-seeking / wandering ideation
-        (r"\b(go home|want (to go )?home|take me home|let me out|i want to leave|where'?s? (my )?(mother|mom|husband|wife|family))\b", "exit_seeking"),
+        # Dizziness / fainting
+        (r"\b(dizzy|dizziness|faint(ing)?|light[- ]?head(ed)?|blacking? out|losing consciousness|nauseated|vomiting|sweating (a lot|profusely|badly))\b", "physical_distress"),
+        # Exit-seeking / wandering ideation (clinical concern for dementia patients)
+        (r"\b(take me home|let me out|i want to leave( here| now)?|i need to get out)\b", "exit_seeking"),
+        (r"\b(i want to go home|i need to go home|please take me home)\b", "exit_seeking"),
     ]
 
     # ─── MEDIUM: Emotional distress ───────────────────────────────────────────

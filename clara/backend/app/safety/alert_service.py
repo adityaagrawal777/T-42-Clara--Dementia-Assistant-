@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 import structlog
 from typing import List, Optional
@@ -99,19 +100,38 @@ class AlertService:
                 level=distress_level,
             )
         else:
-            # 4. Deliver each email directly (awaited) so no send can be orphaned.
-            # This runs inside the outer background task started by ClaraEngine,
-            # so it does NOT block the WebSocket request path.
+            # 4. Deliver each email with one automatic retry on failure.
+            # Runs inside the outer background task started by ClaraEngine —
+            # does NOT block the WebSocket request path.
             results: list[bool] = []
             for recipient in recipients:
-                success = await EmailService.send_clinical_alert(
-                    recipient_email=recipient,
-                    patient_name=patient_name,
-                    alert_level=distress_level,
-                    distress_categories=categories,
-                    message_context=message_content,
-                    patient_id=str(patient_id),
-                )
+                success = False
+                for attempt in range(2):  # up to 2 attempts
+                    success = await EmailService.send_clinical_alert(
+                        recipient_email=recipient,
+                        patient_name=patient_name,
+                        alert_level=distress_level,
+                        distress_categories=categories,
+                        message_context=message_content,
+                        patient_id=str(patient_id),
+                    )
+                    if success:
+                        break
+                    if attempt == 0:
+                        logger.warning(
+                            "alert_email_retry",
+                            recipient=recipient,
+                            patient=patient_name,
+                            attempt=1,
+                        )
+                        await asyncio.sleep(30)  # 30s before retry
+                if not success:
+                    logger.error(
+                        "alert_email_failed_permanently",
+                        recipient=recipient,
+                        patient=patient_name,
+                        alert_id=str(alert.id) if alert else "NO_DB_RECORD",
+                    )
                 results.append(success)
 
             delivered = sum(results)

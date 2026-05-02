@@ -32,6 +32,7 @@ class Patient(Base, TenantMixin, SoftDeleteMixin, TimestampMixin):
     favourite_topics: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
     life_memories: Mapped[Optional[List[Dict]]] = mapped_column(JSON, nullable=True)
 
+
     # ── Relations ────────────────────────────────────────────────────────────
     # caregiver_id: nullable FK — populated on assignment, cleared on unassign.
     # SET NULL on caregiver deletion preserves patient records.

@@ -29,5 +29,6 @@ class AlertResponse(AlertBase):
     resolved_at: Optional[datetime]
     resolved_by: Optional[str]
     created_at: datetime
-    
+    patient_name: Optional[str] = None
+
     model_config = ConfigDict(from_attributes=True)

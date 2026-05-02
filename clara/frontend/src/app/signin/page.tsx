@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { setJWT } from "@/lib/tokens";
+import { setJWT, setPatientIdentity } from "@/lib/tokens";
 import { useClaraStore } from "@/store/claraStore";
 import { EyeOff, User, Lock, ArrowRight, HelpCircle, ShieldCheck, UserPlus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,8 +20,8 @@ function PatientSignInForm() {
   const [error, setError] = useState<string | null>(null);
   const [showPassphrase, setShowPassphrase] = useState(false);
 
-  // Form is valid when both fields have content
-  const isValid = form.name.trim().length > 0 && form.passphrase.trim().length >= 4;
+  // Form is valid when both fields have content (min 6 chars for passphrase)
+  const isValid = form.name.trim().length > 0 && form.passphrase.trim().length >= 6;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -68,6 +68,7 @@ function PatientSignInForm() {
 
       const data = await res.json();
       setJWT(data.access_token);
+      setPatientIdentity(data.patient_name, data.patient_id, data.session_id);
       setSession({
         sessionId: data.session_id,
         patientId: data.patient_id,
@@ -173,7 +174,7 @@ function PatientSignInForm() {
                       name="passphrase"
                       type={showPassphrase ? "text" : "password"}
                       autoComplete={mode === "register" ? "new-password" : "current-password"}
-                      placeholder="Your private key (min. 4 characters)"
+                      placeholder="Your private key (min. 6 characters)"
                       value={form.passphrase}
                       onChange={handleChange}
                       className="w-full bg-clara-surface border border-clara-border rounded-xl py-3.5 pl-11 pr-12 text-clara-text-primary placeholder-clara-text-muted focus:outline-none focus:border-clara-primary focus:ring-2 focus:ring-clara-primary/20 transition-all"

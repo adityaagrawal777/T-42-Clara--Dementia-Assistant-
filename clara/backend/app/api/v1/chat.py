@@ -3,6 +3,7 @@ import asyncio
 import uuid
 import json
 import structlog
+from datetime import datetime
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from app.services.auth_service import auth_service
 from app.services.chat_service import ChatService
@@ -119,4 +120,23 @@ async def websocket_chat_endpoint(
                     await websocket.send_json({"type": "error", "message": "An unexpected error occurred."})
                     
         except WebSocketDisconnect:
-            pass
+            # Session terminated — write ended_at so the caregiver timeline
+            # shows a resolved duration instead of "Ongoing" indefinitely.
+            try:
+                session_obj = await chat_service.session_repo.get_by_id_scoped(
+                    session_id, user.organization_id
+                )
+                if session_obj and session_obj.ended_at is None:
+                    session_obj.ended_at = datetime.utcnow()
+                    await db.commit()
+                    logger.info(
+                        "websocket_session_closed",
+                        session_id=str(session_id),
+                        patient_id=str(session_obj.patient_id),
+                    )
+            except Exception as close_err:
+                logger.warning(
+                    "websocket_session_close_failed",
+                    session_id=str(session_id),
+                    error=str(close_err),
+                )

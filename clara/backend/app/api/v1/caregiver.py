@@ -175,19 +175,32 @@ async def get_caregiver_analytics(
 async def list_org_unresolved_alerts(
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver),
-) -> Sequence[Alert]:
+) -> List[AlertResponse]:
     """Unresolved alerts scoped to the caregiver's assigned patients."""
     patient_ids = await _caregiver_patient_ids(
         db, current_user.user_id, current_user.organization_id
     )
     if not patient_ids:
         return []
+
+    # Build patient_id → display name lookup in a single query
+    patients_result = await db.execute(
+        select(Patient.id, Patient.name, Patient.preferred_name).where(
+            Patient.id.in_(patient_ids)
+        )
+    )
+    patient_names: Dict[uuid.UUID, str] = {
+        row.id: (row.preferred_name or row.name) for row in patients_result.all()
+    }
+
     repo = AlertRepository(db)
-    all_alerts: list = []
+    enriched: List[AlertResponse] = []
     for pid in patient_ids:
         alerts = await repo.get_unresolved_alerts(pid, current_user.organization_id)
-        all_alerts.extend(alerts)
-    return all_alerts
+        for alert in alerts:
+            r = AlertResponse.model_validate(alert)
+            enriched.append(r.model_copy(update={"patient_name": patient_names.get(pid)}))
+    return enriched
 
 
 @router.patch("/alerts/{alert_id}/resolve", response_model=AlertResponse)
@@ -348,8 +361,23 @@ async def list_patient_sessions(
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver),
 ) -> Sequence[ClaraSession]:
-    """Paginated list of interaction sessions for a specific patient."""
+    """Paginated list of interaction sessions for a specific patient.
+
+    Before returning results, any orphaned sessions (ended_at IS NULL but
+    started_at older than 4 h) are silently closed. This heals records that
+    were created before the WebSocketDisconnect auto-close fix and prevents
+    them from showing as 'Ongoing' on the Record Timeline indefinitely.
+    """
     repo = SessionRepository(db)
+
+    # ── Heal stale orphans ───────────────────────────────────────────────────
+    healed = await repo.close_stale_sessions(
+        organization_id=current_user.organization_id,
+        patient_id=patient_id,
+    )
+    if healed:
+        await db.commit()
+
     sessions, _ = await repo.get_patient_sessions_paginated(
         patient_id=patient_id,
         organization_id=current_user.organization_id,
@@ -393,15 +421,56 @@ async def list_patient_unresolved_alerts(
     patient_id: uuid.UUID,
     db: AsyncSession = Depends(get_db_session),
     current_user: CurrentUser = Depends(require_caregiver),
-) -> Sequence[Alert]:
+) -> List[AlertResponse]:
     """Current unresolved incidents for a specific patient."""
     patient_repo = PatientRepository(db)
     patient = await patient_repo.get_by_id_scoped(patient_id, current_user.organization_id)
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found.")
 
+    patient_name = patient.preferred_name or patient.name
     repo = AlertRepository(db)
-    return await repo.get_unresolved_alerts(patient_id, current_user.organization_id)
+    raw_alerts = await repo.get_unresolved_alerts(patient_id, current_user.organization_id)
+    return [
+        AlertResponse.model_validate(a).model_copy(update={"patient_name": patient_name})
+        for a in raw_alerts
+    ]
+
+
+# ── Emergency Session Control ─────────────────────────────────────────────────
+
+@router.post(
+    "/patients/{patient_id}/end-session",
+    status_code=status.HTTP_200_OK,
+    summary="Emergency interrupt — remotely close a patient's active session",
+)
+async def end_active_session(
+    patient_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: CurrentUser = Depends(require_caregiver),
+) -> Dict[str, str]:
+    """
+    Caregiver emergency control: immediately close the patient's active WebSocket
+    session by marking it ended in the database. The patient's device will detect
+    the session close on the next keep-alive and redirect to the sign-in screen.
+    """
+    await _verify_patient_access(db, patient_id, current_user.user_id, current_user.organization_id)
+
+    result = await db.execute(
+        select(ClaraSession).where(
+            ClaraSession.patient_id == patient_id,
+            ClaraSession.organization_id == current_user.organization_id,
+            ClaraSession.ended_at.is_(None),
+            ClaraSession.is_deleted == False,  # noqa: E712
+        ).order_by(ClaraSession.started_at.desc()).limit(1)
+    )
+    session = result.scalars().first()
+    if not session:
+        return {"message": "No active session found for this patient."}
+
+    session.ended_at = datetime.utcnow()
+    await db.commit()
+    return {"message": "Session ended. Patient device will disconnect shortly."}
 
 
 # ── Caregiver Notes Endpoints (Priority 6) ────────────────────────────────────
